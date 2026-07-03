@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: fintry-postgres
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: fintry
+      POSTGRES_USER: fintry
+      POSTGRES_PASSWORD: fintry
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
