@@ -1,6 +1,7 @@
 package com.fintry.company.mapper;
 
 import com.fintry.company.dto.request.CreateCompanyRequest;
+import com.fintry.company.dto.request.UpdateCompanyRequest;
 import com.fintry.company.dto.response.CompanyResponse;
 import com.fintry.company.entity.Company;
 
@@ -33,6 +34,17 @@ public class CompanyMapper {
                 .phone(company.getPhone())
                 .createdAt(company.getCreatedAt())
                 .build();
+    }
+
+    public static void updateEntity(
+            Company company,
+            UpdateCompanyRequest request
+    ) {
+        company.setTradeName(request.getTradeName());
+        company.setLegalName(request.getLegalName());
+        company.setDocument(request.getDocument());
+        company.setEmail(request.getEmail());
+        company.setPhone(request.getPhone());
     }
 
 }

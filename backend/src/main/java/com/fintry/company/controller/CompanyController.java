@@ -1,6 +1,7 @@
 package com.fintry.company.controller;
 
 import com.fintry.company.dto.request.CreateCompanyRequest;
+import com.fintry.company.dto.request.UpdateCompanyRequest;
 import com.fintry.company.dto.response.CompanyResponse;
 import com.fintry.company.service.CompanyService;
 import jakarta.validation.Valid;
@@ -43,6 +44,14 @@ public class CompanyController {
                 service.findAll(pageable)
         );
 
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CompanyResponse> update(
+            @PathVariable UUID id,
+            @RequestBody @Valid UpdateCompanyRequest request) {
+
+        return ResponseEntity.ok(service.update(id, request));
     }
 
 }

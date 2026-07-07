@@ -1,6 +1,7 @@
 package com.fintry.company.service;
 
 import com.fintry.company.dto.request.CreateCompanyRequest;
+import com.fintry.company.dto.request.UpdateCompanyRequest;
 import com.fintry.company.dto.response.CompanyResponse;
 import com.fintry.company.entity.Company;
 import com.fintry.company.exception.CompanyAlreadyExistsException;
@@ -53,6 +54,20 @@ public class CompanyService {
                 .findAll(pageable)
                 .map(CompanyMapper::toResponse);
 
+    }
+
+    @Transactional
+    public CompanyResponse update(UUID id, UpdateCompanyRequest request) {
+
+        Company company = repository.findById(id)
+                .orElseThrow(() ->
+                        new CompanyNotFoundException(id));
+
+        CompanyMapper.updateEntity(company, request);
+
+        Company updatedCompany = repository.save(company);
+
+        return CompanyMapper.toResponse(updatedCompany);
     }
 
 }
