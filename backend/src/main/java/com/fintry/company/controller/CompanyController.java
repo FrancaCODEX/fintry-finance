@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
@@ -29,6 +31,16 @@ public class CompanyController {
 
         return ResponseEntity.ok(
                 service.getById(id)
+        );
+
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<CompanyResponse>> findAll(
+            Pageable pageable) {
+
+        return ResponseEntity.ok(
+                service.findAll(pageable)
         );
 
     }

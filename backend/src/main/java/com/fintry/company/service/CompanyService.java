@@ -10,6 +10,8 @@ import com.fintry.company.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
@@ -41,6 +43,16 @@ public class CompanyService {
                         new CompanyNotFoundException(id));
 
         return CompanyMapper.toResponse(company);
+    }
+
+    //Listando empresas
+    @Transactional(readOnly = true)
+    public Page<CompanyResponse> findAll(Pageable pageable) {
+
+        return repository
+                .findAll(pageable)
+                .map(CompanyMapper::toResponse);
+
     }
 
 }
