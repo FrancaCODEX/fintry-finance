@@ -4,11 +4,14 @@ import com.fintry.company.dto.request.CreateCompanyRequest;
 import com.fintry.company.dto.response.CompanyResponse;
 import com.fintry.company.entity.Company;
 import com.fintry.company.exception.CompanyAlreadyExistsException;
+import com.fintry.company.exception.CompanyNotFoundException;
 import com.fintry.company.mapper.CompanyMapper;
 import com.fintry.company.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,16 @@ public class CompanyService {
         Company savedCompany = repository.save(company);
 
         return CompanyMapper.toResponse(savedCompany);
+    }
+
+    @Transactional(readOnly = true)
+    public CompanyResponse getById(UUID id) {
+
+        Company company = repository.findById(id)
+                .orElseThrow(() ->
+                        new CompanyNotFoundException(id));
+
+        return CompanyMapper.toResponse(company);
     }
 
 }
