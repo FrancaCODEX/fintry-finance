@@ -10,20 +10,23 @@ import lombok.Setter;
 @Setter
 public class CreateCompanyRequest {
 
-    @NotBlank
+    @NotBlank(message = "Legal name is required")
     @Size(max = 255)
     private String legalName;
 
+    @NotBlank(message = "Trade name is required")
     @Size(max = 255)
     private String tradeName;
 
-    @NotBlank
+    @NotBlank(message = "Document is required")
     @Size(max = 20)
     private String document;
 
-    @Email
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email")
     private String email;
 
+    @NotBlank(message = "Phone is required")
     @Size(max = 20)
     private String phone;
 

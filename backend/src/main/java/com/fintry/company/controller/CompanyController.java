@@ -62,8 +62,7 @@ public class CompanyController {
     @PutMapping("/{id}")
     public ResponseEntity<CompanyResponse> update(
             @PathVariable UUID id,
-            @RequestBody @Valid UpdateCompanyRequest request) {
-
+            @Valid @RequestBody UpdateCompanyRequest request) {
         return ResponseEntity.ok(service.update(id, request));
     }
 

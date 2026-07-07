@@ -2,6 +2,7 @@ package com.fintry.company.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,19 +10,23 @@ import lombok.Setter;
 @Setter
 public class UpdateCompanyRequest {
 
-    @NotBlank
-    private String tradeName;
-
-    @NotBlank
+    @NotBlank(message = "Legal name is required")
+    @Size(max = 255)
     private String legalName;
 
-    @NotBlank
+    @NotBlank(message = "Trade name is required")
+    @Size(max = 255)
+    private String tradeName;
+
+    @NotBlank(message = "Document is required")
+    @Size(max = 20)
     private String document;
 
-    @Email
-    @NotBlank
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "Phone is required")
+    @Size(max = 20)
     private String phone;
 }
