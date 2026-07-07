@@ -46,12 +46,28 @@ public class CompanyController {
 
     }
 
+    @GetMapping("/document/{document}")
+    public ResponseEntity<CompanyResponse> getByDocument(
+            @PathVariable String document) {
+
+        return ResponseEntity.ok(
+                service.getByDocument(document));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<CompanyResponse> update(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateCompanyRequest request) {
 
         return ResponseEntity.ok(service.update(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+
+        service.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 
 }

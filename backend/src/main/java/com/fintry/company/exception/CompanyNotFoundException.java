@@ -8,4 +8,7 @@ public class CompanyNotFoundException extends RuntimeException {
         super("Company with id " + id + " not found.");
     }
 
+    public CompanyNotFoundException(String document) {
+        super("Company with document " + document + " not found.");
+    }
 }

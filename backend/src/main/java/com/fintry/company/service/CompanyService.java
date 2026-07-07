@@ -46,6 +46,17 @@ public class CompanyService {
         return CompanyMapper.toResponse(company);
     }
 
+    @Transactional(readOnly = true)
+    public CompanyResponse getByDocument(String document) {
+
+        Company company = repository
+                .findByDocument(document)
+                .orElseThrow(() ->
+                        new CompanyNotFoundException(document));
+
+        return CompanyMapper.toResponse(company);
+    }
+
     //Listando empresas
     @Transactional(readOnly = true)
     public Page<CompanyResponse> findAll(Pageable pageable) {
@@ -62,7 +73,13 @@ public class CompanyService {
         Company company = repository.findById(id)
                 .orElseThrow(() ->
                         new CompanyNotFoundException(id));
+        if (repository.existsByDocumentAndIdNot(
+                request.getDocument(),
+                id)) {
 
+            throw new CompanyAlreadyExistsException(
+                    request.getDocument());
+        }
         CompanyMapper.updateEntity(company, request);
 
         Company updatedCompany = repository.save(company);
@@ -70,4 +87,13 @@ public class CompanyService {
         return CompanyMapper.toResponse(updatedCompany);
     }
 
+    @Transactional
+    public void delete(UUID id) {
+
+        Company company = repository.findById(id)
+                .orElseThrow(() ->
+                        new CompanyNotFoundException(id));
+
+        repository.delete(company);
+    }
 }
