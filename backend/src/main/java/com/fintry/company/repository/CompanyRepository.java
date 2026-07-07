@@ -19,4 +19,7 @@ public interface CompanyRepository extends JpaRepository<Company, UUID> {
             String tradeName,
             Pageable pageable);
 
+    Page<Company> findByDocumentContaining(
+            String document,
+            Pageable pageable);
 }

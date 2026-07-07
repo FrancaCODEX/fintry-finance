@@ -38,12 +38,17 @@ public class CompanyController {
 
     @GetMapping
     public ResponseEntity<Page<CompanyResponse>> findAll(
+
+            @RequestParam(required = false)
+            String tradeName,
+
+            @RequestParam(required = false)
+            String document,
+
             Pageable pageable) {
 
         return ResponseEntity.ok(
-                service.findAll(pageable)
-        );
-
+                service.findAll(tradeName, document, pageable));
     }
 
     @GetMapping("/document/{document}")

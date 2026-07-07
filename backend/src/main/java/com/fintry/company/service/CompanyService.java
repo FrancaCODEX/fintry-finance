@@ -59,12 +59,32 @@ public class CompanyService {
 
     //Listando empresas
     @Transactional(readOnly = true)
-    public Page<CompanyResponse> findAll(Pageable pageable) {
+    public Page<CompanyResponse> findAll(
+            String tradeName,
+            String document,
+            Pageable pageable) {
 
-        return repository
-                .findAll(pageable)
-                .map(CompanyMapper::toResponse);
+        Page<Company> companies;
 
+        if (tradeName != null && !tradeName.isBlank()) {
+
+            companies = repository.findByTradeNameContainingIgnoreCase(
+                    tradeName,
+                    pageable);
+
+        } else if (document != null && !document.isBlank()) {
+
+            companies = repository.findByDocumentContaining(
+                    document,
+                    pageable);
+
+        } else {
+
+            companies = repository.findAll(pageable);
+
+        }
+
+        return companies.map(CompanyMapper::toResponse);
     }
 
     @Transactional
