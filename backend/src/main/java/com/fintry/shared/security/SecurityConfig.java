@@ -16,7 +16,7 @@ public class SecurityConfig {
         http.securityContext(c -> c.securityContextRepository(new HttpSessionSecurityContextRepository()))
             .authorizeHttpRequests(a -> a
                 .requestMatchers("/", "/index.html", "/app.js", "/style.css", "/favicon.svg",
-                    "/api/v1/auth/csrf", "/api/v1/auth/login", "/api/v1/auth/register", "/actuator/health", "/error").permitAll()
+                    "/api/v1/app", "/api/v1/auth/csrf", "/api/v1/auth/login", "/api/v1/auth/register", "/actuator/health", "/error").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(e -> e
                 .authenticationEntryPoint((req,res,ex) -> {

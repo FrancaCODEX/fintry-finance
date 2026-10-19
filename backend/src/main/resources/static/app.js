@@ -3,6 +3,9 @@ const root = document.querySelector("#root");
 const modal = document.querySelector("#modal");
 const state = {
   user: null,
+  version: "",
+  series: null,
+  seriesPage: 0,
   page: "dashboard",
   month: localDate().slice(0, 7),
   accounts: [],
@@ -129,7 +132,7 @@ async function submitForm(event, action) {
   }
 }
 function renderAuth(register = false) {
-  root.innerHTML = `<main class="auth"><section class="auth-story"><div class="brand"><img src="/favicon.svg" alt="">fintry<span>.</span></div><div><div class="eyebrow">Control today. Grow tomorrow.</div><h1>Seu financeiro.<br>Mais simples.<br><span>Mais claro.</span></h1><p>Organize o presente e enxergue os próximos passos da sua empresa. Tudo em um só lugar.</p><div class="preview-card"><span class="eyebrow">Clareza para crescer</span><strong>Decisões com direção.</strong><div class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div></div><footer>Feito para quem cuida de cada detalhe do negócio.</footer></section><section class="auth-panel"><div class="auth-form"><h2>${register ? "Comece pela sua empresa" : "Bom ter você por aqui."}</h2><p class="muted">${register ? "Crie seu acesso e organize suas finanças." : "Entre para acompanhar os números do seu negócio."}</p><form id="auth-form">${register ? field("Seu nome", "name", "text", 'required maxlength="120" autocomplete="name"') + field("Nome da empresa", "companyName", "text", 'required maxlength="255" autocomplete="organization"') + field("CNPJ (somente números)", "document", "text", 'required pattern="[0-9]{14}" maxlength="14" inputmode="numeric" placeholder="14 dígitos"') : ""}${field("E-mail", "email", "email", 'required maxlength="255" autocomplete="username" placeholder="voce@empresa.com.br"')}${field("Senha", "password", "password", `required ${register ? 'minlength="10"' : ""} maxlength="64" autocomplete="${register ? "new-password" : "current-password"}" placeholder="${register ? "Pelo menos 10 caracteres" : "Sua senha"}"`)}<div class="form-error" role="alert"></div><button class="btn submit" type="submit">${register ? "Criar minha conta" : "Entrar no Fintry"} ${icon("income")}</button></form><div class="auth-switch">${register ? "Já tem uma conta?" : "Primeira vez por aqui?"} <button id="auth-switch">${register ? "Entrar" : "Criar conta"}</button></div><p class="auth-note">Fintry · Gestão financeira para pequenas empresas<br>Desenvolvido por Vinicius Azeredo França</p></div></section></main>`;
+  root.innerHTML = `<main class="auth"><section class="auth-story"><div class="brand"><img src="/favicon.svg" alt="">fintry<span>.</span></div><div><div class="eyebrow">Control today. Grow tomorrow.</div><h1>Seu financeiro.<br>Mais simples.<br><span>Mais claro.</span></h1><p>Organize o presente e enxergue os próximos passos da sua empresa. Tudo em um só lugar.</p><div class="preview-card"><span class="eyebrow">Clareza para crescer</span><strong>Decisões com direção.</strong><div class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div></div><footer>Feito para quem cuida de cada detalhe do negócio.</footer></section><section class="auth-panel"><div class="auth-form"><h2>${register ? "Comece pela sua empresa" : "Bom ter você por aqui."}</h2><p class="muted">${register ? "Crie seu acesso e organize suas finanças." : "Entre para acompanhar os números do seu negócio."}</p><form id="auth-form">${register ? field("Seu nome", "name", "text", 'required maxlength="120" autocomplete="name"') + field("Nome da empresa", "companyName", "text", 'required maxlength="255" autocomplete="organization"') + field("CNPJ (somente números)", "document", "text", 'required pattern="[0-9]{14}" maxlength="14" inputmode="numeric" placeholder="14 dígitos"') : ""}${field("E-mail", "email", "email", 'required maxlength="255" autocomplete="username" placeholder="voce@empresa.com.br"')}${field("Senha", "password", "password", `required ${register ? 'minlength="10"' : ""} maxlength="64" autocomplete="${register ? "new-password" : "current-password"}" placeholder="${register ? "Pelo menos 10 caracteres" : "Sua senha"}"`)}<div class="form-error" role="alert"></div><button class="btn submit" type="submit">${register ? "Criar minha conta" : "Entrar no Fintry"} ${icon("income")}</button></form><div class="auth-switch">${register ? "Já tem uma conta?" : "Primeira vez por aqui?"} <button id="auth-switch">${register ? "Entrar" : "Criar conta"}</button></div><p class="auth-note">Fintry v${e(state.version)} · Gestão financeira para pequenas empresas<br>Desenvolvido por Vinicius Azeredo França</p></div></section></main>`;
   document.querySelector("#auth-switch").onclick = () => renderAuth(!register);
   document.querySelector("#auth-form").onsubmit = (ev) =>
     submitForm(ev, async (data) => {
@@ -144,6 +147,7 @@ function renderAuth(register = false) {
       state.filters = {};
       state.directoryFilters = { active: "true" };
       state.contactPage = 0;
+      state.seriesPage = 0;
       await load();
     });
 }
@@ -153,6 +157,7 @@ function shell() {
     ["dashboard", "Visão geral", "dashboard"],
     ["entries", "Lançamentos", "entries"],
     ["accounts", "Contas", "wallet"],
+    ["series", "Parcelas e recorrências", "entries"],
     ["contacts", "Clientes e fornecedores", "company"],
     ["categories", "Categorias", "entries"],
   ]
@@ -162,7 +167,7 @@ function shell() {
     )
     .join(
       "",
-    )}</nav><div class="side-bottom"><div class="side-note"><strong>Um passo de cada vez.</strong><p>O controle do seu negócio começa com boas informações.</p></div><div class="user-block"><div class="avatar">${e(u.name.slice(0, 1).toUpperCase())}</div><div class="user-info"><strong>${e(u.name)}</strong><small>Administrador</small></div><button class="logout" data-action="logout" title="Sair" aria-label="Sair da conta">${icon("exit")}</button></div></div></aside><main class="main"><header class="topbar"><div class="company-label">${icon("company")} ${e(u.companyName)}</div><span class="muted">Seu negócio, em boa direção.</span><button class="btn text small" data-action="logout">Sair ${icon("exit")}</button></header><div class="main-content"><div id="page-content"></div><footer class="footer"><span>Fintry © ${new Date().getFullYear()} · Control today. Grow tomorrow.</span><a href="mailto:vfranca.dev@gmail.com">Criado por Vinicius Azeredo França</a></footer></div></main></div>`;
+    )}</nav><div class="side-bottom"><div class="side-note"><strong>Um passo de cada vez.</strong><p>O controle do seu negócio começa com boas informações.</p></div><div class="user-block"><div class="avatar">${e(u.name.slice(0, 1).toUpperCase())}</div><div class="user-info"><strong>${e(u.name)}</strong><small>Administrador</small></div><button class="logout" data-action="logout" title="Sair" aria-label="Sair da conta">${icon("exit")}</button></div></div></aside><main class="main"><header class="topbar"><div class="company-label">${icon("company")} ${e(u.companyName)}</div><span class="muted">Seu negócio, em boa direção.</span><button class="btn text small" data-action="logout">Sair ${icon("exit")}</button></header><div class="main-content"><div id="page-content"></div><footer class="footer"><span>Fintry v${e(state.version)} · © ${new Date().getFullYear()}</span><a href="mailto:vfranca.dev@gmail.com">Criado por Vinicius Azeredo França</a></footer></div></main></div>`;
 }
 function monthInput() {
   return `<label><span class="eyebrow" hidden>Período</span><input class="period" id="month" type="month" aria-label="Mês de referência" value="${state.month}" min="2000-01" max="2100-12"></label>`;
@@ -214,7 +219,7 @@ function entriesTable(rows) {
         paid = row.status === "PAID",
         cancelled = row.status === "CANCELLED";
       const overdue = !paid && !cancelled && row.dueDate < localDate();
-      return `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}${row.transferId ? " · Transferência" : ""}</small></td><td>${dateLabel(row.dueDate)}${paid ? `<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small>` : ""}</td><td>${e(names.get(row.accountId) || "Conta")}</td><td class="${income ? "positive" : "negative"}"><strong>${income ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${cancelled ? "cancelled" : paid ? "" : "pending"}">${cancelled ? "Cancelado" : paid ? (income ? "Recebido" : "Pago") : overdue ? "Em atraso" : "Pendente"}</span></td><td><div class="row-actions">${!paid && !cancelled ? `<button class="btn soft small" data-action="pay" data-id="${row.id}">${income ? "Receber" : "Pagar"}</button><button class="btn secondary small" data-action="edit-entry" data-id="${row.id}" aria-label="Editar ${e(row.description)}">Editar</button>` : ""}${!cancelled && !row.transferId ? `<button class="btn text small" data-action="cancel" data-id="${row.id}" aria-label="Cancelar ${e(row.description)}">Cancelar</button>` : row.transferId ? '<small class="muted">Entre contas</small>' : "—"}</div></td></tr>`;
+      return `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}${row.transferId ? " · Transferência" : ""}${row.seriesId ? `<br><span class="series-label">${row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição"} ${row.sequenceNumber}/${row.seriesCount}</span>` : ""}</small></td><td>${dateLabel(row.dueDate)}${paid ? `<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small>` : ""}</td><td>${e(names.get(row.accountId) || "Conta")}</td><td class="${income ? "positive" : "negative"}"><strong>${income ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${cancelled ? "cancelled" : paid ? "" : "pending"}">${cancelled ? "Cancelado" : paid ? (income ? "Recebido" : "Pago") : overdue ? "Em atraso" : "Pendente"}</span></td><td><div class="row-actions">${!paid && !cancelled ? `<button class="btn soft small" data-action="pay" data-id="${row.id}">${income ? "Receber" : "Pagar"}</button>${!row.seriesId ? `<button class="btn secondary small" data-action="edit-entry" data-id="${row.id}" aria-label="Editar ${e(row.description)}">Editar</button>` : ""}` : ""}${!cancelled && !row.transferId ? `<button class="btn text small" data-action="cancel" data-id="${row.id}" aria-label="Cancelar ${e(row.description)}">Cancelar</button>` : row.transferId ? '<small class="muted">Entre contas</small>' : "—"}</div></td></tr>`;
     })
     .join("")}</tbody></table></div>`;
 }
@@ -280,26 +285,31 @@ async function load() {
     size: state.page === "dashboard" ? "5" : "20",
     ...(state.page === "entries" ? state.filters : {}),
   });
-  const [accounts, entries, summary, categories, contacts] = await Promise.all([
-    api("/finance/accounts"),
-    api("/finance/entries?" + query),
-    api("/finance/summary?month=" + state.month),
-    api("/categories"),
-    state.page === "contacts"
-      ? api(
-          "/contacts?" +
-            new URLSearchParams({
-              ...state.directoryFilters,
-              page: String(state.contactPage),
-              size: "20",
-            }),
-        )
-      : Promise.resolve(null),
-  ]);
+  const [accounts, entries, summary, categories, contacts, series] =
+    await Promise.all([
+      api("/finance/accounts"),
+      api("/finance/entries?" + query),
+      api("/finance/summary?month=" + state.month),
+      api("/categories"),
+      state.page === "contacts"
+        ? api(
+            "/contacts?" +
+              new URLSearchParams({
+                ...state.directoryFilters,
+                page: String(state.contactPage),
+                size: "20",
+              }),
+          )
+        : Promise.resolve(null),
+      state.page === "series"
+        ? api("/finance/series?page=" + state.seriesPage)
+        : Promise.resolve(null),
+    ]);
   if (id !== requestId || !state.user) return;
   state.accounts = accounts;
   state.entries = entries;
   state.summary = summary;
+  state.series = series;
   state.categories = categories;
   state.contacts = contacts;
   shell();
@@ -308,11 +318,13 @@ async function load() {
       ? renderDashboard()
       : state.page === "entries"
         ? renderEntries()
-        : state.page === "contacts"
-          ? renderContacts()
-          : state.page === "categories"
-            ? renderCategories()
-            : renderAccounts();
+        : state.page === "series"
+          ? renderSeries()
+          : state.page === "contacts"
+            ? renderContacts()
+            : state.page === "categories"
+              ? renderCategories()
+              : renderAccounts();
   document
     .querySelector("#directory-filter")
     ?.addEventListener("submit", async (ev) => {
@@ -321,6 +333,7 @@ async function load() {
         new FormData(ev.currentTarget),
       );
       state.contactPage = 0;
+      state.seriesPage = 0;
       await safeLoad();
     });
   document.querySelector("#month")?.addEventListener("change", async (ev) => {
@@ -328,6 +341,7 @@ async function load() {
     state.month = ev.target.value;
     state.entryPage = 0;
     state.contactPage = 0;
+    state.seriesPage = 0;
     await safeLoad();
   });
   document
@@ -391,6 +405,74 @@ function accountDialog() {
     "Criar conta",
   );
 }
+function monthlyPlan(kind, count, value, first) {
+  const cents = Math.round(Number(value) * 100);
+  if (
+    !Number.isInteger(count) ||
+    count < 2 ||
+    count > 120 ||
+    !Number.isSafeInteger(cents) ||
+    cents < 1 ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(first)
+  )
+    throw new Error(
+      "Informe valor, quantidade de 2 a 120 e o primeiro vencimento.",
+    );
+  const [year, month, day] = first.split("-").map(Number);
+  const base = Math.floor(cents / count),
+    remainder = cents % count;
+  if (kind === "INSTALLMENT" && base < 1)
+    throw new Error("Cada parcela deve ter ao menos R$ 0,01.");
+  return Array.from({ length: count }, (_, i) => {
+    const target = new Date(Date.UTC(year, month - 1 + i, 1));
+    const last = new Date(
+      Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0),
+    ).getUTCDate();
+    target.setUTCDate(Math.min(day, last));
+    return {
+      date: target.toISOString().slice(0, 10),
+      cents: kind === "INSTALLMENT" ? base + (i < remainder ? 1 : 0) : cents,
+    };
+  });
+}
+function renderSeries() {
+  const result = state.series;
+  return (
+    head(
+      "Organize os próximos meses.",
+      "Parcelamentos e repetições mensais com quantidade definida.",
+      `<button class="btn" data-action="entry">${icon("plus")}Nova série ou lançamento</button>`,
+    ) +
+    `<section class="card">${result.content.length ? `<div class="table-wrap"><table><thead><tr><th>SÉRIE</th><th>PERÍODO</th><th>VALOR TOTAL</th><th>ACOMPANHAMENTO</th><th>AÇÕES</th></tr></thead><tbody>${result.content.map((item) => `<tr><td class="description"><strong>${e(item.description)}</strong><small>${item.kind === "INSTALLMENT" ? "Parcelamento" : "Recorrência mensal"} · ${item.occurrences} ocorrências</small></td><td>${dateLabel(item.firstDueDate)}<br><small class="muted">até ${dateLabel(item.lastDueDate)}</small></td><td><strong>${money(item.totalAmount)}</strong></td><td class="description"><span class="badge ${item.stopped ? "cancelled" : item.pending ? "pending" : ""}">${item.stopped ? "Encerrada" : item.pending ? "Em andamento" : item.paid === item.occurrences ? "Concluída" : item.cancelled === item.occurrences ? "Cancelada" : "Encerrada"}</span><br><small>${item.paid} realizadas · ${item.pending} pendentes · ${item.cancelled} canceladas</small></td><td><div class="row-actions"><button class="btn secondary small" data-action="series-items" data-id="${item.id}">Ver lançamentos</button>${item.pending ? `<button class="btn text small" data-action="stop-series" data-id="${item.id}">Cancelar pendências</button>` : ""}</div></td></tr>`).join("")}</tbody></table></div>` : `<div class="empty"><h3>Planeje seus próximos vencimentos</h3><p>Divida um valor total em parcelas ou repita um valor mensalmente. Confira a prévia antes de registrar.</p><button class="btn" data-action="entry">Criar primeira série</button></div>`}<div class="pagination"><span>${result.totalElements} série(s)</span><div class="row-actions"><button class="btn secondary small" data-action="series-prev" ${state.seriesPage === 0 ? "disabled" : ""}>Anterior</button><span>${state.seriesPage + 1} / ${Math.max(1, result.totalPages)}</span><button class="btn secondary small" data-action="series-next" ${state.seriesPage + 1 >= result.totalPages ? "disabled" : ""}>Próxima</button></div></div></section><p class="notice">Os valores entram no saldo ao registrar cada baixa. Cancelar pendências da série preserva pagamentos e recebimentos realizados. Recorrências desta versão têm prazo definido, sem renovação automática.</p>`
+  );
+}
+async function showSeriesItems(id) {
+  const selected = state.series.content.find((item) => item.id === id);
+  showDialog(
+    "Lançamentos da série",
+    e(selected.description),
+    '<div class="series-items-content">Carregando…</div>',
+    async () => {},
+    "Fechar",
+  );
+  modal.querySelector("[type=submit]").hidden = true;
+  const form = modal.querySelector("form");
+  try {
+    const parts = await Promise.all([
+      api("/finance/entries?seriesId=" + id + "&size=100"),
+      api("/finance/entries?seriesId=" + id + "&size=100&page=1"),
+    ]);
+    if (!form.isConnected) return;
+    const rows = parts
+      .flatMap((part) => part.content)
+      .sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+    form.querySelector(".series-items-content").innerHTML =
+      `<div class="schedule-rows">${rows.map((item) => `<div><span>${item.sequenceNumber}/${item.seriesCount} · ${dateLabel(item.dueDate)}<br><small>${item.status === "PAID" ? "Realizado" : item.status === "CANCELLED" ? "Cancelado" : "Pendente"}</small></span><strong>${money(item.amount)}</strong></div>`).join("")}</div><p class="notice">Para registrar uma baixa, abra Lançamentos e selecione o mês do vencimento.</p>`;
+  } catch (err) {
+    if (form.isConnected)
+      form.querySelector(".series-items-content").textContent = err.message;
+  }
+}
 function categoryOptions(type, row) {
   const options = state.categories.filter(
     (c) =>
@@ -404,12 +486,17 @@ function entryDialog(row = null) {
     accountDialog();
     return;
   }
+  let requestId = crypto.randomUUID(),
+    lastPayload = null;
   showDialog(
     row ? "Editar lançamento pendente" : "Novo lançamento",
     row
       ? "Ajuste os dados antes de registrar a baixa."
       : "Organize cada movimento e seus vínculos.",
-    `<div class="form-row"><label class="field">Tipo<select name="type"><option value="INCOME">Receita</option><option value="EXPENSE">Despesa</option></select></label>${field("Valor (R$)", "amount", "number", 'required min="0.01" max="999999999999.99" step="0.01"', row?.amount ?? "")}</div>` +
+    (row
+      ? ""
+      : `<div class="entry-steps"><span class="eyebrow">1 · COMO LANÇAR</span><label class="field">Formato<select name="mode"><option value="SINGLE">Lançamento único</option><option value="INSTALLMENT">Parcelar um valor total</option><option value="RECURRING">Repetir valor mensalmente</option></select></label><div id="occurrences-field" hidden>${field("Quantidade de parcelas / repetições", "occurrences", "number", 'min="2" max="120" step="1"', "12")}</div></div>`) +
+      `<div class="form-row"><label class="field">Tipo<select name="type"><option value="INCOME">Receita</option><option value="EXPENSE">Despesa</option></select></label>${field("Valor (R$)", "amount", "number", 'required min="0.01" max="999999999999.99" step="0.01"', row?.amount ?? "")}</div>` +
       field(
         "Descrição",
         "description",
@@ -436,8 +523,12 @@ function entryDialog(row = null) {
       ) +
       (row
         ? ""
-        : `<label class="check"><input type="checkbox" name="paid" id="paid">Já foi pago / recebido</label><div id="payment-field" hidden>${field("Data do pagamento / recebimento", "paymentDate", "date", `max="${localDate()}"`, localDate())}</div>`),
+        : `<label class="check"><input type="checkbox" name="paid" id="paid">Já foi pago / recebido</label><div id="payment-field" hidden>${field("Data do pagamento / recebimento", "paymentDate", "date", `max="${localDate()}"`, localDate())}</div><div id="schedule-preview" class="schedule-preview" aria-live="polite" hidden></div>`),
     async (data) => {
+      const mode = data.mode || "SINGLE",
+        count = Number(data.occurrences);
+      delete data.mode;
+      delete data.occurrences;
       delete data.contactSearch;
       data.paid = data.paid === "on";
       if (!data.paid) data.paymentDate = null;
@@ -448,8 +539,29 @@ function entryDialog(row = null) {
           method: "PUT",
           body: JSON.stringify(data),
         });
-      else await send("/finance/entries", data);
-      toast(row ? "Lançamento atualizado." : "Lançamento registrado.");
+      else if (mode !== "SINGLE") {
+        const payload = JSON.stringify({
+          kind: mode,
+          occurrences: count,
+          entry: data,
+        });
+        if (lastPayload !== null && lastPayload !== payload)
+          requestId = crypto.randomUUID();
+        lastPayload = payload;
+        await send("/finance/series", {
+          requestId,
+          kind: mode,
+          occurrences: count,
+          entry: data,
+        });
+      } else await send("/finance/entries", data);
+      toast(
+        row
+          ? "Lançamento atualizado."
+          : mode === "SINGLE"
+            ? "Lançamento registrado."
+            : "Série criada. Confira os próximos vencimentos em Parcelas e recorrências.",
+      );
     },
     row ? "Salvar alterações" : "Registrar lançamento",
   );
@@ -520,11 +632,54 @@ function entryDialog(row = null) {
     form.elements.contactSearch.value = "";
     lookupContacts();
   };
-  if (!row)
+  if (!row) {
+    const mode = form.elements.mode,
+      count = form.elements.occurrences;
+    const label = form.elements.amount.closest("label").firstChild;
+    const paidLabel = form.querySelector("#paid").parentElement;
+    function preview() {
+      const series = mode.value !== "SINGLE";
+      form.querySelector("#occurrences-field").hidden = !series;
+      count.required = series;
+      count.disabled = !series;
+      label.textContent =
+        mode.value === "INSTALLMENT"
+          ? "Valor total (R$)"
+          : mode.value === "RECURRING"
+            ? "Valor mensal (R$)"
+            : "Valor (R$)";
+      paidLabel.lastChild.textContent = series
+        ? "Primeira ocorrência já paga / recebida"
+        : "Já foi pago / recebido";
+      const box = form.querySelector("#schedule-preview");
+      box.hidden = !series;
+      if (!series) return;
+      try {
+        const rows = monthlyPlan(
+          mode.value,
+          Number(count.value),
+          form.elements.amount.value,
+          form.elements.dueDate.value,
+        );
+        const total = rows.reduce((sum, item) => sum + item.cents, 0);
+        box.innerHTML = `<strong>Confira antes de registrar</strong><p>${rows.length} ${mode.value === "INSTALLMENT" ? "parcelas" : "repetições mensais"} · Total: ${money(total / 100)}</p><div class="schedule-rows">${rows.map((item, i) => `<div><span>${i + 1}/${rows.length} · ${dateLabel(item.date)}</span><strong>${money(item.cents / 100)}</strong></div>`).join("")}</div><small>Somente a primeira pode ser marcada como realizada agora. As demais ficam pendentes.</small>`;
+      } catch (err) {
+        box.textContent = err.message;
+      }
+    }
+    for (const input of [
+      mode,
+      count,
+      form.elements.amount,
+      form.elements.dueDate,
+    ])
+      input.addEventListener("input", preview);
     form.querySelector("#paid").onchange = (ev) => {
       form.querySelector("#payment-field").hidden = !ev.target.checked;
       form.elements.paymentDate.required = ev.target.checked;
     };
+    preview();
+  }
   lookupContacts();
 }
 const contactKindLabel = (kind) =>
@@ -694,6 +849,7 @@ root.addEventListener("click", async (ev) => {
     state.page = nav.dataset.nav;
     state.entryPage = 0;
     state.contactPage = 0;
+    state.seriesPage = 0;
     await safeLoad();
     return;
   }
@@ -707,6 +863,31 @@ modal.addEventListener("click", (ev) => {
 async function act(btn) {
   const action = btn.dataset.action;
   if (action === "entry") return entryDialog();
+  if (action === "series-prev" || action === "series-next") {
+    state.seriesPage += action === "series-next" ? 1 : -1;
+    return safeLoad();
+  }
+  if (action === "series-items") {
+    try {
+      await showSeriesItems(btn.dataset.id);
+    } catch (err) {
+      toast(err.message);
+    }
+    return;
+  }
+  if (action === "stop-series") {
+    showDialog(
+      "Cancelar pendências da série?",
+      "Os pagamentos e recebimentos realizados serão mantidos.",
+      '<p class="notice">Todas as ocorrências ainda pendentes desta série serão canceladas, inclusive vencidas. O histórico será preservado.</p>',
+      async () => {
+        await send("/finance/series/" + btn.dataset.id + "/stop");
+        toast("Pendências canceladas. Registros realizados preservados.");
+      },
+      "Confirmar cancelamento",
+    );
+    return;
+  }
   if (action === "edit-entry")
     return entryDialog(
       state.entries.content.find((r) => r.id === btn.dataset.id),
@@ -783,6 +964,7 @@ async function act(btn) {
       state.filters = {};
       state.directoryFilters = { active: "true" };
       state.contactPage = 0;
+      state.seriesPage = 0;
       await csrf();
       renderAuth();
     }
@@ -800,6 +982,7 @@ async function act(btn) {
 (async () => {
   try {
     await csrf();
+    state.version = (await api("/app")).version;
     try {
       state.user = await api("/auth/me");
     } catch {}

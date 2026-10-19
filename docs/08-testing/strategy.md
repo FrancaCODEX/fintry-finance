@@ -16,3 +16,7 @@ Cenários adicionais:
 Execute `cd backend` e `sh mvnw verify`. O perfil padrão dos testes usa H2; `-Dspring.profiles.active=postgres-test` utiliza o PostgreSQL dedicado configurado para CI. O teste isolado de migração reproduz a atualização H2 com um pool de conexões, tal como a aplicação.
 
 Na validação local desta entrega foi utilizado Java 17 como override (`-Djava.version=17`); o projeto mantém Java 21 como alvo. Docker e PostgreSQL não estão disponíveis no ambiente local. O workflow do GitHub conserva as verificações de Java 21, PostgreSQL e Docker.
+
+## Séries mensais — 0.3.0
+
+Cobertura adicional para divisão exata dos centavos, datas ancoradas em meses curtos e anos bissextos, valores máximos, chave idempotente em chamadas concorrentes, isolamento de empresas, criação atômica, primeira ocorrência realizada e cancelamento da série sem reverter pagamentos. O teste de migração também aplica a nova migração sobre lançamentos existentes. A interface é verificada em navegador com lançamento único, parcelamento, recorrência, prévia, acompanhamento e cancelamento.

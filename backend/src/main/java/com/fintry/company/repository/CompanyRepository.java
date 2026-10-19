@@ -10,6 +10,10 @@ import java.util.UUID;
 
 public interface CompanyRepository extends JpaRepository<Company, UUID> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select c from Company c where c.id=:id")
+    Optional<Company> lock(@org.springframework.data.repository.query.Param("id") UUID id);
+
     Optional<Company> findByDocument(String document);
 
     boolean existsByDocument(String document);

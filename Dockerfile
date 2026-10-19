@@ -10,7 +10,7 @@ RUN sh ./mvnw -B -DskipTests package
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 RUN groupadd --system fintry && useradd --system --gid fintry fintry
-COPY --from=build --chown=fintry:fintry /build/target/backend-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build --chown=fintry:fintry /build/target/fintry.jar app.jar
 USER fintry
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

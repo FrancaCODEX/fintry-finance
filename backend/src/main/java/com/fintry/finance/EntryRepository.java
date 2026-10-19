@@ -5,6 +5,10 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.*;
 public interface EntryRepository extends JpaRepository<FinancialEntry, UUID>, JpaSpecificationExecutor<FinancialEntry> {
+    List<FinancialEntry> findByCompanyIdAndSeriesIdIn(UUID companyId,List<UUID> ids);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select e from FinancialEntry e where e.seriesId=:id and e.companyId=:company order by e.sequenceNumber")
+    List<FinancialEntry> lockSeries(@Param("id")UUID id,@Param("company")UUID company);
     boolean existsByContactIdAndCompanyId(UUID contactId,UUID companyId);
     boolean existsByCategoryIdAndCompanyId(UUID categoryId,UUID companyId);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
