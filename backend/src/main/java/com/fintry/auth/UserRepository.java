@@ -1,8 +1,27 @@
 package com.fintry.auth;
-import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.Optional;
 import java.util.UUID;
-public interface UserRepository extends JpaRepository<AppUser, UUID> {
-    Optional<AppUser> findByEmail(String email);
-    boolean existsByEmail(String email);
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository
+    extends JpaRepository<AppUser, UUID>,
+        org.springframework.data.jpa.repository.JpaSpecificationExecutor<AppUser> {
+  @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+  @org.springframework.data.jpa.repository.Query("select u from AppUser u where u.id=:id")
+  Optional<AppUser> lock(@org.springframework.data.repository.query.Param("id") UUID id);
+
+  Optional<AppUser> findByIdAndCompanyId(UUID id, UUID companyId);
+
+  java.util.List<AppUser> findByCompanyIdOrderByNameAsc(UUID companyId);
+
+  long countByCompanyIdAndActive(UUID companyId, boolean active);
+
+  long countByCompanyIdAndInvited(UUID companyId, boolean invited);
+
+  long countByCompanyIdAndRoleAndActive(UUID companyId, AppUser.Role role, boolean active);
+
+  Optional<AppUser> findByEmail(String email);
+
+  boolean existsByEmail(String email);
 }

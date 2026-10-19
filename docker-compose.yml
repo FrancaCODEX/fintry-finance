@@ -13,6 +13,12 @@ services:
       timeout: 5s
       retries: 15
     restart: unless-stopped
+  mailpit:
+    image: axllent/mailpit:v1.31.6
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
+    restart: unless-stopped
   app:
     build: .
     ports:
@@ -21,8 +27,19 @@ services:
       DB_URL: jdbc:postgresql://db:5432/fintry
       DB_USER: fintry
       DB_PASSWORD: ${DB_PASSWORD:-fintry-local}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+      MAIL_ENABLED: ${MAIL_ENABLED:-true}
+      MAIL_FROM: ${MAIL_FROM:-noreply@fintry.local}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_AUTH: ${SMTP_AUTH:-false}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
     depends_on:
+      mailpit:
+        condition: service_started
       db:
         condition: service_healthy
     restart: unless-stopped

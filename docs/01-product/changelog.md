@@ -2,6 +2,43 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.6.0] - 2026-10-19
+
+### Funcionalidades
+
+- Equipe com convites de ativação, renovação/revogação de links e edição de nome, perfil e situação.
+- Perfis Administrador, Financeiro e Somente leitura, verificados na API e refletidos na interface.
+- Recuperação de senha por e-mail, link de 15 minutos e troca de senha autenticada em Minha segurança.
+- Convites de 7 dias, com confirmação da empresa/perfil e criação da senha pelo destinatário; compartilhamento manual do link.
+- Histórico por empresa com autor, horário, ação e diferenças de campos; filtros, busca, paginação e abertura do lançamento relacionado.
+- Auditoria transacional de contas, lançamentos, baixas/cancelamentos, transferências, séries, cadastros, comprovantes, empresa e acessos.
+
+### Melhorias
+
+- Telas Equipe, Histórico e Minha segurança com hierarquia visual, cartões de acesso, indicadores de situação e adaptação aos temas claro/escuro e ao celular.
+- Formulários de acesso com confirmação de senha e botão Mostrar/Ocultar; mensagens de convite expirado, recuperação indisponível e sessão encerrada.
+- Perfil real na navegação, aviso de somente leitura e ações financeiras disponíveis conforme a permissão.
+- SMTP configurável e Mailpit no Compose para conferir e-mails localmente, sem entrega externa.
+- Listagens da equipe e histórico paginadas no banco; histórico em horário de Brasília.
+
+### Correções e segurança
+
+- Mudanças de senha, perfil ou situação invalidam sessões existentes por versão de autenticação.
+- Proteção contra desativação/rebaixamento da própria conta administrativa e contra remoção do último Administrador ativo.
+- Tokens aleatórios de 256 bits, armazenados somente como hash SHA-256, com expiração, revogação e uso único protegido por bloqueio transacional.
+- Links usam URL configurada e fragmento removido da barra ao abrir; nenhum token ou senha é registrado no histórico/log de envio.
+- Recuperação responde igualmente para conta desconhecida, inativa ou ativa; envio assíncrono após commit e limites de tentativas por IP/e-mail.
+- Histórico registra somente campos permitidos, sem conteúdo de arquivos, senhas ou hashes de senha; ações sem mudanças não geram diferenças duplicadas.
+
+### Atualização
+
+- PostgreSQL V7 e H2 V5 adicionam perfis, situação, versão de sessão, tokens e auditoria. Migrações anteriores preservadas.
+- Usuários existentes continuam Administradores ativos; sessões da versão anterior exigem novo login.
+- O histórico começa nesta versão, sem reconstrução retroativa. Não há exclusão de usuários pela interface/API.
+- Configure `APP_BASE_URL` e SMTP para entrega real; no Compose padrão os e-mails ficam no Mailpit em localhost:8025. Fora do Docker, `MAIL_ENABLED=false` por padrão.
+- Limitador local em memória, por instância; múltiplas réplicas exigem limitação centralizada. Fila de e-mail limitada, sem promessa de entrega; confira logs/configuração do SMTP se não receber.
+- Preserve o banco e seus volumes durante a atualização.
+
 ## [0.5.0] - 2026-10-19
 
 ### Funcionalidades
