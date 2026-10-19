@@ -4,6 +4,8 @@
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
+![Dashboard do Fintry com dados fictícios](docs/screenshots/dashboard.webp)
+
 ## Rodar com Docker (recomendado)
 
 Pré-requisito: Docker Desktop com Docker Compose. No Windows, abra o terminal na pasta do projeto com o Docker Desktop iniciado.
