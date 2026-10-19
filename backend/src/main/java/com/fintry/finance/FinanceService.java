@@ -83,7 +83,8 @@ public class FinanceService {
       UUID seriesId,
       Integer sequenceNumber,
       Integer seriesCount,
-      FinancialSeries.Kind seriesKind) {}
+      FinancialSeries.Kind seriesKind,
+      UUID saleId) {}
 
   public record EntryDetails(
       EntryView entry, String accountName, LocalDateTime createdAt, LocalDateTime updatedAt) {}
@@ -149,7 +150,8 @@ public class FinanceService {
         e.getSeriesId(),
         e.getSequenceNumber(),
         e.getSeriesCount(),
-        e.getSeriesKind());
+        e.getSeriesKind(),
+        e.getSaleId());
   }
 
   public List<AccountView> accounts() {
@@ -253,6 +255,9 @@ public class FinanceService {
   @Transactional
   public EntryView updateEntry(UUID id, EntryInput input) {
     var e = entries.lock(id, current.companyId()).orElseThrow(this::missing);
+    if (e.getSaleId() != null)
+      throw invalid(
+          "O lançamento pertence a uma venda. Cancele a venda para corrigir os itens e o estoque.");
     if (e.getSeriesId() != null)
       throw invalid(
           "Para ajustar uma série, cancele as pendências e crie outra série. Os registros"
@@ -342,6 +347,9 @@ public class FinanceService {
   @Transactional
   public EntryView cancel(UUID id) {
     var e = entries.lock(id, current.companyId()).orElseThrow(this::missing);
+    if (e.getSaleId() != null)
+      throw invalid(
+          "Cancele pela página Vendas para devolver o estoque e estornar o financeiro juntos.");
     if (e.getTransferId() != null)
       throw invalid(
           "Transferências não podem ser canceladas individualmente. Faça a transferência inversa.");

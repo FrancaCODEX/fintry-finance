@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.6.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.7.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
@@ -15,7 +15,8 @@ Pré-requisito: Docker Desktop com Docker Compose. No Windows, abra o terminal n
 ```bash
 git clone https://github.com/FrancaCODEX/fintry-finance.git
 cd fintry-finance
-git switch codex/fintry-v0.6-equipe-seguranca
+git switch main
+git pull --ff-only
 docker compose up --build -d
 ```
 
@@ -57,6 +58,20 @@ cd backend
 
 Abra **http://localhost:8080**. O perfil `demo` usa H2 persistido em `./data/` relativo à pasta de execução (`backend/data/` nos comandos acima), sem precisar instalar PostgreSQL. H2 é uma alternativa para avaliação local; PostgreSQL é o banco principal. Os dois ambientes têm bancos separados. Não há credencial padrão: crie seu próprio acesso.
 
+## Produtos, estoque e vendas (0.7.0)
+
+Em **Produtos**, cadastre SKU/código único, nome, unidade, preço, custo de referência, estoque inicial e estoque mínimo. O catálogo mostra disponibilidade e alerta para saldo igual ou abaixo do mínimo; oferece busca, filtros, inativação e histórico. A unidade é fixa após cadastrar; para outro tipo de unidade, crie outro produto. Quantidades aceitam até três casas decimais.
+
+Em **Estoque**, consulte entradas, saídas e saldo após cada movimento. Movimentações manuais pedem quantidade e motivo; não é permitido saldo negativo. O estoque inicial, as vendas confirmadas e suas devoluções também aparecem no histórico. Ajustes de estoque não criam despesas: registre compras e pagamentos em Lançamentos. O indicador de valor usa a quantidade dos produtos ativos multiplicada pelo custo atual cadastrado, sem cálculo de custo médio/contabilidade fiscal.
+
+Em **Vendas**, crie um rascunho com cliente opcional e até 100 produtos. Confira quantidades, preços e total antes de salvar. Nomes, códigos, unidades e preços são preservados nos itens; rascunhos não reservam estoque. Para corrigir itens de um rascunho, cancele e crie outro.
+
+Ao **confirmar**, escolha conta, vencimento e se a venda já foi recebida. O Fintry confere o estoque novamente, registra as saídas e cria uma única receita vinculada. Se qualquer etapa falhar, toda a confirmação é revertida. Sem recebimento imediato, a receita fica pendente e a baixa pode ser feita no financeiro. Repetir a confirmação mantém o registro original, sem outra receita ou saída.
+
+Ao **cancelar uma venda confirmada**, os itens voltam ao estoque e a receita é cancelada na mesma transação. Se já estava recebida, deixa de compor o saldo. A operação registra o estorno no controle financeiro; não executa devolução bancária. Para proteger a consistência, o lançamento vinculado não pode ser editado/cancelado isoladamente. Comprovantes continuam disponíveis no painel de detalhes.
+
+Administrador e Financeiro gerenciam esses recursos; Somente leitura pode consultar. O histórico de alterações inclui catálogo, movimentações e vendas. Esta etapa é um controle interno: não inclui NF-e, cobrança bancária, reservas, descontos, devoluções parciais ou integração automática de compras.
+
 ## Equipe e segurança (0.6.0)
 
 Em **Equipe**, um Administrador pode convidar pessoas e definir o perfil. **Administrador** gerencia toda a empresa, equipe e histórico; **Financeiro** gerencia finanças e comprovantes; **Somente leitura** consulta e exporta informações. Todo perfil pode alterar a própria senha em **Minha segurança**. Mudanças de acesso ou senha encerram as sessões existentes. O administrador original mantém seu acesso após a atualização.
@@ -79,6 +94,7 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 
 - Cadastro de empresa e administrador; login e logout com sessão HTTP.
 - Recuperação de senha, convites, equipe com três perfis, troca de senha e histórico de alterações.
+- Catálogo de produtos, estoque mínimo, movimentações e vendas integradas às receitas.
 - Isolamento dos dados por empresa, derivado da sessão autenticada.
 - Contas financeiras com saldo inicial e saldo calculado.
 - Receitas e despesas com valor, categoria, conta e vencimento.
@@ -160,7 +176,8 @@ Na pasta do projeto:
 
 ```bash
 git fetch origin
-git switch codex/fintry-v0.6-equipe-seguranca
+git switch main
+git pull --ff-only
 git pull --ff-only origin codex/fintry-v0.5-comprovantes-temas
 docker compose up --build -d
 ```

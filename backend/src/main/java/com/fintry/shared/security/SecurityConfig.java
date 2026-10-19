@@ -27,6 +27,7 @@ public class SecurityConfig {
                         "/",
                         "/index.html",
                         "/app.js",
+                        "/commerce.js",
                         "/theme.js",
                         "/style.css",
                         "/favicon.svg",
@@ -77,7 +78,7 @@ public class SecurityConfig {
                               .write(
                                   ex instanceof org.springframework.security.web.csrf.CsrfException
                                       ? "{\"message\":\"Sessão de segurança expirada. Recarregue a"
-                                            + " página.\"}"
+                                          + " página.\"}"
                                       : "{\"message\":\"Seu perfil não permite esta ação.\"}");
                         }))
         .logout(

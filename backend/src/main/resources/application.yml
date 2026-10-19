@@ -38,6 +38,9 @@ server:
   error:
     include-message: never
 management:
+  health:
+    mail:
+      enabled: ${fintry.mail.enabled:false}
   endpoints:
     web:
       exposure:
