@@ -10,3 +10,11 @@
 8. **Exclusões:** lançamentos são cancelados e preservados. A API de exclusão física de empresas não é mais exposta.
 
 Este documento registra as decisões implementadas e prevalece sobre propostas antigas da documentação de planejamento.
+
+## Evolução 0.2
+
+- Cadastros ficam no módulo directory e usam companyId derivado da sessão. Documentos de contatos e nomes normalizados de categorias têm unicidade por empresa.
+- As referências financeiras têm chaves estrangeiras compostas com companyId, além das verificações de autorização na aplicação.
+- Os nomes são copiados ao salvar o lançamento. Renomear/inativar o cadastro não reescreve o histórico existente. Não há exclusão física.
+- Edição de pendências, baixa e cancelamento usam o mesmo bloqueio pessimista da linha financeira. Atribuição e alteração/inativação de cadastros também compartilham bloqueio para evitar novos vínculos após inativação.
+- V4 no PostgreSQL e V2 no H2 são migrações incrementais. As migrações já publicadas permanecem intactas. Categorias avulsas da versão inicial continuam compatíveis.

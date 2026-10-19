@@ -1,5 +1,14 @@
 # Histórico
 
+## 0.2.0 — Cadastros e edição
+
+- Clientes/fornecedores com busca, paginação, edição e inativação/reativação.
+- Categorias com classificação por receita/despesa e unicidade por empresa.
+- Vínculos opcionais nos lançamentos, com validação de tipo e empresa.
+- Edição de pendências sob bloqueio, preservando os saldos e os registros realizados.
+- Migrações incrementais PostgreSQL V4 e H2 V2 preservam dados existentes.
+- Nomes registrados nos lançamentos mantêm o histórico após inativar ou renomear cadastros.
+
 ## 0.1.0 — Primeira versão funcional
 
 - Cadastro, autenticação com sessão e CSRF, isolamento por empresa.

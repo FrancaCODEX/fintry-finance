@@ -57,6 +57,67 @@ class FinanceIntegrationTests {
     }
     void amount(String expected,JsonNode actual) { assertEquals(0,new java.math.BigDecimal(expected).compareTo(actual.decimalValue())); }
 
+    Map<String,Object> contact(String name,String kind,String document,boolean active) {
+        return Map.of("name",name,"kind",kind,"document",document,"email","contato@example.com","phone","11999999999","notes","Cadastro de teste","active",active);
+    }
+    @Test void directoryAndPendingEditPreserveFinancialHistory() throws Exception {
+        var b=new Browser().signup();var bank=b.account("Banco","500");
+        var person=b.request("POST","/contacts",contact("Cliente original","CUSTOMER","123.456.789-00",true),201);
+        String personId=person.get("id").asText();
+        assertEquals("12345678900",person.get("document").asText());
+        var category=b.request("POST","/categories",Map.of("name","Consultoria","kind","INCOME"),201);
+        String categoryId=category.get("id").asText();
+        var input=b.entry(bank,false,"100","INCOME");input.put("categoryId",categoryId);input.put("contactId",personId);input.remove("category");
+        var entry=b.request("POST","/finance/entries",input,201);String id=entry.get("id").asText();
+        assertEquals("Consultoria",entry.get("category").asText());assertEquals("Cliente original",entry.get("contactName").asText());
+        input.put("amount","175.50");input.put("description","Projeto ajustado");
+        var updated=b.request("PUT","/finance/entries/"+id,input,200);
+        amount("175.50",updated.get("amount"));amount("500",b.summary().get("balance"));amount("175.50",b.summary().get("pendingIncome"));
+        b.request("PUT","/contacts/"+personId,contact("Cliente renomeado","CUSTOMER","12345678900",false),200);
+        b.request("PUT","/categories/"+categoryId,Map.of("name","Consultoria renomeada","kind","INCOME","active",false),200);
+        var history=b.request("GET","/finance/entries",null,200).get("content").get(0);
+        assertEquals("Cliente original",history.get("contactName").asText());assertEquals("Consultoria",history.get("category").asText());
+        assertEquals(0,b.request("GET","/contacts?active=true",null,200).get("totalElements").asInt());
+        assertEquals(1,b.request("GET","/contacts?active=false&kind=CUSTOMER&search=renomeado",null,200).get("totalElements").asInt());
+        b.request("PUT","/finance/entries/"+id,input,200); // unchanged archived links remain editable
+        b.request("POST","/finance/entries",input,400); // archived records cannot receive new links
+        b.request("POST","/finance/entries/"+id+"/pay",Map.of("paymentDate",today),200);
+        b.request("PUT","/finance/entries/"+id,input,400);
+        amount("675.50",b.summary().get("balance"));
+        b.request("POST","/finance/entries/"+id+"/cancel",null,200);
+        b.request("PUT","/finance/entries/"+id,input,400);
+        amount("500",b.summary().get("balance"));
+    }
+    @Test void directoryEnforcesOwnershipKindsDuplicatesAndArchive() throws Exception {
+        var a=new Browser().signup();var b=new Browser().signup();String bank=a.account("Conta","0"),other=b.account("Conta","0");
+        String person=a.request("POST","/contacts",contact("Fornecedor","SUPPLIER","11111111111",true),201).get("id").asText();
+        a.request("POST","/contacts",contact("Duplicado","SUPPLIER","11111111111",true),409);
+        b.request("POST","/contacts",contact("Mesmo documento em outra empresa","CUSTOMER","11111111111",true),201);
+        a.request("POST","/contacts",contact("Inválido","CUSTOMER","123",true),400);
+        String category=a.request("POST","/categories",Map.of("name","Operação","kind","EXPENSE"),201).get("id").asText();
+        a.request("POST","/categories",Map.of("name","  OPERAÇÃO  ","kind","EXPENSE"),409);
+        b.request("PUT","/contacts/"+person,contact("Invasão","SUPPLIER","11111111111",true),404);
+        b.request("PUT","/categories/"+category,Map.of("name","Invasão","kind","EXPENSE"),404);
+        assertEquals(0,b.request("GET","/categories",null,200).size());
+        var bad=b.entry(other,false,"20","EXPENSE");bad.put("categoryId",category);
+        b.request("POST","/finance/entries",bad,404);bad.remove("categoryId");bad.put("contactId",person);
+        b.request("POST","/finance/entries",bad,404);
+        var own=a.entry(bank,false,"20","INCOME");own.put("contactId",person);
+        a.request("POST","/finance/entries",own,400);own.remove("contactId");own.put("categoryId",category);
+        a.request("POST","/finance/entries",own,400);
+        own.put("type","EXPENSE");own.put("contactId",person);
+        String id=a.request("POST","/finance/entries",own,201).get("id").asText();
+        b.request("PUT","/finance/entries/"+id,b.entry(other,false,"1","INCOME"),404);
+        a.request("PUT","/contacts/"+person,contact("Fornecedor","CUSTOMER","11111111111",true),400);
+        a.request("PUT","/categories/"+category,Map.of("name","Operação","kind","INCOME"),400);
+        own.put("paid",true);a.request("PUT","/finance/entries/"+id,own,400);
+        own.put("paid",false);own.put("accountId",other);a.request("PUT","/finance/entries/"+id,own,404);
+        String both=a.request("POST","/contacts",contact("Ambos","BOTH","",true),201).get("id").asText();
+        var flexible=a.entry(bank,false,"10","INCOME");flexible.put("contactId",both);
+        a.request("POST","/finance/entries",flexible,201);flexible.put("type","EXPENSE");
+        a.request("POST","/finance/entries",flexible,201);
+    }
+
     @Test void cashLifecycleAndAtomicTransfer() throws Exception {
         var b=new Browser().signup();String bank=b.account("Banco","1000.00"),cash=b.account("Caixa","0.00");
         var entry=b.request("POST","/finance/entries",b.entry(bank,false,"100.00","INCOME"),201);

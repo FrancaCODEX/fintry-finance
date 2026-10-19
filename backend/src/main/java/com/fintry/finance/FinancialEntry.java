@@ -20,4 +20,7 @@ public class FinancialEntry extends BaseEntity {
     private LocalDate paymentDate;
     @Enumerated(EnumType.STRING) @Column(nullable=false, length=10) private Status status;
     private UUID transferId;
+    private UUID categoryId;
+    private UUID contactId;
+    @Column(length=120) private String contactName;
 }

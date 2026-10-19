@@ -5,6 +5,8 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.*;
 public interface EntryRepository extends JpaRepository<FinancialEntry, UUID>, JpaSpecificationExecutor<FinancialEntry> {
+    boolean existsByContactIdAndCompanyId(UUID contactId,UUID companyId);
+    boolean existsByCategoryIdAndCompanyId(UUID categoryId,UUID companyId);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select e from FinancialEntry e where e.id=:id and e.companyId=:company")
     Optional<FinancialEntry> lock(@Param("id") UUID id, @Param("company") UUID companyId);
