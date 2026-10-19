@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleConflict(Exception ex) {
-        return ResponseEntity.status(409).body(Map.of("message", "Já existe um registro com esses dados. Confira o e-mail, CNPJ ou nome da conta."));
+        return ResponseEntity.status(409).body(Map.of("message", "Já existe um cadastro com esses dados. Confira o documento, e-mail ou nome informado."));
     }
 
     @ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class,

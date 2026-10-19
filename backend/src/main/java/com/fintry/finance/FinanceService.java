@@ -19,14 +19,20 @@ import static com.fintry.finance.FinancialEntry.Status.*;
 @Service @RequiredArgsConstructor @Transactional(readOnly=true)
 public class FinanceService {
     private final CurrentUser current;
+    private final com.fintry.directory.DirectoryService directory;
     private final AccountRepository accounts;
     private final EntryRepository entries;
     public record AccountInput(@NotBlank @Size(max=100) String name,
         @NotNull @Digits(integer=12,fraction=2) BigDecimal initialBalance) {}
     public record EntryInput(@NotNull UUID accountId, @NotBlank @Size(max=255) String description,
-        @NotBlank @Size(max=80) String category, @NotNull FinancialEntry.Type type,
+        @Size(max=80) String category, @NotNull FinancialEntry.Type type,
         @NotNull @DecimalMin("0.01") @Digits(integer=12,fraction=2) BigDecimal amount,
-        @NotNull LocalDate dueDate, boolean paid, LocalDate paymentDate) {}
+        @NotNull LocalDate dueDate, boolean paid, LocalDate paymentDate, UUID categoryId, UUID contactId) {
+        public EntryInput(UUID accountId,String description,String category,FinancialEntry.Type type,
+                BigDecimal amount,LocalDate dueDate,boolean paid,LocalDate paymentDate) {
+            this(accountId,description,category,type,amount,dueDate,paid,paymentDate,null,null);
+        }
+    }
     public record PaymentInput(@NotNull LocalDate paymentDate) {}
     public record TransferInput(@NotNull UUID sourceId, @NotNull UUID destinationId,
         @NotNull @DecimalMin("0.01") @Digits(integer=12,fraction=2) BigDecimal amount,
@@ -34,7 +40,7 @@ public class FinanceService {
     public record AccountView(UUID id, String name, BigDecimal initialBalance, BigDecimal balance) {}
     public record EntryView(UUID id, UUID accountId, String description, String category,
         FinancialEntry.Type type, BigDecimal amount, LocalDate dueDate, LocalDate paymentDate,
-        FinancialEntry.Status status, UUID transferId) {}
+        FinancialEntry.Status status, UUID transferId,UUID categoryId,UUID contactId,String contactName) {}
     public record EntryPage(List<EntryView> content, long totalElements, int totalPages, int number) {}
     public record MonthView(String month, BigDecimal income, BigDecimal expense) {}
     public record Summary(BigDecimal balance, BigDecimal income, BigDecimal expense,
@@ -49,7 +55,7 @@ public class FinanceService {
     }
     public EntryView view(FinancialEntry e) {
         return new EntryView(e.getId(),e.getAccountId(),e.getDescription(),e.getCategory(),e.getType(),
-            e.getAmount(),e.getDueDate(),e.getPaymentDate(),e.getStatus(),e.getTransferId());
+            e.getAmount(),e.getDueDate(),e.getPaymentDate(),e.getStatus(),e.getTransferId(),e.getCategoryId(),e.getContactId(),e.getContactName());
     }
     public List<AccountView> accounts() {
         var company = current.companyId();
@@ -74,10 +80,31 @@ public class FinanceService {
         var a = account(input.accountId());
         if (input.paid()) validPaymentDate(input.paymentDate());
         FinancialEntry e = new FinancialEntry(); e.setCompanyId(a.getCompanyId()); e.setAccountId(a.getId());
-        e.setDescription(input.description().strip()); e.setCategory(input.category().strip());
+        e.setDescription(input.description().strip()); applyLinks(e,input);
         e.setType(input.type()); e.setAmount(input.amount()); e.setDueDate(input.dueDate());
         e.setStatus(input.paid() ? PAID : PENDING); e.setPaymentDate(input.paid() ? input.paymentDate() : null);
         return view(entries.save(e));
+    }
+    private void applyLinks(FinancialEntry e,EntryInput input) {
+        if(input.categoryId()!=null) {
+            e.setCategory(directory.categoryName(input.categoryId(),e.getCategoryId(),input.type()));
+        } else {
+            if(input.category()==null || input.category().isBlank())throw invalid("Informe uma categoria ou escolha uma cadastrada.");
+            e.setCategory(input.category().strip());
+        }
+        e.setContactName(input.contactId()==null ? null : directory.contactName(input.contactId(),e.getContactId(),input.type()));
+        e.setCategoryId(input.categoryId());e.setContactId(input.contactId());
+    }
+    @Transactional
+    public EntryView updateEntry(UUID id,EntryInput input) {
+        var e=entries.lock(id,current.companyId()).orElseThrow(this::missing);
+        if(e.getStatus()!=PENDING || e.getTransferId()!=null)
+            throw invalid("Somente lançamentos pendentes podem ser editados. Para corrigir realizados, cancele e cadastre novamente.");
+        if(input.paid())throw invalid("Use a ação de baixa para registrar o pagamento.");
+        var a=account(input.accountId());
+        applyLinks(e,input);e.setAccountId(a.getId());e.setDescription(input.description().strip());
+        e.setType(input.type());e.setAmount(input.amount());e.setDueDate(input.dueDate());
+        return view(e);
     }
     public EntryPage list(LocalDate start, LocalDate end, FinancialEntry.Type type,
             FinancialEntry.Status status, UUID accountId, String search, int page, int size) {

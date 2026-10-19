@@ -10,6 +10,10 @@ const state = {
   summary: null,
   entryPage: 0,
   filters: {},
+  contacts: null,
+  categories: [],
+  directoryFilters: { active: "true" },
+  contactPage: 0,
   csrf: null,
 };
 const money = (value) =>
@@ -138,6 +142,8 @@ function renderAuth(register = false) {
       state.page = "dashboard";
       state.entryPage = 0;
       state.filters = {};
+      state.directoryFilters = { active: "true" };
+      state.contactPage = 0;
       await load();
     });
 }
@@ -147,6 +153,8 @@ function shell() {
     ["dashboard", "Visão geral", "dashboard"],
     ["entries", "Lançamentos", "entries"],
     ["accounts", "Contas", "wallet"],
+    ["contacts", "Clientes e fornecedores", "company"],
+    ["categories", "Categorias", "entries"],
   ]
     .map(
       ([page, label, ic]) =>
@@ -206,7 +214,7 @@ function entriesTable(rows) {
         paid = row.status === "PAID",
         cancelled = row.status === "CANCELLED";
       const overdue = !paid && !cancelled && row.dueDate < localDate();
-      return `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.transferId ? " · Transferência" : ""}</small></td><td>${dateLabel(row.dueDate)}${paid ? `<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small>` : ""}</td><td>${e(names.get(row.accountId) || "Conta")}</td><td class="${income ? "positive" : "negative"}"><strong>${income ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${cancelled ? "cancelled" : paid ? "" : "pending"}">${cancelled ? "Cancelado" : paid ? (income ? "Recebido" : "Pago") : overdue ? "Em atraso" : "Pendente"}</span></td><td><div class="row-actions">${!paid && !cancelled ? `<button class="btn soft small" data-action="pay" data-id="${row.id}">${income ? "Receber" : "Pagar"}</button>` : ""}${!cancelled && !row.transferId ? `<button class="btn text small" data-action="cancel" data-id="${row.id}" aria-label="Cancelar ${e(row.description)}">Cancelar</button>` : row.transferId ? '<small class="muted">Entre contas</small>' : "—"}</div></td></tr>`;
+      return `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}${row.transferId ? " · Transferência" : ""}</small></td><td>${dateLabel(row.dueDate)}${paid ? `<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small>` : ""}</td><td>${e(names.get(row.accountId) || "Conta")}</td><td class="${income ? "positive" : "negative"}"><strong>${income ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${cancelled ? "cancelled" : paid ? "" : "pending"}">${cancelled ? "Cancelado" : paid ? (income ? "Recebido" : "Pago") : overdue ? "Em atraso" : "Pendente"}</span></td><td><div class="row-actions">${!paid && !cancelled ? `<button class="btn soft small" data-action="pay" data-id="${row.id}">${income ? "Receber" : "Pagar"}</button><button class="btn secondary small" data-action="edit-entry" data-id="${row.id}" aria-label="Editar ${e(row.description)}">Editar</button>` : ""}${!cancelled && !row.transferId ? `<button class="btn text small" data-action="cancel" data-id="${row.id}" aria-label="Cancelar ${e(row.description)}">Cancelar</button>` : row.transferId ? '<small class="muted">Entre contas</small>' : "—"}</div></td></tr>`;
     })
     .join("")}</tbody></table></div>`;
 }
@@ -272,26 +280,54 @@ async function load() {
     size: state.page === "dashboard" ? "5" : "20",
     ...(state.page === "entries" ? state.filters : {}),
   });
-  const [accounts, entries, summary] = await Promise.all([
+  const [accounts, entries, summary, categories, contacts] = await Promise.all([
     api("/finance/accounts"),
     api("/finance/entries?" + query),
     api("/finance/summary?month=" + state.month),
+    api("/categories"),
+    state.page === "contacts"
+      ? api(
+          "/contacts?" +
+            new URLSearchParams({
+              ...state.directoryFilters,
+              page: String(state.contactPage),
+              size: "20",
+            }),
+        )
+      : Promise.resolve(null),
   ]);
   if (id !== requestId || !state.user) return;
   state.accounts = accounts;
   state.entries = entries;
   state.summary = summary;
+  state.categories = categories;
+  state.contacts = contacts;
   shell();
   document.querySelector("#page-content").innerHTML =
     state.page === "dashboard"
       ? renderDashboard()
       : state.page === "entries"
         ? renderEntries()
-        : renderAccounts();
+        : state.page === "contacts"
+          ? renderContacts()
+          : state.page === "categories"
+            ? renderCategories()
+            : renderAccounts();
+  document
+    .querySelector("#directory-filter")
+    ?.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      state.directoryFilters = Object.fromEntries(
+        new FormData(ev.currentTarget),
+      );
+      state.contactPage = 0;
+      await safeLoad();
+    });
   document.querySelector("#month")?.addEventListener("change", async (ev) => {
     if (!/^\d{4}-\d{2}$/.test(ev.target.value)) return;
     state.month = ev.target.value;
     state.entryPage = 0;
+    state.contactPage = 0;
     await safeLoad();
   });
   document
@@ -355,37 +391,276 @@ function accountDialog() {
     "Criar conta",
   );
 }
-function entryDialog() {
+function categoryOptions(type, row) {
+  const options = state.categories.filter(
+    (c) =>
+      (c.active && (c.kind === type || c.kind === "BOTH")) ||
+      c.id === row?.categoryId,
+  );
+  return `<label class="field">Categoria cadastrada<select name="categoryId" id="entry-category"><option value="">Usar categoria avulsa</option>${options.map((c) => `<option value="${c.id}" ${c.id === row?.categoryId ? "selected" : ""}>${e(c.name)}${c.active ? "" : " (inativa)"}</option>`).join("")}</select></label>`;
+}
+function entryDialog(row = null) {
   if (!state.accounts.length) {
     accountDialog();
     return;
   }
   showDialog(
-    "Novo lançamento",
-    "Cada registro deixa seu financeiro mais claro.",
-    `<div class="form-row"><label class="field">Tipo<select name="type"><option value="INCOME">Receita</option><option value="EXPENSE">Despesa</option></select></label>${field("Valor (R$)", "amount", "number", 'required min="0.01" max="999999999999.99" step="0.01" placeholder="0,00"')}</div>` +
+    row ? "Editar lançamento pendente" : "Novo lançamento",
+    row
+      ? "Ajuste os dados antes de registrar a baixa."
+      : "Organize cada movimento e seus vínculos.",
+    `<div class="form-row"><label class="field">Tipo<select name="type"><option value="INCOME">Receita</option><option value="EXPENSE">Despesa</option></select></label>${field("Valor (R$)", "amount", "number", 'required min="0.01" max="999999999999.99" step="0.01"', row?.amount ?? "")}</div>` +
       field(
         "Descrição",
         "description",
         "text",
-        'required maxlength="255" placeholder="Ex.: Projeto entregue ao cliente"',
+        'required maxlength="255"',
+        row?.description ?? "",
       ) +
-      `<div class="form-row">${accountOptions("accountId", "Conta")}${field("Categoria", "category", "text", 'required maxlength="80" list="categories" placeholder="Ex.: Serviços"')}</div><datalist id="categories"><option value="Serviços"><option value="Vendas"><option value="Aluguel"><option value="Fornecedores"><option value="Marketing"><option value="Salários"><option value="Impostos"><option value="Outros"></datalist>` +
-      field("Vencimento", "dueDate", "date", "required", localDate()) +
-      `<label class="check"><input type="checkbox" name="paid" id="paid">Já foi pago / recebido</label><div id="payment-field" hidden>${field("Data do pagamento / recebimento", "paymentDate", "date", `max="${localDate()}"`, localDate())}</div>`,
+      accountOptions("accountId", "Conta") +
+      `<div id="category-select">${categoryOptions(row?.type ?? "INCOME", row)}</div>` +
+      `<div id="legacy-category">${field("Categoria avulsa", "category", "text", 'maxlength="80" placeholder="Ex.: Serviços"', row?.category ?? "Outros")}</div>` +
+      field(
+        "Buscar cliente ou fornecedor (opcional)",
+        "contactSearch",
+        "search",
+        'placeholder="Digite para buscar um cadastro" autocomplete="off"',
+      ) +
+      `<label class="field">Cliente / fornecedor<select name="contactId"><option value="">Sem vínculo</option>${row?.contactId ? `<option value="${row.contactId}" selected>${e(row.contactName)}</option>` : ""}</select><small id="contact-hint" aria-live="polite">Buscando cadastros ativos…</small></label>` +
+      field(
+        "Vencimento",
+        "dueDate",
+        "date",
+        "required",
+        row?.dueDate ?? localDate(),
+      ) +
+      (row
+        ? ""
+        : `<label class="check"><input type="checkbox" name="paid" id="paid">Já foi pago / recebido</label><div id="payment-field" hidden>${field("Data do pagamento / recebimento", "paymentDate", "date", `max="${localDate()}"`, localDate())}</div>`),
     async (data) => {
+      delete data.contactSearch;
       data.paid = data.paid === "on";
       if (!data.paid) data.paymentDate = null;
-      await send("/finance/entries", data);
-      toast("Lançamento registrado.");
+      data.categoryId = data.categoryId || null;
+      data.contactId = data.contactId || null;
+      if (row)
+        await api("/finance/entries/" + row.id, {
+          method: "PUT",
+          body: JSON.stringify(data),
+        });
+      else await send("/finance/entries", data);
+      toast(row ? "Lançamento atualizado." : "Lançamento registrado.");
     },
-    "Registrar lançamento",
+    row ? "Salvar alterações" : "Registrar lançamento",
   );
-  const check = modal.querySelector("#paid");
-  check.onchange = () => {
-    modal.querySelector("#payment-field").hidden = !check.checked;
-    modal.querySelector("[name=paymentDate]").required = check.checked;
+  const form = modal.querySelector("form");
+  form.elements.type.value = row?.type ?? "INCOME";
+  if (row) form.elements.accountId.value = row.accountId;
+  const toggleCategory = () => {
+    const linked = Boolean(form.elements.categoryId.value);
+    form.querySelector("#legacy-category").hidden = linked;
+    form.elements.category.required = !linked;
   };
+  form
+    .querySelector("#category-select")
+    .addEventListener("change", toggleCategory);
+  toggleCategory();
+  let contactRequest = 0,
+    timer;
+  async function lookupContacts() {
+    const n = ++contactRequest;
+    try {
+      const query = new URLSearchParams({
+        kind: form.elements.type.value === "INCOME" ? "CUSTOMER" : "SUPPLIER",
+        active: "true",
+        size: "100",
+        search: form.elements.contactSearch.value,
+      });
+      const result = await api("/contacts?" + query);
+      if (n !== contactRequest || !form.isConnected) return;
+      const selected = form.elements.contactId.value;
+      const selectedName =
+        form.elements.contactId.selectedOptions[0]?.textContent;
+      let opts = result.content;
+      if (selected && !opts.some((c) => c.id === selected))
+        opts = [
+          {
+            id: selected,
+            name: selectedName || row?.contactName || "Vínculo anterior",
+          },
+          ...opts,
+        ];
+      form.elements.contactId.innerHTML =
+        '<option value="">Sem vínculo</option>' +
+        opts
+          .map((c) => `<option value="${c.id}">${e(c.name)}</option>`)
+          .join("");
+      if (opts.some((c) => c.id === selected))
+        form.elements.contactId.value = selected;
+      form.querySelector("#contact-hint").textContent =
+        result.totalElements > 100
+          ? "Mostrando os primeiros 100. Refine a busca."
+          : "Selecione um cadastro ou deixe sem vínculo.";
+    } catch (err) {
+      if (form.isConnected)
+        form.querySelector("#contact-hint").textContent = err.message;
+    }
+  }
+  form.elements.contactSearch.oninput = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => lookupContacts(), 250);
+  };
+  form.elements.type.onchange = () => {
+    form.querySelector("#category-select").innerHTML = categoryOptions(
+      form.elements.type.value,
+      null,
+    );
+    toggleCategory();
+    form.elements.contactId.innerHTML = '<option value="">Sem vínculo</option>';
+    form.elements.contactSearch.value = "";
+    lookupContacts();
+  };
+  if (!row)
+    form.querySelector("#paid").onchange = (ev) => {
+      form.querySelector("#payment-field").hidden = !ev.target.checked;
+      form.elements.paymentDate.required = ev.target.checked;
+    };
+  lookupContacts();
+}
+const contactKindLabel = (kind) =>
+  ({
+    CUSTOMER: "Cliente",
+    SUPPLIER: "Fornecedor",
+    BOTH: "Cliente e fornecedor",
+  })[kind];
+const categoryKindLabel = (kind) =>
+  ({ INCOME: "Receitas", EXPENSE: "Despesas", BOTH: "Receitas e despesas" })[
+    kind
+  ];
+function directoryEmpty(label, action) {
+  return `<div class="empty"><div class="empty-icon">${icon("company")}</div><h3>Nenhum cadastro encontrado</h3><p>Cadastre ${label} ou ajuste os filtros para encontrar outros resultados.</p><button class="btn" data-action="${action}">${icon("plus")}Novo cadastro</button></div>`;
+}
+function renderContacts() {
+  const f = state.directoryFilters,
+    result = state.contacts;
+  return (
+    head(
+      "Quem faz parte do seu negócio.",
+      "Clientes e fornecedores próximos das suas movimentações.",
+      `<button class="btn" data-action="contact">${icon("plus")}Novo contato</button>`,
+    ) +
+    `<section class="card"><form class="filters" id="directory-filter"><input name="search" type="search" aria-label="Buscar contatos" placeholder="Buscar por nome ou documento…" value="${e(f.search ?? "")}"><select name="kind" aria-label="Tipo de contato"><option value="">Clientes e fornecedores</option><option value="CUSTOMER" ${f.kind === "CUSTOMER" ? "selected" : ""}>Clientes</option><option value="SUPPLIER" ${f.kind === "SUPPLIER" ? "selected" : ""}>Fornecedores</option></select><select name="active" aria-label="Situação do contato"><option value="true" ${f.active === "true" ? "selected" : ""}>Ativos</option><option value="false" ${f.active === "false" ? "selected" : ""}>Inativos</option><option value="" ${f.active === "" ? "selected" : ""}>Todos</option></select><button type="submit" class="btn secondary">Filtrar</button></form>` +
+    (result.content.length
+      ? `<div class="table-wrap"><table><thead><tr><th>NOME / DOCUMENTO</th><th>TIPO</th><th>CONTATO</th><th>SITUAÇÃO</th><th>AÇÕES</th></tr></thead><tbody>${result.content.map((c) => `<tr><td class="description"><strong>${e(c.name)}</strong><small>${e(c.document ?? "Documento não informado")}</small></td><td>${contactKindLabel(c.kind)}</td><td class="description">${e(c.email ?? "—")}<br><small>${e(c.phone ?? "")}</small></td><td><span class="badge ${c.active ? "" : "cancelled"}">${c.active ? "Ativo" : "Inativo"}</span></td><td><div class="row-actions"><button class="btn secondary small" data-action="edit-contact" data-id="${c.id}" aria-label="Editar ${e(c.name)}">Editar</button><button class="btn text small" data-action="toggle-contact" data-id="${c.id}">${c.active ? "Inativar" : "Reativar"}</button></div></td></tr>`).join("")}</tbody></table></div>`
+      : directoryEmpty("seus clientes e fornecedores", "contact")) +
+    `<div class="pagination"><span>${result.totalElements} contato(s)</span><div class="row-actions"><button class="btn secondary small" data-action="contacts-prev" ${state.contactPage === 0 ? "disabled" : ""}>Anterior</button><span>${state.contactPage + 1} / ${Math.max(1, result.totalPages)}</span><button class="btn secondary small" data-action="contacts-next" ${state.contactPage + 1 >= result.totalPages ? "disabled" : ""}>Próxima</button></div></div></section>`
+  );
+}
+function renderCategories() {
+  return (
+    head(
+      "Categorias com a sua organização.",
+      "Separe receitas e despesas de um jeito que faça sentido para sua empresa.",
+      `<button class="btn" data-action="category">${icon("plus")}Nova categoria</button>`,
+    ) +
+    `<section class="card">${state.categories.length ? `<div class="table-wrap"><table><thead><tr><th>CATEGORIA</th><th>APLICAÇÃO</th><th>SITUAÇÃO</th><th>AÇÕES</th></tr></thead><tbody>${state.categories.map((c) => `<tr><td class="description"><strong>${e(c.name)}</strong></td><td>${categoryKindLabel(c.kind)}</td><td><span class="badge ${c.active ? "" : "cancelled"}">${c.active ? "Ativa" : "Inativa"}</span></td><td><div class="row-actions"><button class="btn secondary small" data-action="edit-category" data-id="${c.id}" aria-label="Editar ${e(c.name)}">Editar</button><button class="btn text small" data-action="toggle-category" data-id="${c.id}">${c.active ? "Inativar" : "Reativar"}</button></div></td></tr>`).join("")}</tbody></table></div>` : directoryEmpty("categorias financeiras", "category")}</section><p class="notice">Categorias e contatos inativos continuam no histórico. Os lançamentos antigos com categoria avulsa permanecem disponíveis.</p>`
+  );
+}
+function contactDialog(row = null) {
+  showDialog(
+    row ? "Editar contato" : "Novo contato",
+    "Organize clientes e fornecedores da sua empresa.",
+    field("Nome", "name", "text", 'required maxlength="120"', row?.name ?? "") +
+      `<label class="field">Tipo de contato<select name="kind"><option value="CUSTOMER">Cliente</option><option value="SUPPLIER">Fornecedor</option><option value="BOTH">Cliente e fornecedor</option></select></label>` +
+      field(
+        "CPF / CNPJ (opcional)",
+        "document",
+        "text",
+        'maxlength="18" inputmode="numeric"',
+        row?.document ?? "",
+      ) +
+      field(
+        "E-mail (opcional)",
+        "email",
+        "email",
+        'maxlength="255"',
+        row?.email ?? "",
+      ) +
+      field(
+        "Telefone (opcional)",
+        "phone",
+        "tel",
+        'maxlength="24"',
+        row?.phone ?? "",
+      ) +
+      `<label class="field">Observações<textarea name="notes" maxlength="1000" rows="3">${e(row?.notes ?? "")}</textarea></label>` +
+      (row
+        ? `<label class="field">Situação<select name="active"><option value="true">Ativo</option><option value="false">Inativo</option></select></label>`
+        : ""),
+    async (data) => {
+      data.active = row ? data.active === "true" : true;
+      await api("/contacts" + (row ? "/" + row.id : ""), {
+        method: row ? "PUT" : "POST",
+        body: JSON.stringify(data),
+      });
+      toast("Contato salvo.");
+    },
+  );
+  modal.querySelector("[name=kind]").value = row?.kind ?? "CUSTOMER";
+  if (row) modal.querySelector("[name=active]").value = String(row.active);
+}
+function categoryDialog(row = null) {
+  showDialog(
+    row ? "Editar categoria" : "Nova categoria",
+    "Uma classificação para suas movimentações.",
+    field(
+      "Nome da categoria",
+      "name",
+      "text",
+      'required maxlength="80"',
+      row?.name ?? "",
+    ) +
+      `<label class="field">Aplicação<select name="kind"><option value="INCOME">Receitas</option><option value="EXPENSE">Despesas</option><option value="BOTH">Receitas e despesas</option></select></label>` +
+      (row
+        ? `<label class="field">Situação<select name="active"><option value="true">Ativa</option><option value="false">Inativa</option></select></label>`
+        : ""),
+    async (data) => {
+      data.active = row ? data.active === "true" : true;
+      await api("/categories" + (row ? "/" + row.id : ""), {
+        method: row ? "PUT" : "POST",
+        body: JSON.stringify(data),
+      });
+      toast("Categoria salva.");
+    },
+  );
+  modal.querySelector("[name=kind]").value = row?.kind ?? "INCOME";
+  if (row) modal.querySelector("[name=active]").value = String(row.active);
+}
+function toggleDirectory(row, category) {
+  showDialog(
+    `${row.active ? "Inativar" : "Reativar"} ${category ? "categoria" : "contato"}?`,
+    e(row.name),
+    '<p class="notice">O histórico será preservado. Cadastros inativos deixam de aparecer para novos vínculos.</p>',
+    async () => {
+      const body = category
+        ? { name: row.name, kind: row.kind, active: !row.active }
+        : {
+            name: row.name,
+            kind: row.kind,
+            document: row.document,
+            email: row.email,
+            phone: row.phone,
+            notes: row.notes,
+            active: !row.active,
+          };
+      await api((category ? "/categories/" : "/contacts/") + row.id, {
+        method: "PUT",
+        body: JSON.stringify(body),
+      });
+      toast("Cadastro atualizado.");
+    },
+    "Confirmar",
+  );
 }
 function transferDialog() {
   if (state.accounts.length < 2) {
@@ -418,6 +693,7 @@ root.addEventListener("click", async (ev) => {
   if (nav) {
     state.page = nav.dataset.nav;
     state.entryPage = 0;
+    state.contactPage = 0;
     await safeLoad();
     return;
   }
@@ -431,6 +707,34 @@ modal.addEventListener("click", (ev) => {
 async function act(btn) {
   const action = btn.dataset.action;
   if (action === "entry") return entryDialog();
+  if (action === "edit-entry")
+    return entryDialog(
+      state.entries.content.find((r) => r.id === btn.dataset.id),
+    );
+  if (action === "contact") return contactDialog();
+  if (action === "category") return categoryDialog();
+  if (action === "edit-contact")
+    return contactDialog(
+      state.contacts.content.find((r) => r.id === btn.dataset.id),
+    );
+  if (action === "edit-category")
+    return categoryDialog(
+      state.categories.find((r) => r.id === btn.dataset.id),
+    );
+  if (action === "toggle-contact")
+    return toggleDirectory(
+      state.contacts.content.find((r) => r.id === btn.dataset.id),
+      false,
+    );
+  if (action === "toggle-category")
+    return toggleDirectory(
+      state.categories.find((r) => r.id === btn.dataset.id),
+      true,
+    );
+  if (action === "contacts-prev" || action === "contacts-next") {
+    state.contactPage += action === "contacts-next" ? 1 : -1;
+    return safeLoad();
+  }
   if (action === "account") return accountDialog();
   if (action === "transfer") return transferDialog();
   if (action === "prev" || action === "next") {
@@ -461,7 +765,7 @@ async function act(btn) {
     showDialog(
       "Cancelar lançamento?",
       "O registro ficará no histórico como cancelado.",
-      '<p class="notice">Se já estiver pago, o valor deixará de compor o saldo. Para corrigir um lançamento, cancele e cadastre novamente.</p>',
+      '<p class="notice">Se já estiver pago, o valor deixará de compor o saldo. Lançamentos pendentes também podem ser corrigidos pela opção Editar.</p>',
       async () => {
         await send(`/finance/entries/${btn.dataset.id}/cancel`);
         toast("Lançamento cancelado.");
@@ -477,6 +781,8 @@ async function act(btn) {
       state.user = null;
       state.csrf = null;
       state.filters = {};
+      state.directoryFilters = { active: "true" };
+      state.contactPage = 0;
       await csrf();
       renderAuth();
     }

@@ -25,6 +25,8 @@ public class FinanceController {
     }
     @PostMapping("/entries") @ResponseStatus(HttpStatus.CREATED)
     public FinanceService.EntryView entry(@Valid @RequestBody FinanceService.EntryInput input) { return service.createEntry(input); }
+    @PutMapping("/entries/{id}")
+    public FinanceService.EntryView update(@PathVariable UUID id,@Valid @RequestBody FinanceService.EntryInput input) { return service.updateEntry(id,input); }
     @PostMapping("/entries/{id}/pay")
     public FinanceService.EntryView pay(@PathVariable UUID id, @Valid @RequestBody FinanceService.PaymentInput input) { return service.pay(id,input); }
     @PostMapping("/entries/{id}/cancel")

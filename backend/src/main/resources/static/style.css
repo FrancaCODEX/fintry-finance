@@ -1062,3 +1062,30 @@ dialog::backdrop {
     transition: none !important;
   }
 }
+
+.field textarea {
+  width: 100%;
+  border: 1px solid #d8e1d9;
+  border-radius: 9px;
+  padding: 12px 13px;
+  resize: vertical;
+  font: inherit;
+  color: var(--ink);
+  background: white;
+}
+.sidebar nav {
+  max-height: 55vh;
+  overflow-y: auto;
+}
+@media (max-width: 700px) {
+  .sidebar nav {
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 3px;
+  }
+  .nav-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
