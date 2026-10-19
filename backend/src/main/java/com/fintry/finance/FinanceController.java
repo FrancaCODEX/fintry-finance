@@ -23,6 +23,8 @@ public class FinanceController {
         @RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="20") int size) {
         return service.list(start,end,type,status,accountId,search,seriesId,page,size);
     }
+    @GetMapping("/entries/{id}")
+    public FinanceService.EntryDetails details(@PathVariable UUID id) { return service.details(id); }
     @PostMapping("/entries") @ResponseStatus(HttpStatus.CREATED)
     public FinanceService.EntryView entry(@Valid @RequestBody FinanceService.EntryInput input) { return service.createEntry(input); }
     @PutMapping("/entries/{id}")

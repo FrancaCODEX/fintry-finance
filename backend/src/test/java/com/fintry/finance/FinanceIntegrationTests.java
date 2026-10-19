@@ -241,6 +241,64 @@ class FinanceIntegrationTests {
         b.request("GET","/reports/export?start="+today+"&end="+today+"&format=csv",null,400);
     }
 
+
+    byte[] imageFile(String format) throws Exception {
+        var image=new java.awt.image.BufferedImage(4,4,java.awt.image.BufferedImage.TYPE_INT_RGB);
+        var out=new java.io.ByteArrayOutputStream();assertTrue(javax.imageio.ImageIO.write(image,format,out));return out.toByteArray();
+    }
+    byte[] pdfFile(boolean encrypted) throws Exception {
+        try(var pdf=new org.apache.pdfbox.pdmodel.PDDocument();var out=new java.io.ByteArrayOutputStream()) {
+            pdf.addPage(new org.apache.pdfbox.pdmodel.PDPage());
+            if(encrypted)pdf.protect(new org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy("owner-password","reader-password",new org.apache.pdfbox.pdmodel.encryption.AccessPermission()));
+            pdf.save(out);return out.toByteArray();
+        }
+    }
+    HttpResponse<byte[]> upload(Browser b,String entry,String filename,byte[] data,boolean withCsrf) throws Exception {
+        String boundary="fintry-"+UUID.randomUUID();var out=new java.io.ByteArrayOutputStream();
+        out.write(("--"+boundary+"\r\nContent-Disposition: form-data; name=\"file\"; filename=\""+filename+"\"\r\nContent-Type: application/octet-stream\r\n\r\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));out.write(data);out.write(("\r\n--"+boundary+"--\r\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        var request=HttpRequest.newBuilder(URI.create("http://localhost:"+port+"/api/v1/finance/entries/"+entry+"/attachments")).header("Content-Type","multipart/form-data; boundary="+boundary);
+        if(withCsrf)request.header(b.header,b.token);return b.client.send(request.POST(HttpRequest.BodyPublishers.ofByteArray(out.toByteArray())).build(),HttpResponse.BodyHandlers.ofByteArray());
+    }
+    JsonNode uploaded(Browser b,String entry,String name,byte[] data) throws Exception {
+        var response=upload(b,entry,name,data,true);assertEquals(201,response.statusCode(),new String(response.body(),java.nio.charset.StandardCharsets.UTF_8));return json.readTree(response.body());
+    }
+    @Test void attachmentsRemainThroughPaymentCancellationAndDownloadExactBytes() throws Exception {
+        var b=new Browser().signup();var account=b.account("Banco principal","100");
+        String entry=b.request("POST","/finance/entries",b.entry(account,false,"10","EXPENSE"),201).get("id").asText();
+        var details=b.request("GET","/finance/entries/"+entry,null,200);assertEquals("Banco principal",details.get("accountName").asText());assertNotNull(details.get("createdAt"));
+        byte[] png=imageFile("PNG");var file=uploaded(b,entry,"recibo São José.png",png);assertEquals("recibo São José.png",file.get("filename").asText());assertEquals(png.length,file.get("byteCount").asInt());assertEquals("image/png",file.get("contentType").asText());assertFalse(file.has("content"));
+        uploaded(b,entry,"nota.pdf",pdfFile(false));uploaded(b,entry,"foto.jpeg",imageFile("JPEG"));
+        String route="/finance/entries/"+entry+"/attachments";var files=b.request("GET",route,null,200);assertEquals(3,files.size());assertFalse(files.get(0).has("content"));assertEquals("Usuário teste",files.get(0).get("uploadedByName").asText());
+        var download=b.client.send(HttpRequest.newBuilder(URI.create("http://localhost:"+port+"/api/v1"+route+"/"+file.get("id").asText())).GET().build(),HttpResponse.BodyHandlers.ofByteArray());assertEquals(200,download.statusCode());assertArrayEquals(png,download.body());assertTrue(download.headers().firstValue("Content-Disposition").orElse("").startsWith("attachment;"));assertTrue(download.headers().firstValue("Cache-Control").orElse("").contains("no-store"));
+        amount("100",b.summary().get("balance"));b.request("POST","/finance/entries/"+entry+"/pay",Map.of("paymentDate",today),200);amount("90",b.summary().get("balance"));assertEquals(3,b.request("GET",route,null,200).size());
+        b.request("POST","/finance/entries/"+entry+"/cancel",null,200);assertEquals("CANCELLED",b.request("GET","/finance/entries/"+entry,null,200).get("entry").get("status").asText());assertEquals(3,b.request("GET",route,null,200).size());amount("100",b.summary().get("balance"));
+        b.request("DELETE",route+"/"+file.get("id").asText(),null,204);assertEquals(2,b.request("GET",route,null,200).size());b.request("GET",route+"/"+file.get("id").asText(),null,404);amount("100",b.summary().get("balance"));
+    }
+    @Test void attachmentsAndEntryDetailsRespectCompanyEntryAndCsrfBoundaries() throws Exception {
+        var a=new Browser().signup();var b=new Browser().signup();var account=a.account("Conta privada","0");
+        String entry=a.request("POST","/finance/entries",a.entry(account,false,"5","INCOME"),201).get("id").asText();String second=a.request("POST","/finance/entries",a.entry(account,false,"6","INCOME"),201).get("id").asText();
+        byte[] png=imageFile("PNG");var file=uploaded(a,entry,"../../recibo.png",png);assertEquals("recibo.png",file.get("filename").asText());String route="/finance/entries/"+entry+"/attachments";
+        assertEquals(403,upload(a,entry,"arquivo.png",png,false).statusCode());
+        b.request("GET","/finance/entries/"+entry,null,404);b.request("GET",route,null,404);b.request("GET",route+"/"+file.get("id").asText(),null,404);b.request("DELETE",route+"/"+file.get("id").asText(),null,404);assertEquals(404,upload(b,entry,"privado.png",png,true).statusCode());
+        a.request("GET","/finance/entries/"+second+"/attachments/"+file.get("id").asText(),null,404);a.request("DELETE","/finance/entries/"+second+"/attachments/"+file.get("id").asText(),null,404);
+        var anonymous=new Browser();anonymous.request("GET",route,null,401);anonymous.request("GET",route+"/"+file.get("id").asText(),null,401);assertEquals(1,a.request("GET",route,null,200).size());
+    }
+    @Test void attachmentValidationRejectsDisguisedCorruptEncryptedAndLargeFiles() throws Exception {
+        var b=new Browser().signup();var account=b.account("Conta","0");String entry=b.request("POST","/finance/entries",b.entry(account,false,"1","INCOME"),201).get("id").asText();
+        byte[] png=imageFile("PNG");assertEquals(400,upload(b,entry,"arquivo.svg","<svg/>".getBytes(),true).statusCode());assertEquals(400,upload(b,entry,"falso.pdf",png,true).statusCode());assertEquals(400,upload(b,entry,"falso.png",imageFile("JPEG"),true).statusCode());assertEquals(400,upload(b,entry,"vazio.png",new byte[0],true).statusCode());assertEquals(400,upload(b,entry,"quebrado.pdf","%PDF-1.7 inválido".getBytes(),true).statusCode());assertEquals(400,upload(b,entry,"segredo.pdf",pdfFile(true),true).statusCode());
+        var large=upload(b,entry,"grande.png",new byte[5*1024*1024+1],true);assertEquals(413,large.statusCode());assertTrue(new String(large.body(),java.nio.charset.StandardCharsets.UTF_8).contains("5 MB"));assertEquals(0,b.request("GET","/finance/entries/"+entry+"/attachments",null,200).size());
+    }
+    @Test void concurrentAttachmentsCannotExceedTenAndRemovalFreesOneSlot() throws Exception {
+        var b=new Browser().signup();var account=b.account("Conta","0");String entry=b.request("POST","/finance/entries",b.entry(account,false,"1","INCOME"),201).get("id").asText();byte[] png=imageFile("PNG");
+        for(int i=0;i<9;i++)uploaded(b,entry,"recibo-"+i+".png",png);
+        var pool=java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            var results=pool.invokeAll(List.<java.util.concurrent.Callable<Integer>>of(()->upload(b,entry,"concorrente-a.png",png,true).statusCode(),()->upload(b,entry,"concorrente-b.png",png,true).statusCode()));
+            var codes=results.stream().map(result->{try{return result.get();}catch(Exception ex){throw new RuntimeException(ex);}}).sorted().toList();assertEquals(List.of(201,400),codes);
+        }finally{pool.shutdownNow();}
+        String route="/finance/entries/"+entry+"/attachments";var files=b.request("GET",route,null,200);assertEquals(10,files.size());b.request("DELETE",route+"/"+files.get(0).get("id").asText(),null,204);uploaded(b,entry,"substituto.png",png);assertEquals(10,b.request("GET",route,null,200).size());
+    }
+
     @Test void cashLifecycleAndAtomicTransfer() throws Exception {
         var b=new Browser().signup();String bank=b.account("Banco","1000.00"),cash=b.account("Caixa","0.00");
         var entry=b.request("POST","/finance/entries",b.entry(bank,false,"100.00","INCOME"),201);

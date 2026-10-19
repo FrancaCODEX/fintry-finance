@@ -84,7 +84,8 @@ async function api(path, options = {}) {
   const method = options.method || "GET";
   if (method !== "GET" && !state.csrf) await csrf();
   const headers = { ...options.headers };
-  if (options.body) headers["Content-Type"] = "application/json";
+  if (options.body && !(options.body instanceof FormData))
+    headers["Content-Type"] = "application/json";
   if (method !== "GET") headers[state.csrf.headerName] = state.csrf.token;
   let res;
   try {
@@ -107,6 +108,7 @@ async function api(path, options = {}) {
     if (res.status === 401 && state.user) {
       state.user = null;
       modal.close();
+      closeDetails();
       renderAuth();
     }
     throw new Error(
@@ -142,7 +144,7 @@ async function submitForm(event, action) {
   }
 }
 function renderAuth(register = false) {
-  root.innerHTML = `<main class="auth"><section class="auth-story"><div class="brand"><img src="/favicon.svg" alt="">fintry<span>.</span></div><div><div class="eyebrow">Control today. Grow tomorrow.</div><h1>Seu financeiro.<br>Mais simples.<br><span>Mais claro.</span></h1><p>Organize o presente e enxergue os próximos passos da sua empresa. Tudo em um só lugar.</p><div class="preview-card"><span class="eyebrow">Clareza para crescer</span><strong>Decisões com direção.</strong><div class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div></div><footer>Feito para quem cuida de cada detalhe do negócio.</footer></section><section class="auth-panel"><div class="auth-form"><h2>${register ? "Comece pela sua empresa" : "Bom ter você por aqui."}</h2><p class="muted">${register ? "Crie seu acesso e organize suas finanças." : "Entre para acompanhar os números do seu negócio."}</p><form id="auth-form">${register ? field("Seu nome", "name", "text", 'required maxlength="120" autocomplete="name"') + field("Nome da empresa", "companyName", "text", 'required maxlength="255" autocomplete="organization"') + field("CNPJ (somente números)", "document", "text", 'required pattern="[0-9]{14}" maxlength="14" inputmode="numeric" placeholder="14 dígitos"') : ""}${field("E-mail", "email", "email", 'required maxlength="255" autocomplete="username" placeholder="voce@empresa.com.br"')}${field("Senha", "password", "password", `required ${register ? 'minlength="10"' : ""} maxlength="64" autocomplete="${register ? "new-password" : "current-password"}" placeholder="${register ? "Pelo menos 10 caracteres" : "Sua senha"}"`)}<div class="form-error" role="alert"></div><button class="btn submit" type="submit">${register ? "Criar minha conta" : "Entrar no Fintry"} ${icon("income")}</button></form><div class="auth-switch">${register ? "Já tem uma conta?" : "Primeira vez por aqui?"} <button id="auth-switch">${register ? "Entrar" : "Criar conta"}</button></div><p class="auth-note">Fintry v${e(state.version)} · Gestão financeira para pequenas empresas<br>Desenvolvido por Vinicius Azeredo França</p></div></section></main>`;
+  root.innerHTML = `<main class="auth"><section class="auth-story"><div class="brand"><img src="/favicon.svg" alt="">fintry<span>.</span></div><div><div class="eyebrow">Control today. Grow tomorrow.</div><h1>Seu financeiro.<br>Mais simples.<br><span>Mais claro.</span></h1><p>Organize o presente e enxergue os próximos passos da sua empresa. Tudo em um só lugar.</p><div class="preview-card"><span class="eyebrow">Clareza para crescer</span><strong>Decisões com direção.</strong><div class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div></div><footer>Feito para quem cuida de cada detalhe do negócio.</footer></section><section class="auth-panel"><div class="auth-form"><div class="auth-tools">${themeToggle()}</div><h2>${register ? "Comece pela sua empresa" : "Bom ter você por aqui."}</h2><p class="muted">${register ? "Crie seu acesso e organize suas finanças." : "Entre para acompanhar os números do seu negócio."}</p><form id="auth-form">${register ? field("Seu nome", "name", "text", 'required maxlength="120" autocomplete="name"') + field("Nome da empresa", "companyName", "text", 'required maxlength="255" autocomplete="organization"') + field("CNPJ (somente números)", "document", "text", 'required pattern="[0-9]{14}" maxlength="14" inputmode="numeric" placeholder="14 dígitos"') : ""}${field("E-mail", "email", "email", 'required maxlength="255" autocomplete="username" placeholder="voce@empresa.com.br"')}${field("Senha", "password", "password", `required ${register ? 'minlength="10"' : ""} maxlength="64" autocomplete="${register ? "new-password" : "current-password"}" placeholder="${register ? "Pelo menos 10 caracteres" : "Sua senha"}"`)}<div class="form-error" role="alert"></div><button class="btn submit" type="submit">${register ? "Criar minha conta" : "Entrar no Fintry"} ${icon("income")}</button></form><div class="auth-switch">${register ? "Já tem uma conta?" : "Primeira vez por aqui?"} <button id="auth-switch">${register ? "Entrar" : "Criar conta"}</button></div><p class="auth-note">Fintry v${e(state.version)} · Gestão financeira para pequenas empresas<br>Desenvolvido por Vinicius Azeredo França</p></div></section></main>`;
   document.querySelector("#auth-switch").onclick = () => renderAuth(!register);
   document.querySelector("#auth-form").onsubmit = (ev) =>
     submitForm(ev, async (data) => {
@@ -187,7 +189,7 @@ function shell() {
     )
     .join(
       "",
-    )}</nav><div class="side-bottom"><div class="side-note"><strong>Um passo de cada vez.</strong><p>O controle do seu negócio começa com boas informações.</p></div><div class="user-block"><div class="avatar">${e(u.name.slice(0, 1).toUpperCase())}</div><div class="user-info"><strong>${e(u.name)}</strong><small>Administrador</small></div><button class="logout" data-action="logout" title="Sair" aria-label="Sair da conta">${icon("exit")}</button></div></div></aside><main class="main"><header class="topbar"><div class="company-label">${icon("company")} ${e(u.companyName)}</div><span class="muted">Seu negócio, em boa direção.</span><button class="btn text small" data-action="logout">Sair ${icon("exit")}</button></header><div class="main-content"><div id="page-content"></div><footer class="footer"><span>Fintry v${e(state.version)} · © ${new Date().getFullYear()}</span><a href="mailto:vfranca.dev@gmail.com">Criado por Vinicius Azeredo França</a></footer></div></main></div>`;
+    )}</nav><div class="side-bottom"><div class="side-note"><strong>Um passo de cada vez.</strong><p>O controle do seu negócio começa com boas informações.</p></div><div class="user-block"><div class="avatar">${e(u.name.slice(0, 1).toUpperCase())}</div><div class="user-info"><strong>${e(u.name)}</strong><small>Administrador</small></div><button class="logout" data-action="logout" title="Sair" aria-label="Sair da conta">${icon("exit")}</button></div></div></aside><main class="main"><header class="topbar"><div class="company-label">${icon("company")} ${e(u.companyName)}</div><span class="muted topbar-message">Seu negócio, em boa direção.</span>${themeToggle()}<button class="btn text small" data-action="logout">Sair ${icon("exit")}</button></header><div class="main-content"><div id="page-content"></div><footer class="footer"><span>Fintry v${e(state.version)} · © ${new Date().getFullYear()}</span><a href="mailto:vfranca.dev@gmail.com">Criado por Vinicius Azeredo França</a></footer></div></main></div>`;
   requestAnimationFrame(syncNavigation);
 }
 function syncNavigation() {
@@ -231,7 +233,7 @@ function categoryBreakdown(categories, total) {
       const percent = Number(total)
         ? (Number(item.amount) / Number(total)) * 100
         : 0;
-      return `<div><div class="category-line"><span>${e(item.category)}</span><strong>${money(item.amount)}</strong></div><svg viewBox="0 0 100 5" preserveAspectRatio="none" role="img" aria-label="${e(item.category)}: ${percent.toFixed(1)}% das despesas realizadas"><rect width="100" height="5" rx="2.5" fill="#edf2e9"/><rect width="${Math.min(100, percent)}" height="5" rx="2.5" fill="#18785a"/></svg></div>`;
+      return `<div><div class="category-line"><span>${e(item.category)}</span><strong>${money(item.amount)}</strong></div><svg viewBox="0 0 100 5" preserveAspectRatio="none" role="img" aria-label="${e(item.category)}: ${percent.toFixed(1)}% das despesas realizadas"><rect width="100" height="5" rx="2.5" fill="var(--line)"/><rect width="${Math.min(100, percent)}" height="5" rx="2.5" fill="var(--green)"/></svg></div>`;
     })
     .join("")}</div>`;
 }
@@ -258,7 +260,7 @@ function chart(flow) {
       notation: "compact",
       maximumFractionDigits: 1,
     });
-  return `<div class="chart"><svg role="img" aria-label="Receitas e despesas pagas nos últimos seis meses. Os valores também aparecem nas descrições das barras." viewBox="0 0 600 210">${[0, 1, 2, 3].map((i) => `<line x1="48" x2="588" y1="${20 + i * 47}" y2="${20 + i * 47}" stroke="#edf0e9"/><text x="0" y="${24 + i * 47}">${compact(max * (1 - i / 3))}</text>`).join("")}${flow
+  return `<div class="chart"><svg role="img" aria-label="Receitas e despesas pagas nos últimos seis meses. Os valores também aparecem nas descrições das barras." viewBox="0 0 600 210">${[0, 1, 2, 3].map((i) => `<line x1="48" x2="588" y1="${20 + i * 47}" y2="${20 + i * 47}" stroke="var(--line)"/><text x="0" y="${24 + i * 47}">${compact(max * (1 - i / 3))}</text>`).join("")}${flow
     .map((m, i) => {
       const x = 62 + i * 88,
         hi = (Number(m.income) / max) * 141,
@@ -269,7 +271,7 @@ function chart(flow) {
       })
         .format(new Date(m.month + "-15T12:00:00Z"))
         .replace(".", "");
-      return `<g><title>${label}: receitas ${money(m.income)}, despesas ${money(m.expense)}</title><rect x="${x}" y="${161 - hi}" width="23" height="${hi}" rx="4" fill="#18785a"/><rect x="${x + 28}" y="${161 - he}" width="23" height="${he}" rx="4" fill="#b8c6b0"/><text x="${x + 25}" y="188" text-anchor="middle">${label}</text></g>`;
+      return `<g><title>${label}: receitas ${money(m.income)}, despesas ${money(m.expense)}</title><rect x="${x}" y="${161 - hi}" width="23" height="${hi}" rx="4" fill="var(--green)"/><rect x="${x + 28}" y="${161 - he}" width="23" height="${he}" rx="4" fill="#b8c6b0"/><text x="${x + 25}" y="188" text-anchor="middle">${label}</text></g>`;
     })
     .join("")}</svg></div>`;
 }
@@ -286,7 +288,7 @@ function entriesTable(rows) {
         paid = row.status === "PAID",
         cancelled = row.status === "CANCELLED";
       const overdue = !paid && !cancelled && row.dueDate < localDate();
-      return `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}${row.transferId ? " · Transferência" : ""}${row.seriesId ? `<br><span class="series-label">${row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição"} ${row.sequenceNumber}/${row.seriesCount}</span>` : ""}</small></td><td>${dateLabel(row.dueDate)}${paid ? `<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small>` : ""}</td><td>${e(names.get(row.accountId) || "Conta")}</td><td class="${income ? "positive" : "negative"}"><strong>${income ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${cancelled ? "cancelled" : paid ? "" : "pending"}">${cancelled ? "Cancelado" : paid ? (income ? "Recebido" : "Pago") : overdue ? "Em atraso" : "Pendente"}</span></td><td><div class="row-actions">${!paid && !cancelled ? `<button class="btn soft small" data-action="pay" data-id="${row.id}">${income ? "Receber" : "Pagar"}</button>${!row.seriesId ? `<button class="btn secondary small" data-action="edit-entry" data-id="${row.id}" aria-label="Editar ${e(row.description)}">Editar</button>` : ""}` : ""}${!cancelled && !row.transferId ? `<button class="btn text small" data-action="cancel" data-id="${row.id}" aria-label="Cancelar ${e(row.description)}">Cancelar</button>` : row.transferId ? '<small class="muted">Entre contas</small>' : "—"}</div></td></tr>`;
+      return `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}${row.transferId ? " · Transferência" : ""}${row.seriesId ? `<br><span class="series-label">${row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição"} ${row.sequenceNumber}/${row.seriesCount}</span>` : ""}</small></td><td>${dateLabel(row.dueDate)}${paid ? `<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small>` : ""}</td><td>${e(names.get(row.accountId) || "Conta")}</td><td class="${income ? "positive" : "negative"}"><strong>${income ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${cancelled ? "cancelled" : paid ? "" : "pending"}">${cancelled ? "Cancelado" : paid ? (income ? "Recebido" : "Pago") : overdue ? "Em atraso" : "Pendente"}</span></td><td><div class="row-actions"><button class="btn secondary small" data-action="details" data-id="${row.id}" aria-label="Detalhes de ${e(row.description)}">Detalhes</button>${!paid && !cancelled ? `<button class="btn soft small" data-action="pay" data-id="${row.id}">${income ? "Receber" : "Pagar"}</button>${!row.seriesId ? `<button class="btn secondary small" data-action="edit-entry" data-id="${row.id}" aria-label="Editar ${e(row.description)}">Editar</button>` : ""}` : ""}${!cancelled && !row.transferId ? `<button class="btn text small" data-action="cancel" data-id="${row.id}" aria-label="Cancelar ${e(row.description)}">Cancelar</button>` : row.transferId ? '<small class="muted">Entre contas</small>' : "—"}</div></td></tr>`;
     })
     .join("")}</tbody></table></div>`;
 }
@@ -331,7 +333,7 @@ function renderEntries() {
 function reportRows(rows) {
   if (!rows.length)
     return '<div class="empty"><h3>Nenhum lançamento encontrado</h3><p>Ajuste o período ou os filtros. Transferências não fazem parte deste relatório.</p></div>';
-  return `<div class="table-wrap"><table><thead><tr><th>DESCRIÇÃO / CATEGORIA</th><th>CONTA</th><th>VENCIMENTO / BAIXA</th><th>VALOR</th><th>SITUAÇÃO</th></tr></thead><tbody>${rows.map((row) => `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}${row.sequenceNumber ? " · " + row.sequenceNumber + "/" + row.seriesCount : ""}</small></td><td>${e(row.accountName)}</td><td>${dateLabel(row.dueDate)}<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small></td><td class="${row.type === "INCOME" ? "positive" : "negative"}"><strong>${row.type === "INCOME" ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${row.status === "PENDING" ? "pending" : row.status === "CANCELLED" ? "cancelled" : ""}">${row.status === "PAID" ? "Realizado" : row.status === "PENDING" ? "Pendente" : "Cancelado"}</span></td></tr>`).join("")}</tbody></table></div>`;
+  return `<div class="table-wrap"><table><thead><tr><th>DESCRIÇÃO / CATEGORIA</th><th>CONTA</th><th>VENCIMENTO / BAIXA</th><th>VALOR</th><th>SITUAÇÃO</th></tr></thead><tbody>${rows.map((row) => `<tr><td class="description"><button class="entry-link" data-action="details" data-id="${row.id}" aria-label="Detalhes de ${e(row.description)}">${e(row.description)}</button><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}${row.sequenceNumber ? " · " + row.sequenceNumber + "/" + row.seriesCount : ""}</small></td><td>${e(row.accountName)}</td><td>${dateLabel(row.dueDate)}<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small></td><td class="${row.type === "INCOME" ? "positive" : "negative"}"><strong>${row.type === "INCOME" ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${row.status === "PENDING" ? "pending" : row.status === "CANCELLED" ? "cancelled" : ""}">${row.status === "PAID" ? "Realizado" : row.status === "PENDING" ? "Pendente" : "Cancelado"}</span></td></tr>`).join("")}</tbody></table></div>`;
 }
 function accountFilter(selected) {
   return `<label class="field">Conta<select name="accountId"><option value="">Todas as contas</option>${state.accounts.map((a) => `<option value="${a.id}" ${a.id === selected ? "selected" : ""}>${e(a.name)}</option>`).join("")}</select></label>`;
@@ -367,7 +369,7 @@ function forecastChart(f) {
   const points = f.days
     .map((d, i) => `${x(i)},${y(Number(d.balance))}`)
     .join(" ");
-  return `<div class="chart"><svg viewBox="0 0 600 220" role="img" aria-label="Evolução estimada do saldo até ${dateLabel(f.end)}"><line x1="48" x2="580" y1="${y(0)}" y2="${y(0)}" stroke="#c7d2c2" stroke-dasharray="4 4"/>${[high, (high + low) / 2, low].map((v) => `<text x="0" y="${y(v) + 4}">${v.toLocaleString("pt-BR", { notation: "compact", maximumFractionDigits: 1 })}</text>`).join("")}<polyline points="${points}" fill="none" stroke="#18785a" stroke-width="2.5"/>${f.days
+  return `<div class="chart"><svg viewBox="0 0 600 220" role="img" aria-label="Evolução estimada do saldo até ${dateLabel(f.end)}"><line x1="48" x2="580" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)" stroke-dasharray="4 4"/>${[high, (high + low) / 2, low].map((v) => `<text x="0" y="${y(v) + 4}">${v.toLocaleString("pt-BR", { notation: "compact", maximumFractionDigits: 1 })}</text>`).join("")}<polyline points="${points}" fill="none" stroke="var(--green)" stroke-width="2.5"/>${f.days
     .filter(
       (d, i) =>
         i === 0 || i === f.days.length - 1 || d.date === f.firstNegativeDate,
@@ -598,6 +600,10 @@ function showDialog(title, subtitle, fields, action, submit = "Salvar") {
       await action(data, form);
       modal.close();
       await safeLoad();
+      if (drawer.open) {
+        await loadDetails();
+        drawer.querySelector("#drawer-title")?.focus();
+      }
     });
 }
 function accountOptions(name, label) {
@@ -1085,6 +1091,8 @@ modal.addEventListener("click", (ev) => {
 });
 async function act(btn) {
   const action = btn.dataset.action;
+  if (action === "theme") return window.fintryTheme.toggle();
+  if (action === "details") return openDetails(btn.dataset.id);
   if (action === "entry") return entryDialog();
   if (action === "report-export")
     return downloadReport(btn.dataset.format, btn);
@@ -1119,7 +1127,8 @@ async function act(btn) {
   }
   if (action === "edit-entry")
     return entryDialog(
-      state.entries.content.find((r) => r.id === btn.dataset.id),
+      state.entries.content.find((r) => r.id === btn.dataset.id) ||
+        (detailData?.entry.id === btn.dataset.id ? detailData.entry : null),
     );
   if (action === "contact") return contactDialog();
   if (action === "category") return categoryDialog();
@@ -1188,6 +1197,7 @@ async function act(btn) {
   try {
     if (action === "logout") {
       await send("/auth/logout");
+      closeDetails();
       state.user = null;
       state.csrf = null;
       state.filters = {};
@@ -1216,6 +1226,204 @@ async function act(btn) {
     btn.disabled = false;
   }
 }
+function themeToggle() {
+  const dark = document.documentElement.dataset.theme === "dark";
+  return `<button type="button" class="btn secondary small theme-toggle" data-action="theme" aria-pressed="${dark}" aria-label="Ativar modo ${dark ? "claro" : "escuro"}">${dark ? "☀ Claro" : "☾ Escuro"}</button>`;
+}
+window.addEventListener("fintrythemechange", () => {
+  const dark = document.documentElement.dataset.theme === "dark";
+  document.querySelectorAll("[data-action=theme]").forEach((button) => {
+    button.textContent = dark ? "☀ Claro" : "☾ Escuro";
+    button.setAttribute("aria-pressed", String(dark));
+    button.setAttribute(
+      "aria-label",
+      `Ativar modo ${dark ? "claro" : "escuro"}`,
+    );
+  });
+});
+const drawer = document.querySelector("#details-drawer");
+let detailId = null,
+  detailData = null,
+  detailFiles = [],
+  detailRequest = 0,
+  removalId = null;
+function closeDetails() {
+  detailRequest++;
+  detailId = null;
+  detailData = null;
+  detailFiles = [];
+  if (drawer.open) drawer.close();
+}
+drawer.addEventListener("close", () => {
+  detailId = null;
+  detailData = null;
+  detailFiles = [];
+  detailRequest++;
+  if (!document.activeElement || document.activeElement === document.body)
+    document.querySelector(".nav-btn.active")?.focus();
+});
+const fileSize = (n) =>
+  n < 1024 * 1024
+    ? `${(n / 1024).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} KB`
+    : `${(n / (1024 * 1024)).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} MB`;
+async function openDetails(id) {
+  detailId = id;
+  removalId = null;
+  drawer.innerHTML =
+    '<div class="drawer-header"><h2 id="drawer-title" tabindex="-1">Detalhes do lançamento</h2><button class="close" data-action="drawer-close" aria-label="Fechar detalhes">×</button></div><p class="muted" role="status">Carregando lançamento…</p>';
+  if (!drawer.open) drawer.showModal();
+  await loadDetails();
+  if (drawer.open && detailId === id)
+    drawer.querySelector("[data-action=drawer-close]")?.focus();
+}
+async function loadDetails() {
+  const id = detailId,
+    request = ++detailRequest;
+  if (!id) return;
+  try {
+    const [data, files] = await Promise.all([
+      api(`/finance/entries/${id}`),
+      api(`/finance/entries/${id}/attachments`),
+    ]);
+    if (request !== detailRequest || !drawer.open || !state.user) return;
+    detailData = data;
+    detailFiles = files;
+    renderDetails();
+  } catch (error) {
+    if (request !== detailRequest || !drawer.open) return;
+    drawer.innerHTML =
+      '<div class="drawer-header"><h2 id="drawer-title" tabindex="-1">Detalhes do lançamento</h2><button class="close" data-action="drawer-close" aria-label="Fechar detalhes">×</button></div><p role="alert">' +
+      e(error.message) +
+      '</p><button class="btn secondary" data-action="drawer-retry">Tentar novamente</button>';
+  }
+}
+function renderDetails() {
+  const data = detailData,
+    row = data.entry;
+  const status =
+    row.status === "PAID"
+      ? row.type === "INCOME"
+        ? "Recebido"
+        : "Pago"
+      : row.status === "CANCELLED"
+        ? "Cancelado"
+        : row.dueDate < localDate()
+          ? "Em atraso"
+          : "Pendente";
+  const item = (label, value) =>
+    `<div><dt>${label}</dt><dd>${e(value || "—")}</dd></div>`;
+  drawer.innerHTML = `<div class="drawer-header"><div><span class="eyebrow">${row.transferId ? "Transferência entre contas" : row.type === "INCOME" ? "Receita" : "Despesa"}</span><h2 id="drawer-title" tabindex="-1">${e(row.description)}</h2></div><button class="close" data-action="drawer-close" aria-label="Fechar detalhes">×</button></div><div class="drawer-amount ${row.type === "INCOME" ? "positive" : "negative"}">${money(row.amount)}</div><span class="badge ${row.status === "PENDING" ? "pending" : row.status === "CANCELLED" ? "cancelled" : ""}">${status}</span><dl class="detail-grid">${item("Conta", data.accountName)}${item("Categoria", row.category)}${item("Cliente / fornecedor", row.contactName)}${item("Vencimento", dateLabel(row.dueDate))}${item("Pagamento / recebimento", dateLabel(row.paymentDate))}${item("Registrado em", dateLabel(data.createdAt?.slice(0, 10)))}${item("Última alteração", dateLabel(data.updatedAt?.slice(0, 10)))}${row.seriesId ? item(row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição mensal", row.sequenceNumber + " de " + row.seriesCount) : ""}</dl><div class="drawer-actions">${row.status === "PENDING" ? `<button class="btn" data-action="pay" data-id="${row.id}">${row.type === "INCOME" ? "Receber" : "Pagar"}</button>${!row.seriesId && !row.transferId ? `<button class="btn secondary" data-action="edit-entry" data-id="${row.id}">Editar lançamento</button>` : ""}` : ""}${row.status !== "CANCELLED" && !row.transferId ? `<button class="btn text" data-action="cancel" data-id="${row.id}">Cancelar lançamento</button>` : ""}</div><section class="attachments-section" aria-labelledby="attachments-title"><div class="card-head"><div><h3 id="attachments-title">Comprovantes</h3><p>${detailFiles.length} de 10 arquivos · PDF, PNG ou JPEG</p></div></div><p class="muted attachment-hint">Os arquivos ficam vinculados somente a este lançamento, inclusive após a baixa ou o cancelamento.</p><div class="attachment-list">${detailFiles.length ? detailFiles.map((file) => `<article class="attachment-item"><div class="attachment-type" aria-hidden="true">${file.contentType === "application/pdf" ? "PDF" : "IMG"}</div><div class="attachment-info"><strong>${e(file.filename)}</strong><small>${fileSize(file.byteCount)} · ${dateLabel(file.createdAt?.slice(0, 10))}<br>Enviado por ${e(file.uploadedByName)}</small></div><div class="attachment-actions"><button class="btn secondary small" data-action="attachment-download" data-file="${file.id}" aria-label="Baixar ${e(file.filename)}">Baixar</button><button class="btn text small" data-action="attachment-remove" data-file="${file.id}" aria-label="Remover ${e(file.filename)}">Remover</button></div>${removalId === file.id ? `<div class="remove-confirm" role="alert"><p>Remover este comprovante? O arquivo será excluído. O lançamento será preservado.</p><button class="btn danger small" data-action="attachment-confirm" data-file="${file.id}">Confirmar remoção</button><button class="btn secondary small" data-action="attachment-keep">Manter arquivo</button></div>` : ""}</article>`).join("") : '<div class="attachment-empty">Nenhum comprovante anexado. Adicione notas, recibos ou comprovantes de pagamento.</div>'}</div>${detailFiles.length < 10 ? `<form id="attachment-form"><label class="field">Adicionar comprovante<input name="file" type="file" required accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg" aria-describedby="attachment-help"></label><p id="attachment-help" class="muted attachment-hint">Até 5 MB por arquivo e 10 arquivos por lançamento.</p><p id="attachment-error" class="form-error" role="alert"></p><button type="submit" class="btn">Anexar comprovante</button></form>` : '<p class="notice">Limite de 10 comprovantes atingido. Remova um arquivo para anexar outro.</p>'}</section><div class="drawer-footer">${themeToggle()}<button class="btn secondary" data-action="drawer-close">Fechar detalhes</button></div>`;
+  drawer
+    .querySelector("#attachment-form")
+    ?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget,
+        file = form.elements.file.files[0],
+        button = form.querySelector("button"),
+        error = form.querySelector("#attachment-error"),
+        id = detailId;
+      error.textContent = "";
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        error.textContent = "Cada comprovante pode ter até 5 MB.";
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "Enviando…";
+      try {
+        await api(`/finance/entries/${id}/attachments`, {
+          method: "POST",
+          body: new FormData(form),
+        });
+        if (id === detailId && drawer.open) {
+          await loadDetails();
+          drawer.querySelector("#attachment-form button")?.focus();
+        }
+        toast("Comprovante anexado.");
+      } catch (err) {
+        if (form.isConnected) error.textContent = err.message;
+      } finally {
+        button.disabled = false;
+        button.textContent = "Anexar comprovante";
+      }
+    });
+}
+drawer.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-action]");
+  if (!button) return;
+  const action = button.dataset.action;
+  if (action === "drawer-close") return closeDetails();
+  if (action === "drawer-retry") return loadDetails();
+  if (action === "attachment-remove" || action === "attachment-keep") {
+    removalId = action === "attachment-remove" ? button.dataset.file : null;
+    renderDetails();
+    drawer
+      .querySelector(
+        removalId
+          ? "[data-action=attachment-confirm]"
+          : "#attachment-form button",
+      )
+      ?.focus();
+    return;
+  }
+  if (action === "attachment-confirm") {
+    const id = detailId;
+    button.disabled = true;
+    try {
+      await api(`/finance/entries/${id}/attachments/${button.dataset.file}`, {
+        method: "DELETE",
+      });
+      removalId = null;
+      if (id === detailId && drawer.open) {
+        await loadDetails();
+        (
+          drawer.querySelector("#attachment-form button") ||
+          drawer.querySelector("[data-action=drawer-close]")
+        )?.focus();
+      }
+      toast("Comprovante removido. Lançamento preservado.");
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      button.disabled = false;
+    }
+    return;
+  }
+  if (action === "attachment-download") {
+    const id = detailId,
+      file = detailFiles.find((f) => f.id === button.dataset.file);
+    button.disabled = true;
+    try {
+      const response = await fetch(
+        `/api/v1/finance/entries/${id}/attachments/${file.id}`,
+      );
+      if (!response.ok) {
+        if (response.status === 401) {
+          closeDetails();
+          state.user = null;
+          renderAuth();
+        }
+        const data = await response.json();
+        throw new Error(data.message || "Não foi possível baixar o arquivo.");
+      }
+      const url = URL.createObjectURL(await response.blob()),
+        link = document.createElement("a");
+      link.href = url;
+      link.download = file.filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      button.disabled = false;
+    }
+    return;
+  }
+  await act(button);
+});
+
 (async () => {
   try {
     await csrf();

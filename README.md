@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.4.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.5.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
@@ -15,7 +15,7 @@ Pré-requisito: Docker Desktop com Docker Compose. No Windows, abra o terminal n
 ```bash
 git clone https://github.com/FrancaCODEX/fintry-finance.git
 cd fintry-finance
-git switch codex/fintry-v0.4-relatorios-fluxo
+git switch codex/fintry-v0.5-comprovantes-temas
 docker compose up --build -d
 ```
 
@@ -55,7 +55,7 @@ cd backend
 .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=demo"
 ```
 
-Abra **http://localhost:8080**. O perfil `demo` usa H2 persistido em `backend/data/`, sem precisar instalar PostgreSQL. H2 é uma alternativa para avaliação local; PostgreSQL é o banco principal. Os dois ambientes têm bancos separados. Não há credencial padrão: crie seu próprio acesso.
+Abra **http://localhost:8080**. O perfil `demo` usa H2 persistido em `./data/` relativo à pasta de execução (`backend/data/` nos comandos acima), sem precisar instalar PostgreSQL. H2 é uma alternativa para avaliação local; PostgreSQL é o banco principal. Os dois ambientes têm bancos separados. Não há credencial padrão: crie seu próprio acesso.
 
 ## O que já funciona
 
@@ -77,6 +77,10 @@ Abra **http://localhost:8080**. O perfil `demo` usa H2 persistido em `backend/da
 - Relatórios por período, conta, tipo, situação, categoria e cliente/fornecedor.
 - Exportações CSV, Excel (.xlsx) e PDF com os filtros aplicados.
 - Fluxo de caixa projetado por dia, com horizonte e conta selecionáveis e indicação de saldo negativo.
+- Painel lateral com detalhes e ações de lançamento, sem sair da lista.
+- Comprovantes PDF, PNG e JPEG: envio, download e remoção, isolados por empresa.
+- Modo claro/escuro, alternância salva no navegador e preferência inicial do sistema.
+- Bordas e foco dos campos reforçados nos dois temas.
 - Layout responsivo e dados de exemplo opcionais.
 - Migrações Flyway e testes de integração HTTP.
 
@@ -95,6 +99,7 @@ backend/src/main/java/com/fintry/
   finance/    # contas, lançamentos, transferências e indicadores
   directory/  # clientes, fornecedores e categorias financeiras
   report/     # relatórios, exportações e projeção de caixa
+  attachment/ # comprovantes validados e vinculados aos lançamentos
   shared/     # configuração, entidades base e erros
 backend/src/main/resources/
   static/           # interface
@@ -119,11 +124,12 @@ A CI executa ambos com JDK 21 e também constrói a imagem Docker. A suíte cobr
 
 ## Próximas entregas
 
-- Recuperação de senha, convite de usuários e papéis de acesso.
-- Recorrências sem prazo final, renovação automática e edição de ocorrências futuras.
-- Comprovantes e painel lateral de detalhes de lançamentos.
-- Produtos e estoque, após consolidar o financeiro.
-- Assinaturas e integrações bancárias, após validar o produto.
+A sequência está no [roadmap](docs/01-product/roadmap.md):
+
+- **0.6.0:** recuperação de senha, usuários, permissões e histórico de alterações.
+- **0.7.0:** produtos, estoque e vendas.
+
+Depois da base: importações/conciliação, integrações bancárias, cobrança, planos/assinaturas, recorrências sem prazo final e organização avançada dos comprovantes.
 
 Esta é uma primeira versão funcional para desenvolvimento e demonstração. Antes de oferecer o serviço a clientes, faltam recuperação de senha, limitação de tentativas de login, backups, observabilidade e validação operacional. Para publicar, configure HTTPS, `COOKIE_SECURE=true`, credenciais próprias e a infraestrutura de acesso; o Compose padrão expõe a aplicação apenas no computador local. Sessões são armazenadas no processo e expiram em 30 minutos de inatividade; reiniciar a aplicação exige novo login.
 
@@ -135,8 +141,8 @@ Na pasta do projeto:
 
 ```bash
 git fetch origin
-git switch codex/fintry-v0.4-relatorios-fluxo
-git pull --ff-only origin codex/fintry-v0.4-relatorios-fluxo
+git switch codex/fintry-v0.5-comprovantes-temas
+git pull --ff-only origin codex/fintry-v0.5-comprovantes-temas
 docker compose up --build -d
 ```
 
@@ -169,6 +175,18 @@ Os botões **CSV**, **Excel** e **PDF** exportam até 5.000 registros com os fil
 Em **Fluxo projetado**, escolha a conta e um horizonte de até 366 dias. O saldo atual é o ponto de partida; pendências entram pela data do vencimento, incluindo parcelas e recorrências já cadastradas. A projeção inclui hoje e o último dia do horizonte. Pendências vencidas são exibidas à parte e ficam excluídas por padrão; a opção de incluí-las as considera previstas para hoje. A tela mostra saldo final, menor saldo e primeira data com saldo negativo, usando os valores líquidos de cada dia. Nenhuma consulta ou exportação registra baixas ou altera o saldo realizado.
 
 A 0.4.0 não modifica o schema do banco. Atualize a aplicação preservando seus dados e volumes.
+
+## Comprovantes, detalhes e temas — v0.5.0
+
+Clique em **Detalhes** na lista ou no dashboard; nos relatórios, clique na descrição do lançamento. O painel lateral mostra conta, categoria, contato, situação, datas, parcela/repetição e as ações permitidas para aquele registro. É possível editar pendências únicas, registrar baixa ou cancelar sem perder a posição na página. Feche pelo botão ou pela tecla Escape.
+
+Em **Comprovantes**, envie um arquivo PDF, PNG ou JPEG por vez: até **5 MB por arquivo**, **10 arquivos por lançamento** e **20 megapixels por imagem**. O servidor verifica o conteúdo, não apenas o nome ou o tipo informado pelo navegador. PDFs protegidos por senha e arquivos corrompidos são recusados. A lista registra nome, tamanho, data e usuário que anexou. Baixar preserva os bytes originais; remover exige confirmação e exclui o arquivo, preservando o lançamento. Baixar ou anexar não muda o saldo. A baixa e o cancelamento preservam os comprovantes; anexos de uma parcela pertencem somente àquela ocorrência.
+
+Os arquivos ficam no próprio banco de dados, junto dos metadados, sem diretório público de uploads nem volume adicional. O backup do banco deve incluir a nova tabela `entry_attachments`, pois ela contém também os arquivos. Na avaliação H2, eles permanecem no banco local em `./data/`, relativo à pasta de execução; no Compose, no volume PostgreSQL existente. O limite de 5 MB usa 5 × 1024 × 1024 bytes. O envio aceita uma requisição de até 6 MB, incluindo o envelope multipart.
+
+O botão **Escuro / Claro** aparece no acesso, no topo da aplicação e no painel de detalhes. Sem escolha salva, o tema acompanha o sistema. Após alternar, a escolha é mantida naquele navegador, inclusive após recarregar ou sair da conta. Limpar a preferência `fintry-theme` no navegador restaura o acompanhamento do sistema. O tema é aplicado antes da folha de estilos; campos têm bordas mais visíveis, fundos próprios e indicação de foco em ambos os modos.
+
+Migrações incrementais: PostgreSQL V6 e H2 V4. Atualize sem recriar o banco nem remover volumes.
 
 ## Política de versões
 

@@ -28,3 +28,11 @@ A suíte local totaliza 18 testes aprovados (14 de integração financeira HTTP,
 CSV é inspecionado quanto a BOM, separador, centavos e neutralização de fórmulas. XLSX tem as partes XML analisadas e verifica valores numéricos e textos sem fórmulas. PDF é reaberto pelo PDFBox para conferir acentos, valores e múltiplas páginas. O build local usa Java 17 com override, mantendo Java 21 no projeto. PostgreSQL e Docker continuam dependendo da execução na CI ou em ambiente com esses serviços.
 
 A conferência em Chromium cobre dashboard, versão, filtros realizados/pendentes, resultado vazio, downloads nos três formatos, exportação com filtros aplicados, saldo projetado negativo e opção de vencidas. As telas são inspecionadas em 1440px e 390px, verificando ausência de rolagem horizontal da página e valores completos nos cartões. O Excel baixado também é aberto pelo openpyxl; o PDF é renderizado e inspecionado visualmente.
+
+## Comprovantes, detalhes e temas — 0.5.0
+
+A suíte totaliza 22 testes: 18 de integração financeira HTTP, 2 de calendário, 1 de migração e 1 de contexto. Os novos cenários verificam PNG/JPEG/PDF válidos, download com bytes idênticos, metadados sem conteúdo binário, preservação após baixa/cancelamento, remoção sem mudar saldo, conta/lançamento/empresa corretos, sessão e CSRF. Também recusam SVG, arquivos disfarçados, vazios ou corrompidos, PDFs com senha e arquivo acima de 5 MB. Dois envios concorrentes a um lançamento com nove anexos resultam em um sucesso e uma recusa; remover um arquivo libera uma vaga.
+
+As migrações H2 V4 e PostgreSQL V6 são incrementais; o teste de migração aplica a evolução sobre lançamentos existentes. Localmente, build e suíte usam Java 17 com override e H2. Java 21, PostgreSQL e Docker permanecem cobertos pelo workflow do GitHub, sem declaração de execução local desses ambientes.
+
+A conferência em Chromium usa 1440px no desktop e 390px no celular. Verifica modo claro/escuro, escolha salva após recarga, tema inicial do sistema, bordas dos campos, painel com edição, envio/download idêntico de PNG e envio de PDF, erros de tipo/tamanho, confirmação de remoção, baixa/cancelamento mantendo anexos, Escape e reabertura. Capturas de formulários, dashboard, relatórios e painel são inspecionadas nos dois temas; a página e o painel móvel não apresentam rolagem horizontal.
