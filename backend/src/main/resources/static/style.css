@@ -1604,3 +1604,311 @@ a:focus-visible {
     font-size: 27px;
   }
 }
+
+/* Equipe, segurança e histórico usam os mesmos tokens dos dois temas. */
+.password-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-control input {
+  width: 100%;
+  padding-right: 85px;
+}
+.password-toggle {
+  position: absolute;
+  right: 9px;
+  background: transparent;
+  color: var(--green);
+  font: inherit;
+  font-size: 12px;
+  padding: 9px 4px;
+  border: 0;
+  cursor: pointer;
+}
+.auth-link {
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  padding: 14px 0;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.field-help {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 6px 0 18px;
+}
+.readonly-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  margin: 0 0 24px;
+}
+.access-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.access-summary .card {
+  padding: 24px;
+}
+.access-summary strong:not(.role-guide strong) {
+  display: block;
+  font-size: 34px;
+  margin: 12px 0;
+}
+.access-summary p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.role-guide h2 {
+  font-size: 18px;
+}
+.role-guide strong {
+  color: var(--ink);
+}
+.role-pill,
+.self-mark {
+  display: inline-flex;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 5px 9px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.self-mark {
+  margin-left: 6px;
+}
+.security-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.security-grid > .card {
+  padding: 28px;
+}
+.security-profile p {
+  overflow-wrap: anywhere;
+}
+.security-profile .avatar {
+  margin-bottom: 18px;
+}
+.security-profile h2 {
+  font-size: 22px;
+}
+.security-profile hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 24px 0;
+}
+.security-profile h3 {
+  font-size: 15px;
+}
+.security-profile ul {
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 2;
+  color: var(--muted);
+}
+.audit-item {
+  display: flex;
+  gap: 16px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+.audit-marker {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--green);
+}
+.audit-body {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.audit-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.audit-title strong {
+  font-size: 14px;
+}
+.audit-title time,
+.audit-body > small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.audit-body p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+.audit-body details {
+  margin-top: 14px;
+  font-size: 13px;
+}
+.audit-body summary {
+  color: var(--green);
+  cursor: pointer;
+  padding: 5px 0;
+}
+.audit-changes {
+  margin-top: 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+}
+.audit-changes > div {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1.5fr;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.audit-changes > div:last-child {
+  border-bottom: 0;
+}
+.audit-changes small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.notice.success {
+  border-left: 3px solid var(--green);
+}
+#team-filter,
+#audit-filter {
+  flex-wrap: wrap;
+}
+@media (max-width: 1000px) {
+  .access-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+  .role-guide {
+    grid-column: 1/-1;
+  }
+  .security-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .access-summary {
+    gap: 12px;
+  }
+  .access-summary .card {
+    padding: 18px;
+  }
+  .security-grid > .card {
+    padding: 20px;
+  }
+  .audit-item {
+    gap: 10px;
+  }
+  .audit-marker {
+    width: 28px;
+    height: 28px;
+  }
+  .audit-changes > div {
+    grid-template-columns: 1fr 1fr;
+  }
+  .audit-changes > div > strong {
+    grid-column: 1/-1;
+  }
+  .readonly-banner {
+    align-items: flex-start;
+  }
+  .auth-form h2 {
+    font-size: 26px;
+  }
+  .readonly-banner .icon {
+    flex-shrink: 0;
+  }
+}
+
+/* A navegação cresce com os módulos sem esconder o acesso à segurança. */
+@media (min-width: 701px) {
+  .sidebar nav {
+    max-height: none;
+    min-height: 0;
+    flex: 1;
+    align-content: start;
+    scrollbar-width: thin;
+    gap: 6px;
+  }
+  .sidebar .nav-btn {
+    padding: 12px 14px;
+  }
+  .side-bottom {
+    margin-top: 24px;
+  }
+}
+#team-filter,
+#audit-filter {
+  display: grid;
+  align-items: end;
+  gap: 14px;
+}
+#team-filter {
+  grid-template-columns: minmax(180px, 1fr) minmax(150px, 240px) auto;
+}
+#audit-filter {
+  grid-template-columns:
+    minmax(130px, 1fr) minmax(130px, 1fr) minmax(150px, 1.3fr)
+    minmax(150px, 1.5fr) auto;
+}
+#team-filter .field,
+#audit-filter .field {
+  margin: 0;
+  min-width: 0;
+}
+#team-filter input,
+#team-filter select,
+#audit-filter input,
+#audit-filter select {
+  min-width: 0;
+  width: 100%;
+}
+#team-filter > button,
+#audit-filter > button {
+  min-height: 44px;
+}
+@media (max-width: 1100px) {
+  #audit-filter {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #audit-filter > button {
+    grid-column: 1/-1;
+  }
+}
+@media (max-width: 700px) {
+  #team-filter {
+    grid-template-columns: 1fr;
+  }
+  #audit-filter,
+  #team-filter {
+    padding: 18px;
+  }
+}
