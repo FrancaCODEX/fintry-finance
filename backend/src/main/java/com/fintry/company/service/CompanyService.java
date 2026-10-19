@@ -8,112 +8,117 @@ import com.fintry.company.exception.CompanyAlreadyExistsException;
 import com.fintry.company.exception.CompanyNotFoundException;
 import com.fintry.company.mapper.CompanyMapper;
 import com.fintry.company.repository.CompanyRepository;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.UUID;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class CompanyService {
 
-    private final CompanyRepository repository;
+  private final CompanyRepository repository;
+  private final com.fintry.audit.AuditService audit;
 
-    @Transactional
-    public CompanyResponse create(CreateCompanyRequest request) {
+  private java.util.Map<String, String> snapshot(Company c) {
+    return com.fintry.audit.AuditService.fields(
+        "Razão social",
+        c.getLegalName(),
+        "Nome fantasia",
+        c.getTradeName(),
+        "Documento",
+        c.getDocument(),
+        "E-mail",
+        c.getEmail(),
+        "Telefone",
+        c.getPhone());
+  }
 
-        if (repository.existsByDocument(request.getDocument())) {
-            throw new CompanyAlreadyExistsException(request.getDocument());
-        }
+  @Transactional
+  public CompanyResponse create(CreateCompanyRequest request) {
 
-        Company company = CompanyMapper.toEntity(request);
-
-        Company savedCompany = repository.save(company);
-
-        return CompanyMapper.toResponse(savedCompany);
+    if (repository.existsByDocument(request.getDocument())) {
+      throw new CompanyAlreadyExistsException(request.getDocument());
     }
 
-    @Transactional(readOnly = true)
-    public CompanyResponse getById(UUID id) {
+    Company company = CompanyMapper.toEntity(request);
 
-        Company company = repository.findById(id)
-                .orElseThrow(() ->
-                        new CompanyNotFoundException(id));
+    Company savedCompany = repository.save(company);
 
-        return CompanyMapper.toResponse(company);
+    return CompanyMapper.toResponse(savedCompany);
+  }
+
+  @Transactional(readOnly = true)
+  public CompanyResponse getById(UUID id) {
+
+    Company company = repository.findById(id).orElseThrow(() -> new CompanyNotFoundException(id));
+
+    return CompanyMapper.toResponse(company);
+  }
+
+  @Transactional(readOnly = true)
+  public CompanyResponse getByDocument(String document) {
+
+    Company company =
+        repository
+            .findByDocument(document)
+            .orElseThrow(() -> new CompanyNotFoundException(document));
+
+    return CompanyMapper.toResponse(company);
+  }
+
+  // Listando empresas
+  @Transactional(readOnly = true)
+  public Page<CompanyResponse> findAll(String tradeName, String document, Pageable pageable) {
+
+    Page<Company> companies;
+
+    if (tradeName != null && !tradeName.isBlank()) {
+
+      companies = repository.findByTradeNameContainingIgnoreCase(tradeName, pageable);
+
+    } else if (document != null && !document.isBlank()) {
+
+      companies = repository.findByDocumentContaining(document, pageable);
+
+    } else {
+
+      companies = repository.findAll(pageable);
     }
 
-    @Transactional(readOnly = true)
-    public CompanyResponse getByDocument(String document) {
+    return companies.map(CompanyMapper::toResponse);
+  }
 
-        Company company = repository
-                .findByDocument(document)
-                .orElseThrow(() ->
-                        new CompanyNotFoundException(document));
+  @Transactional
+  public CompanyResponse update(UUID id, UpdateCompanyRequest request) {
 
-        return CompanyMapper.toResponse(company);
+    Company company = repository.findById(id).orElseThrow(() -> new CompanyNotFoundException(id));
+    if (repository.existsByDocumentAndIdNot(request.getDocument(), id)) {
+
+      throw new CompanyAlreadyExistsException(request.getDocument());
     }
+    var before = snapshot(company);
+    CompanyMapper.updateEntity(company, request);
 
-    //Listando empresas
-    @Transactional(readOnly = true)
-    public Page<CompanyResponse> findAll(
-            String tradeName,
-            String document,
-            Pageable pageable) {
+    Company updatedCompany = repository.save(company);
+    audit.change(
+        "UPDATE",
+        "COMPANY",
+        id,
+        company.getTradeName() == null ? company.getLegalName() : company.getTradeName(),
+        before,
+        snapshot(company));
 
-        Page<Company> companies;
+    return CompanyMapper.toResponse(updatedCompany);
+  }
 
-        if (tradeName != null && !tradeName.isBlank()) {
+  @Transactional
+  public void delete(UUID id) {
 
-            companies = repository.findByTradeNameContainingIgnoreCase(
-                    tradeName,
-                    pageable);
+    Company company = repository.findById(id).orElseThrow(() -> new CompanyNotFoundException(id));
 
-        } else if (document != null && !document.isBlank()) {
-
-            companies = repository.findByDocumentContaining(
-                    document,
-                    pageable);
-
-        } else {
-
-            companies = repository.findAll(pageable);
-
-        }
-
-        return companies.map(CompanyMapper::toResponse);
-    }
-
-    @Transactional
-    public CompanyResponse update(UUID id, UpdateCompanyRequest request) {
-
-        Company company = repository.findById(id)
-                .orElseThrow(() ->
-                        new CompanyNotFoundException(id));
-        if (repository.existsByDocumentAndIdNot(
-                request.getDocument(),
-                id)) {
-
-            throw new CompanyAlreadyExistsException(
-                    request.getDocument());
-        }
-        CompanyMapper.updateEntity(company, request);
-
-        Company updatedCompany = repository.save(company);
-
-        return CompanyMapper.toResponse(updatedCompany);
-    }
-
-    @Transactional
-    public void delete(UUID id) {
-
-        Company company = repository.findById(id)
-                .orElseThrow(() ->
-                        new CompanyNotFoundException(id));
-
-        repository.delete(company);
-    }
+    repository.delete(company);
+  }
 }

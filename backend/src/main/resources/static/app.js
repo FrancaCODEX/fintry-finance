@@ -3,6 +3,13 @@ const root = document.querySelector("#root");
 const modal = document.querySelector("#modal");
 const state = {
   user: null,
+  recoveryAvailable: false,
+  team: null,
+  teamPage: 0,
+  teamFilters: {},
+  audit: null,
+  auditPage: 0,
+  auditFilters: { start: localDate().slice(0, 7) + "-01", end: localDate() },
   report: null,
   reportPage: 0,
   reportFilters: {
@@ -52,6 +59,8 @@ const dateLabel = (date) =>
       )
     : "—";
 const icons = {
+  shield:
+    '<path d="M12 3 3 7v6c0 5 9 9 9 9s9-4 9-9V7z"/><path d="m8 12 3 3 5-6"/>',
   dashboard:
     '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
   entries: '<path d="M8 3h11v18H5V6z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
@@ -109,7 +118,11 @@ async function api(path, options = {}) {
       state.user = null;
       modal.close();
       closeDetails();
-      renderAuth();
+      state.csrf = null;
+      renderAuth(
+        "login",
+        "Sua sessão foi encerrada. Entre novamente para continuar.",
+      );
     }
     throw new Error(
       data?.message ||
@@ -143,11 +156,124 @@ async function submitForm(event, action) {
     button.disabled = false;
   }
 }
-function renderAuth(register = false) {
-  root.innerHTML = `<main class="auth"><section class="auth-story"><div class="brand"><img src="/favicon.svg" alt="">fintry<span>.</span></div><div><div class="eyebrow">Control today. Grow tomorrow.</div><h1>Seu financeiro.<br>Mais simples.<br><span>Mais claro.</span></h1><p>Organize o presente e enxergue os próximos passos da sua empresa. Tudo em um só lugar.</p><div class="preview-card"><span class="eyebrow">Clareza para crescer</span><strong>Decisões com direção.</strong><div class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div></div><footer>Feito para quem cuida de cada detalhe do negócio.</footer></section><section class="auth-panel"><div class="auth-form"><div class="auth-tools">${themeToggle()}</div><h2>${register ? "Comece pela sua empresa" : "Bom ter você por aqui."}</h2><p class="muted">${register ? "Crie seu acesso e organize suas finanças." : "Entre para acompanhar os números do seu negócio."}</p><form id="auth-form">${register ? field("Seu nome", "name", "text", 'required maxlength="120" autocomplete="name"') + field("Nome da empresa", "companyName", "text", 'required maxlength="255" autocomplete="organization"') + field("CNPJ (somente números)", "document", "text", 'required pattern="[0-9]{14}" maxlength="14" inputmode="numeric" placeholder="14 dígitos"') : ""}${field("E-mail", "email", "email", 'required maxlength="255" autocomplete="username" placeholder="voce@empresa.com.br"')}${field("Senha", "password", "password", `required ${register ? 'minlength="10"' : ""} maxlength="64" autocomplete="${register ? "new-password" : "current-password"}" placeholder="${register ? "Pelo menos 10 caracteres" : "Sua senha"}"`)}<div class="form-error" role="alert"></div><button class="btn submit" type="submit">${register ? "Criar minha conta" : "Entrar no Fintry"} ${icon("income")}</button></form><div class="auth-switch">${register ? "Já tem uma conta?" : "Primeira vez por aqui?"} <button id="auth-switch">${register ? "Entrar" : "Criar conta"}</button></div><p class="auth-note">Fintry v${e(state.version)} · Gestão financeira para pequenas empresas<br>Desenvolvido por Vinicius Azeredo França</p></div></section></main>`;
-  document.querySelector("#auth-switch").onclick = () => renderAuth(!register);
-  document.querySelector("#auth-form").onsubmit = (ev) =>
+const roles = {
+  ADMIN: "Administrador",
+  FINANCE: "Financeiro",
+  VIEWER: "Somente leitura",
+};
+const canWrite = () => state.user?.permissions?.includes("WRITE_FINANCE");
+const isAdmin = () => state.user?.permissions?.includes("MANAGE_USERS");
+const timestamp = (value) =>
+  value
+    ? new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short",
+        timeZone: "America/Sao_Paulo",
+      }).format(new Date(value))
+    : "—";
+function passwordField(label, name, fresh = true) {
+  return `<div class="field"><label for="password-${name}">${label}</label><span class="password-control"><input id="password-${name}" name="${name}" type="password" required ${fresh ? 'minlength="10"' : ""} maxlength="64" autocomplete="${fresh ? "new-password" : "current-password"}"><button type="button" class="password-toggle" data-password="${name}" aria-label="Mostrar ${label.toLowerCase()}" aria-pressed="false">Mostrar</button></span></div>`;
+}
+let accessLink = null;
+function readAccessLink() {
+  const params = new URLSearchParams(location.hash.slice(1));
+  const kind = params.has("invite")
+    ? "invite"
+    : params.has("reset")
+      ? "reset"
+      : null;
+  if (!kind) return false;
+  accessLink = { kind, token: params.get(kind) };
+  history.replaceState(null, "", location.pathname + location.search);
+  closeDetails();
+  modal.close();
+  renderAuth(kind);
+  return true;
+}
+window.addEventListener("hashchange", readAccessLink);
+function renderAuth(mode = "login", notice = "") {
+  if (typeof mode === "boolean") mode = mode ? "register" : "login";
+  const register = mode === "register",
+    invite = mode === "invite",
+    reset = mode === "reset",
+    forgot = mode === "forgot";
+  const titles = {
+    login: "Bom ter você por aqui.",
+    register: "Comece pela sua empresa",
+    forgot: "Vamos recuperar seu acesso.",
+    reset: "Uma nova senha, um novo começo.",
+    invite: "Seu lugar na equipe está pronto.",
+  };
+  const descriptions = {
+    login: "Entre para acompanhar os números do seu negócio.",
+    register: "Crie seu acesso e organize suas finanças.",
+    forgot: "Informe o e-mail da sua conta. O link vale por 15 minutos.",
+    reset: "Escolha uma senha de 10 a 64 caracteres.",
+    invite: "Confira o convite e defina sua senha para começar.",
+  };
+  root.innerHTML = `<main class="auth"><section class="auth-story"><div class="brand"><img src="/favicon.svg" alt="">fintry<span>.</span></div><div><div class="eyebrow">Control today. Grow tomorrow.</div><h1>Seu financeiro.<br>Mais simples.<br><span>Mais claro.</span></h1><p>Organize o presente e enxergue os próximos passos da sua empresa. Tudo em um só lugar.</p><div class="preview-card"><span class="eyebrow">Clareza para crescer</span><strong>Decisões com direção.</strong><div class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div></div><footer>Feito para quem cuida de cada detalhe do negócio.</footer></section><section class="auth-panel"><div class="auth-form"><div class="auth-tools">${themeToggle()}</div><span class="eyebrow">${invite ? "CONVITE PARA A EQUIPE" : reset || forgot ? "SEGURANÇA DO ACESSO" : "BEM-VINDO AO FINTRY"}</span><h2>${titles[mode]}</h2><p class="muted">${descriptions[mode]}</p>${notice ? `<p class="notice success" role="status">${e(notice)}</p>` : ""}${invite ? '<div id="invite-info" class="notice" role="status">Conferindo convite…</div>' : ""}<form id="auth-form">${register ? field("Seu nome", "name", "text", 'required maxlength="120" autocomplete="name"') + field("Nome da empresa", "companyName", "text", 'required maxlength="255" autocomplete="organization"') + field("CNPJ (somente números)", "document", "text", 'required pattern="[0-9]{14}" maxlength="14" inputmode="numeric"') : ""}${invite ? field("Seu nome", "name", "text", 'required maxlength="120" autocomplete="name"') : ""}${!reset && !invite ? field("E-mail", "email", "email", 'required maxlength="255" autocomplete="username" placeholder="voce@empresa.com.br"') : ""}${!forgot ? passwordField(reset || invite ? "Nova senha" : "Senha", "password", mode !== "login") : ""}${register || reset || invite ? passwordField("Confirmar senha", "confirmation") + '<p class="field-help">Use uma senha exclusiva, com 10 a 64 caracteres.</p>' : ""}<div class="form-error" role="alert"></div><button class="btn submit" type="submit" ${invite ? "disabled" : ""}>${register ? "Criar minha conta" : forgot ? "Enviar link de recuperação" : reset ? "Salvar nova senha" : invite ? "Aceitar convite" : "Entrar no Fintry"} ${icon("income")}</button></form>${mode === "login" ? '<button class="auth-link" data-auth="forgot">Esqueci minha senha</button>' : ""}<div class="auth-switch">${mode === "login" ? 'Primeira vez por aqui? <button data-auth="register">Criar conta</button>' : '<button data-auth="login">Voltar para entrar</button>'}</div><p class="auth-note">Fintry v${e(state.version)} · Gestão financeira para pequenas empresas<br>Desenvolvido por Vinicius Azeredo França</p></div></section></main>`;
+  const form = document.querySelector("#auth-form");
+  if (forgot && !state.recoveryAvailable) {
+    form.hidden = true;
+    const help = document.createElement("p");
+    help.className = "notice";
+    help.textContent =
+      "O envio de e-mails ainda não está configurado. Peça ao administrador da instalação para configurar o SMTP e habilitar a recuperação.";
+    form.before(help);
+  }
+  if (invite) {
+    const token = accessLink?.token;
+    send("/auth/invitation", { token })
+      .then((info) => {
+        if (!form.isConnected) return;
+        document.querySelector("#invite-info").innerHTML =
+          `<strong>${e(info.companyName)}</strong><br>${e(info.email)} · ${e(roles[info.role])}<br><small>Válido até ${timestamp(info.expiresAt)}</small>`;
+        form.elements.name.value = info.name;
+        form.querySelector("[type=submit]").disabled = false;
+      })
+      .catch((err) => {
+        if (!form.isConnected) return;
+        document.querySelector("#invite-info").textContent =
+          err.message + " Peça um novo convite ao administrador.";
+        form.hidden = true;
+      });
+  }
+  form.onsubmit = (ev) =>
     submitForm(ev, async (data) => {
+      if (data.confirmation != null && data.password !== data.confirmation)
+        throw new Error("As senhas precisam ser iguais.");
+      if (forgot) {
+        const result = await send("/auth/forgot-password", {
+          email: data.email,
+        });
+        form.hidden = true;
+        const note = document.createElement("p");
+        note.className = "notice success";
+        note.setAttribute("role", "status");
+        note.textContent = result.message + " Confira também a pasta de spam.";
+        form.before(note);
+        return;
+      }
+      if (reset || invite) {
+        if (!accessLink?.token)
+          throw new Error("Link inválido. Solicite outro link de acesso.");
+        await send(invite ? "/auth/accept-invite" : "/auth/reset-password", {
+          token: accessLink.token,
+          password: data.password,
+          ...(invite ? { name: data.name } : {}),
+        });
+        accessLink = null;
+        state.user = null;
+        state.csrf = null;
+        await csrf();
+        renderAuth(
+          "login",
+          invite
+            ? "Convite aceito. Entre com seu e-mail e a senha que acabou de criar."
+            : "Senha alterada. Entre novamente em seus dispositivos.",
+        );
+        return;
+      }
       if (register) await send("/auth/register", data);
       state.user = await send("/auth/login", {
         email: data.email,
@@ -155,22 +281,298 @@ function renderAuth(register = false) {
       });
       await csrf();
       state.page = "dashboard";
-      state.entryPage = 0;
+      state.entryPage =
+        state.contactPage =
+        state.seriesPage =
+        state.reportPage =
+        state.teamPage =
+        state.auditPage =
+          0;
       state.filters = {};
       state.directoryFilters = { active: "true" };
-      state.reportPage = 0;
-      state.reportFilters = {
-        start: localDate().slice(0, 7) + "-01",
-        end: monthEnd(localDate().slice(0, 7)),
-        basis: "PAYMENT",
-        status: "PAID",
-      };
-      state.forecastFilters = { days: "90", includeOverdue: "false" };
-      state.contactPage = 0;
-      state.seriesPage = 0;
+      state.month = localDate().slice(0, 7);
       await load();
     });
 }
+function applyPermissions(scope = document) {
+  if (canWrite()) return;
+  const mutations = [
+    "entry",
+    "account",
+    "transfer",
+    "sample",
+    "pay",
+    "cancel",
+    "edit-entry",
+    "stop-series",
+    "contact",
+    "category",
+    "edit-contact",
+    "edit-category",
+    "toggle-contact",
+    "toggle-category",
+    "attachment-remove",
+    "attachment-confirm",
+  ];
+  scope.querySelectorAll("[data-action]").forEach((el) => {
+    if (mutations.includes(el.dataset.action)) el.remove();
+  });
+  scope.querySelector("#attachment-form")?.remove();
+  scope
+    .querySelectorAll(".empty .actions")
+    .forEach(
+      (el) =>
+        (el.innerHTML =
+          '<span class="muted">Um membro do Financeiro ou Administrador pode adicionar registros.</span>'),
+    );
+}
+function pager(prefix, result, page) {
+  return `<div class="pagination"><span>${result.totalElements} registro(s)</span><div class="row-actions"><button class="btn secondary small" data-action="${prefix}-prev" ${page === 0 ? "disabled" : ""}>Anterior</button><span>${page + 1} / ${Math.max(1, result.totalPages)}</span><button class="btn secondary small" data-action="${prefix}-next" ${page + 1 >= result.totalPages ? "disabled" : ""}>Próxima</button></div></div>`;
+}
+function roleOptions(selected = "FINANCE", all = false) {
+  return `${all ? '<option value="">Todos os perfis</option>' : ""}${Object.entries(
+    roles,
+  )
+    .map(
+      ([key, label]) =>
+        `<option value="${key}" ${selected === key ? "selected" : ""}>${label}</option>`,
+    )
+    .join("")}`;
+}
+function renderTeam() {
+  const t = state.team;
+  return (
+    head(
+      "Pessoas que fazem parte.",
+      "Acesso à sua empresa, com a permissão certa para cada pessoa.",
+      '<button class="btn" data-action="invite-user">' +
+        icon("plus") +
+        "Convidar pessoa</button>",
+    ) +
+    `<section class="access-summary"><article class="card"><span class="eyebrow">ACESSOS ATIVOS</span><strong>${t.active}</strong><p>Prontos para trabalhar</p></article><article class="card"><span class="eyebrow">AGUARDANDO ATIVAÇÃO</span><strong>${t.pending}</strong><p>Confira a validade dos convites</p></article><article class="card role-guide"><h2>Três perfis, um só negócio.</h2><p><strong>Administrador</strong> cuida de tudo, incluindo a equipe.<br><strong>Financeiro</strong> gerencia movimentos e comprovantes.<br><strong>Somente leitura</strong> consulta e exporta informações.</p></article></section><section class="card"><form id="team-filter" class="filters">${field("Buscar pessoa", "search", "search", 'maxlength="120" placeholder="Nome ou e-mail"', state.teamFilters.search || "")}<label class="field">Perfil<select name="role">${roleOptions(state.teamFilters.role || "", true)}</select></label><button class="btn secondary" type="submit">Filtrar equipe</button></form><div class="table-wrap"><table><thead><tr><th>PESSOA</th><th>PERFIL</th><th>ACESSO</th><th>AÇÕES</th></tr></thead><tbody>${t.content.map((u) => `<tr><td class="description"><strong>${e(u.name)} ${u.id === state.user.id ? '<small class="self-mark">Você</small>' : ""}</strong><small>${e(u.email)}</small></td><td><span class="role-pill">${e(roles[u.role])}</span></td><td><span class="badge ${u.invited ? "pending" : u.active ? "" : "cancelled"}">${u.invited ? "Aguardando ativação" : u.active ? "Ativo" : "Inativo"}</span>${u.invited ? `<br><small class="muted">${u.invitationExpiresAt ? (new Date(u.invitationExpiresAt) > new Date() ? "Válido até " : "Expirou em ") + timestamp(u.invitationExpiresAt) : "Convite revogado"}</small>` : ""}</td><td><div class="row-actions"><button class="btn secondary small" data-action="edit-user" data-id="${u.id}">Editar</button>${!u.active ? `<button class="btn soft small" data-action="renew-invite" data-id="${u.id}">Gerar novo convite</button>` : ""}${u.invited && u.invitationExpiresAt ? `<button class="btn text small" data-action="revoke-invite" data-id="${u.id}">Revogar convite</button>` : ""}</div></td></tr>`).join("") || '<tr><td colspan="4"><div class="empty"><h3>Nenhuma pessoa encontrada</h3><p>Ajuste a busca ou o perfil selecionado.</p></div></td></tr>'}</tbody></table></div>${pager("team", t, state.teamPage)}</section><p class="notice">Mudanças de perfil ou situação encerram as sessões dessa pessoa. Os registros financeiros e o histórico são preservados.</p>`
+  );
+}
+const auditActions = {
+  CREATE: "Criou",
+  UPDATE: "Alterou",
+  PAY: "Registrou baixa",
+  CANCEL: "Cancelou",
+  TRANSFER: "Transferiu",
+  SERIES_CREATE: "Criou série",
+  SERIES_STOP: "Encerrou série",
+  ATTACH_ADD: "Anexou comprovante",
+  ATTACH_REMOVE: "Removeu comprovante",
+  REGISTER: "Criou a empresa",
+  LOGIN: "Entrou na conta",
+  INVITE_CREATE: "Criou convite",
+  INVITE_RENEW: "Renovou convite",
+  INVITE_REVOKE: "Revogou convite",
+  INVITE_ACCEPT: "Aceitou convite",
+  PASSWORD_RESET: "Redefiniu a senha",
+  PASSWORD_CHANGE: "Alterou a senha",
+  RESET_REQUEST: "Solicitou recuperação",
+};
+const resources = {
+  ENTRY: "Lançamentos e comprovantes",
+  ACCOUNT: "Contas",
+  TRANSFER: "Transferências",
+  SERIES: "Parcelas e recorrências",
+  CONTACT: "Clientes e fornecedores",
+  CATEGORY: "Categorias",
+  COMPANY: "Empresa",
+  USER: "Equipe",
+  ACCESS: "Segurança do acesso",
+};
+function auditValue(v) {
+  return (
+    roles[v] ||
+    {
+      PAID: "Realizado",
+      PENDING: "Pendente",
+      CANCELLED: "Cancelado",
+      INCOME: "Receita",
+      EXPENSE: "Despesa",
+      BOTH: "Ambos",
+      true: "Sim",
+      false: "Não",
+      RECURRING: "Recorrência",
+      INSTALLMENT: "Parcelamento",
+    }[v] ||
+    v ||
+    "—"
+  );
+}
+function renderAudit() {
+  const a = state.audit;
+  return (
+    head(
+      "Cada mudança tem uma história.",
+      "Acompanhe quem fez o quê, quando e quais dados mudaram.",
+      '<button class="btn secondary" data-action="reload">Atualizar histórico</button>',
+    ) +
+    `<section class="card"><form id="audit-filter" class="filters">${field("De", "start", "date", "required", state.auditFilters.start)}${field("Até", "end", "date", "required", state.auditFilters.end)}<label class="field">Área<select name="resource"><option value="">Todas as áreas</option>${Object.entries(
+      resources,
+    )
+      .map(
+        ([k, v]) =>
+          `<option value="${k}" ${state.auditFilters.resource === k ? "selected" : ""}>${v}</option>`,
+      )
+      .join(
+        "",
+      )}</select></label>${field("Buscar no histórico", "search", "search", 'maxlength="120" placeholder="Pessoa ou registro"', state.auditFilters.search || "")}<button class="btn secondary" type="submit">Filtrar histórico</button></form><div class="audit-list">${a.content.map((item) => `<article class="audit-item"><div class="audit-marker" aria-hidden="true">${icon(item.resource === "ACCESS" ? "shield" : "entries")}</div><div class="audit-body"><div class="audit-title"><strong>${e(auditActions[item.action] || item.action)}</strong><time datetime="${e(item.occurredAt)}">${timestamp(item.occurredAt)}</time></div><p>${e(item.label)}</p><small>${e(item.actorName)} · ${e(resources[item.resource] || item.resource)}</small>${item.changes.length ? `<details><summary>Ver ${item.changes.length} campo(s) alterado(s)</summary><div class="audit-changes">${item.changes.map((c) => `<div><strong>${e(c.field)}</strong><span><small>Antes</small>${e(auditValue(c.before))}</span><span><small>Depois</small>${e(auditValue(c.after))}</span></div>`).join("")}</div></details>` : ""}${item.resource === "ENTRY" && item.resourceId ? `<button class="btn text small" data-action="details" data-id="${item.resourceId}">Abrir lançamento →</button>` : ""}</div></article>`).join("") || '<div class="empty"><h3>Nenhuma alteração neste período</h3><p>Ajuste os filtros para consultar outros registros.</p></div>'}</div>${pager("audit", a, state.auditPage)}</section><p class="notice">Horários de Brasília. O histórico começa na versão 0.6.0. Senhas, links de acesso e conteúdo de comprovantes não são registrados. Consulte até 366 dias por vez.</p>`
+  );
+}
+function renderSecurity() {
+  return (
+    head(
+      "Seu acesso, bem cuidado.",
+      "Mantenha uma senha exclusiva e confira suas permissões.",
+      "",
+    ) +
+    `<section class="security-grid"><article class="card"><div class="card-head"><div><h2>Alterar minha senha</h2><p>As sessões abertas serão encerradas ao salvar.</p></div>${icon("shield")}</div><form id="security-form">${passwordField("Senha atual", "currentPassword", false)}${passwordField("Nova senha", "password")}${passwordField("Confirmar nova senha", "confirmation")}<p class="field-help">Use de 10 a 64 caracteres. A nova senha deve ser diferente da atual.</p><p class="form-error" role="alert"></p><button class="btn" type="submit">Salvar nova senha</button></form></article><aside class="card security-profile"><div class="avatar">${e(state.user.name.slice(0, 1).toUpperCase())}</div><h2>${e(state.user.name)}</h2><p>${e(state.user.email)}</p><span class="role-pill">${e(roles[state.user.role])}</span><hr><h3>O que seu perfil permite</h3><ul><li>Consultar finanças, relatórios e comprovantes</li>${canWrite() ? "<li>Gerenciar lançamentos, contas e cadastros</li>" : ""}${isAdmin() ? "<li>Gerenciar equipe e consultar o histórico</li>" : ""}<li>Alterar sua própria senha</li></ul><p class="notice">${isAdmin() ? "Gerencie os acessos na página Equipe." : "Para mudar suas permissões, fale com um Administrador da empresa."}</p></aside></section>`
+  );
+}
+function bindAccessPages() {
+  for (const prefix of ["team", "audit"]) {
+    document
+      .querySelector(`#${prefix}-filter`)
+      ?.addEventListener("submit", async (ev) => {
+        ev.preventDefault();
+        state[prefix + "Filters"] = Object.fromEntries(
+          new FormData(ev.currentTarget),
+        );
+        state[prefix + "Page"] = 0;
+        await safeLoad();
+      });
+  }
+  document.querySelector("#security-form")?.addEventListener("submit", (ev) =>
+    submitForm(ev, async (data) => {
+      if (data.password !== data.confirmation)
+        throw new Error("As senhas precisam ser iguais.");
+      await send("/auth/change-password", {
+        currentPassword: data.currentPassword,
+        password: data.password,
+      });
+      state.user = null;
+      state.csrf = null;
+      await csrf();
+      renderAuth("login", "Senha alterada. Entre novamente para continuar.");
+    }),
+  );
+}
+function inviteFields(u) {
+  return (
+    field("Nome", "name", "text", 'required maxlength="120"', u?.name || "") +
+    (!u ? field("E-mail", "email", "email", 'required maxlength="255"') : "") +
+    `<label class="field">Perfil<select name="role">${roleOptions(u?.role || "FINANCE")}</select></label><p class="notice">Administrador: acesso completo. Financeiro: gerencia finanças. Somente leitura: consulta e exporta dados.</p>`
+  );
+}
+function showInviteLink() {
+  const invitation = state.invitationToShow;
+  state.invitationToShow = null;
+  if (!invitation) return;
+  showDialog(
+    "Convite pronto para compartilhar",
+    "Envie este link diretamente à pessoa convidada.",
+    `<p class="notice">Válido até ${timestamp(invitation.expiresAt)}. O link será exibido somente agora. Gerar outro invalida o anterior.</p>${field("Link do convite", "link", "text", "readonly", invitation.link)}<button type="button" class="btn secondary" id="copy-invite">Copiar link</button><p id="copy-status" class="field-help" role="status"></p>`,
+    async () => {},
+    "Concluir",
+  );
+  const input = modal.querySelector("[name=link]");
+  modal.querySelector("#copy-invite").onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(invitation.link);
+      modal.querySelector("#copy-status").textContent = "Link copiado.";
+    } catch {
+      input.focus();
+      input.select();
+      modal.querySelector("#copy-status").textContent =
+        "Selecione e copie o link acima.";
+    }
+  };
+}
+async function accessAction(btn) {
+  const action = btn.dataset.action;
+  if (["team-prev", "team-next", "audit-prev", "audit-next"].includes(action)) {
+    const prefix = action.split("-")[0];
+    state[prefix + "Page"] += action.endsWith("next") ? 1 : -1;
+    await safeLoad();
+    return true;
+  }
+  if (
+    !["invite-user", "edit-user", "renew-invite", "revoke-invite"].includes(
+      action,
+    )
+  )
+    return false;
+  if (!isAdmin()) {
+    toast("Seu perfil não permite esta ação.");
+    return true;
+  }
+  const u = state.team?.content.find((x) => x.id === btn.dataset.id);
+  if (action === "invite-user") {
+    showDialog(
+      "Convidar pessoa",
+      "O convite dá acesso somente a esta empresa.",
+      inviteFields(),
+      async (data) => {
+        state.invitationToShow = await send("/users", data);
+      },
+      "Gerar convite",
+    );
+  }
+  if (action === "edit-user") {
+    showDialog(
+      "Editar acesso",
+      e(u.email),
+      inviteFields(u) +
+        `<label class="field">Situação<select name="active" ${u.invited || u.id === state.user.id ? "disabled" : ""}><option value="true">Ativo</option><option value="false">${u.invited ? "Aguardando ativação" : "Inativo"}</option></select></label>${u.id === state.user.id ? '<p class="notice">Sua conta deve permanecer ativa como Administrador.</p>' : ""}`,
+      async (data) => {
+        await api("/users/" + u.id, {
+          method: "PUT",
+          body: JSON.stringify({
+            ...data,
+            active: u.invited
+              ? false
+              : u.id === state.user.id
+                ? true
+                : data.active === "true",
+          }),
+        });
+        toast("Acesso atualizado.");
+      },
+    );
+    modal.querySelector("[name=active]").value = String(u.active);
+    if (u.id === state.user.id)
+      modal.querySelector("[name=role]").disabled = true;
+    const form = modal.querySelector("form");
+    if (u.id === state.user.id) {
+      const hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = "role";
+      hidden.value = "ADMIN";
+      form.append(hidden);
+    }
+  }
+  if (action === "renew-invite" || action === "revoke-invite") {
+    showDialog(
+      action === "renew-invite" ? "Gerar novo convite?" : "Revogar convite?",
+      e(u.name),
+      '<p class="notice">O link anterior deixará de funcionar. Os registros dessa pessoa serão preservados.</p>',
+      async () => {
+        if (action === "renew-invite")
+          state.invitationToShow = await send("/users/" + u.id + "/invitation");
+        else {
+          await api("/users/" + u.id + "/invitation", { method: "DELETE" });
+          toast("Convite revogado.");
+        }
+      },
+      "Confirmar",
+    );
+  }
+  return true;
+}
+
 function shell() {
   const u = state.user;
   root.innerHTML = `<div class="shell"><aside class="sidebar"><div class="brand"><img src="/favicon.svg" alt="">fintry.</div><div class="nav-label">SEU NEGÓCIO</div><nav aria-label="Navegação principal">${[
@@ -182,6 +584,13 @@ function shell() {
     ["series", "Parcelas e recorrências", "entries"],
     ["contacts", "Clientes e fornecedores", "company"],
     ["categories", "Categorias", "entries"],
+    ...(isAdmin()
+      ? [
+          ["team", "Equipe", "company"],
+          ["audit", "Histórico", "entries"],
+        ]
+      : []),
+    ["security", "Minha segurança", "shield"],
   ]
     .map(
       ([page, label, ic]) =>
@@ -189,7 +598,7 @@ function shell() {
     )
     .join(
       "",
-    )}</nav><div class="side-bottom"><div class="side-note"><strong>Um passo de cada vez.</strong><p>O controle do seu negócio começa com boas informações.</p></div><div class="user-block"><div class="avatar">${e(u.name.slice(0, 1).toUpperCase())}</div><div class="user-info"><strong>${e(u.name)}</strong><small>Administrador</small></div><button class="logout" data-action="logout" title="Sair" aria-label="Sair da conta">${icon("exit")}</button></div></div></aside><main class="main"><header class="topbar"><div class="company-label">${icon("company")} ${e(u.companyName)}</div><span class="muted topbar-message">Seu negócio, em boa direção.</span>${themeToggle()}<button class="btn text small" data-action="logout">Sair ${icon("exit")}</button></header><div class="main-content"><div id="page-content"></div><footer class="footer"><span>Fintry v${e(state.version)} · © ${new Date().getFullYear()}</span><a href="mailto:vfranca.dev@gmail.com">Criado por Vinicius Azeredo França</a></footer></div></main></div>`;
+    )}</nav><div class="side-bottom"><div class="user-block"><div class="avatar">${e(u.name.slice(0, 1).toUpperCase())}</div><div class="user-info"><strong>${e(u.name)}</strong><small>${e(roles[u.role])}</small></div><button class="logout" data-action="logout" title="Sair" aria-label="Sair da conta">${icon("exit")}</button></div></div></aside><main class="main"><header class="topbar"><div class="company-label">${icon("company")} ${e(u.companyName)}</div><span class="muted topbar-message">Seu negócio, em boa direção.</span>${themeToggle()}<button class="btn text small" data-action="logout">Sair ${icon("exit")}</button></header><div class="main-content">${!canWrite() ? '<p class="readonly-banner">' + icon("shield") + " Seu acesso é de somente leitura. Você pode consultar e exportar as informações da empresa.</p>" : ""}<div id="page-content"></div><footer class="footer"><span>Fintry v${e(state.version)} · © ${new Date().getFullYear()}</span><a href="mailto:vfranca.dev@gmail.com">Criado por Vinicius Azeredo França</a></footer></div></main></div>`;
   requestAnimationFrame(syncNavigation);
 }
 function syncNavigation() {
@@ -451,6 +860,32 @@ let requestId = 0;
 async function load() {
   const id = ++requestId;
   if (!root.querySelector(".shell")) shell();
+  if (["team", "audit", "security"].includes(state.page)) {
+    if (state.page !== "security" && !isAdmin()) {
+      state.page = "dashboard";
+      return load();
+    }
+    const page = state.page;
+    if (page === "team")
+      state.team = await api(
+        "/users?" + queryParams({ ...state.teamFilters, page: state.teamPage }),
+      );
+    if (page === "audit")
+      state.audit = await api(
+        "/audit?" +
+          queryParams({ ...state.auditFilters, page: state.auditPage }),
+      );
+    if (id !== requestId || !state.user) return;
+    shell();
+    document.querySelector("#page-content").innerHTML =
+      page === "team"
+        ? renderTeam()
+        : page === "audit"
+          ? renderAudit()
+          : renderSecurity();
+    bindAccessPages();
+    return;
+  }
   const [year, month] = state.month.split("-").map(Number);
   const end = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
   const query = new URLSearchParams({
@@ -526,6 +961,7 @@ async function load() {
                 : state.page === "categories"
                   ? renderCategories()
                   : renderAccounts();
+  applyPermissions(root);
   document
     .querySelector("#directory-filter")
     ?.addEventListener("submit", async (ev) => {
@@ -600,6 +1036,7 @@ function showDialog(title, subtitle, fields, action, submit = "Salvar") {
       await action(data, form);
       modal.close();
       await safeLoad();
+      if (state.invitationToShow) showInviteLink();
       if (drawer.open) {
         await loadDetails();
         drawer.querySelector("#drawer-title")?.focus();
@@ -1072,6 +1509,27 @@ function transferDialog() {
   );
   modal.querySelector("[name=destinationId]").selectedIndex = 1;
 }
+document.addEventListener("click", (ev) => {
+  const toggle = ev.target.closest("[data-password]");
+  if (toggle) {
+    const input = toggle
+      .closest("form")
+      .querySelector(`[name="${toggle.dataset.password}"]`);
+    const visible = input.type === "password";
+    input.type = visible ? "text" : "password";
+    toggle.textContent = visible ? "Ocultar" : "Mostrar";
+    toggle.setAttribute("aria-pressed", String(visible));
+    toggle.setAttribute(
+      "aria-label",
+      `${visible ? "Ocultar" : "Mostrar"} senha`,
+    );
+  }
+  const auth = ev.target.closest("[data-auth]");
+  if (auth) {
+    accessLink = null;
+    renderAuth(auth.dataset.auth);
+  }
+});
 root.addEventListener("click", async (ev) => {
   const nav = ev.target.closest("[data-nav]");
   if (nav) {
@@ -1092,6 +1550,29 @@ modal.addEventListener("click", (ev) => {
 async function act(btn) {
   const action = btn.dataset.action;
   if (action === "theme") return window.fintryTheme.toggle();
+  if (await accessAction(btn)) return;
+  if (
+    !canWrite() &&
+    [
+      "entry",
+      "account",
+      "transfer",
+      "sample",
+      "pay",
+      "cancel",
+      "edit-entry",
+      "stop-series",
+      "contact",
+      "category",
+      "edit-contact",
+      "edit-category",
+      "toggle-contact",
+      "toggle-category",
+    ].includes(action)
+  ) {
+    toast("Seu perfil permite somente consultas.");
+    return;
+  }
   if (action === "details") return openDetails(btn.dataset.id);
   if (action === "entry") return entryDialog();
   if (action === "report-export")
@@ -1313,6 +1794,7 @@ function renderDetails() {
   const item = (label, value) =>
     `<div><dt>${label}</dt><dd>${e(value || "—")}</dd></div>`;
   drawer.innerHTML = `<div class="drawer-header"><div><span class="eyebrow">${row.transferId ? "Transferência entre contas" : row.type === "INCOME" ? "Receita" : "Despesa"}</span><h2 id="drawer-title" tabindex="-1">${e(row.description)}</h2></div><button class="close" data-action="drawer-close" aria-label="Fechar detalhes">×</button></div><div class="drawer-amount ${row.type === "INCOME" ? "positive" : "negative"}">${money(row.amount)}</div><span class="badge ${row.status === "PENDING" ? "pending" : row.status === "CANCELLED" ? "cancelled" : ""}">${status}</span><dl class="detail-grid">${item("Conta", data.accountName)}${item("Categoria", row.category)}${item("Cliente / fornecedor", row.contactName)}${item("Vencimento", dateLabel(row.dueDate))}${item("Pagamento / recebimento", dateLabel(row.paymentDate))}${item("Registrado em", dateLabel(data.createdAt?.slice(0, 10)))}${item("Última alteração", dateLabel(data.updatedAt?.slice(0, 10)))}${row.seriesId ? item(row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição mensal", row.sequenceNumber + " de " + row.seriesCount) : ""}</dl><div class="drawer-actions">${row.status === "PENDING" ? `<button class="btn" data-action="pay" data-id="${row.id}">${row.type === "INCOME" ? "Receber" : "Pagar"}</button>${!row.seriesId && !row.transferId ? `<button class="btn secondary" data-action="edit-entry" data-id="${row.id}">Editar lançamento</button>` : ""}` : ""}${row.status !== "CANCELLED" && !row.transferId ? `<button class="btn text" data-action="cancel" data-id="${row.id}">Cancelar lançamento</button>` : ""}</div><section class="attachments-section" aria-labelledby="attachments-title"><div class="card-head"><div><h3 id="attachments-title">Comprovantes</h3><p>${detailFiles.length} de 10 arquivos · PDF, PNG ou JPEG</p></div></div><p class="muted attachment-hint">Os arquivos ficam vinculados somente a este lançamento, inclusive após a baixa ou o cancelamento.</p><div class="attachment-list">${detailFiles.length ? detailFiles.map((file) => `<article class="attachment-item"><div class="attachment-type" aria-hidden="true">${file.contentType === "application/pdf" ? "PDF" : "IMG"}</div><div class="attachment-info"><strong>${e(file.filename)}</strong><small>${fileSize(file.byteCount)} · ${dateLabel(file.createdAt?.slice(0, 10))}<br>Enviado por ${e(file.uploadedByName)}</small></div><div class="attachment-actions"><button class="btn secondary small" data-action="attachment-download" data-file="${file.id}" aria-label="Baixar ${e(file.filename)}">Baixar</button><button class="btn text small" data-action="attachment-remove" data-file="${file.id}" aria-label="Remover ${e(file.filename)}">Remover</button></div>${removalId === file.id ? `<div class="remove-confirm" role="alert"><p>Remover este comprovante? O arquivo será excluído. O lançamento será preservado.</p><button class="btn danger small" data-action="attachment-confirm" data-file="${file.id}">Confirmar remoção</button><button class="btn secondary small" data-action="attachment-keep">Manter arquivo</button></div>` : ""}</article>`).join("") : '<div class="attachment-empty">Nenhum comprovante anexado. Adicione notas, recibos ou comprovantes de pagamento.</div>'}</div>${detailFiles.length < 10 ? `<form id="attachment-form"><label class="field">Adicionar comprovante<input name="file" type="file" required accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg" aria-describedby="attachment-help"></label><p id="attachment-help" class="muted attachment-hint">Até 5 MB por arquivo e 10 arquivos por lançamento.</p><p id="attachment-error" class="form-error" role="alert"></p><button type="submit" class="btn">Anexar comprovante</button></form>` : '<p class="notice">Limite de 10 comprovantes atingido. Remova um arquivo para anexar outro.</p>'}</section><div class="drawer-footer">${themeToggle()}<button class="btn secondary" data-action="drawer-close">Fechar detalhes</button></div>`;
+  applyPermissions(drawer);
   drawer
     .querySelector("#attachment-form")
     ?.addEventListener("submit", async (event) => {
@@ -1427,7 +1909,10 @@ drawer.addEventListener("click", async (event) => {
 (async () => {
   try {
     await csrf();
-    state.version = (await api("/app")).version;
+    const app = await api("/app");
+    state.version = app.version;
+    state.recoveryAvailable = app.passwordRecoveryAvailable;
+    if (readAccessLink()) return;
     try {
       state.user = await api("/auth/me");
     } catch {}

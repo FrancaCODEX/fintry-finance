@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.fintry</groupId>
 	<artifactId>backend</artifactId>
-	<version>0.5.0</version>
+	<version>0.6.0</version>
 	<name/>
 	<description/>
 	<url/>
@@ -30,6 +30,7 @@
 		<java.version>21</java.version>
 	</properties>
 	<dependencies>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-mail</artifactId></dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId><artifactId>pdfbox</artifactId><version>3.0.5</version>
         </dependency>

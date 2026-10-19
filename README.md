@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.5.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.6.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
@@ -15,7 +15,7 @@ Pré-requisito: Docker Desktop com Docker Compose. No Windows, abra o terminal n
 ```bash
 git clone https://github.com/FrancaCODEX/fintry-finance.git
 cd fintry-finance
-git switch codex/fintry-v0.5-comprovantes-temas
+git switch codex/fintry-v0.6-equipe-seguranca
 docker compose up --build -d
 ```
 
@@ -57,9 +57,28 @@ cd backend
 
 Abra **http://localhost:8080**. O perfil `demo` usa H2 persistido em `./data/` relativo à pasta de execução (`backend/data/` nos comandos acima), sem precisar instalar PostgreSQL. H2 é uma alternativa para avaliação local; PostgreSQL é o banco principal. Os dois ambientes têm bancos separados. Não há credencial padrão: crie seu próprio acesso.
 
+## Equipe e segurança (0.6.0)
+
+Em **Equipe**, um Administrador pode convidar pessoas e definir o perfil. **Administrador** gerencia toda a empresa, equipe e histórico; **Financeiro** gerencia finanças e comprovantes; **Somente leitura** consulta e exporta informações. Todo perfil pode alterar a própria senha em **Minha segurança**. Mudanças de acesso ou senha encerram as sessões existentes. O administrador original mantém seu acesso após a atualização.
+
+O convite gera um link de ativação válido por **7 dias**, exibido uma única vez para copiar e compartilhar diretamente com a pessoa. A pessoa confere empresa, e-mail e perfil, define sua senha e entra normalmente. Gerar outro convite invalida o anterior; revogá-lo impede a ativação. Contas inativas podem receber outro convite. Desativar um usuário preserva seus registros.
+
+Em **Histórico**, o Administrador consulta autor, horário e campos alterados, com busca, filtros por área/período (até 366 dias) e paginação. Os registros começam na 0.6.0; versões anteriores não são reconstruídas. Senhas, tokens e conteúdo de arquivos não entram no histórico.
+
+### Recuperação de senha e e-mail local
+
+Com Docker, o serviço **Mailpit** captura os e-mails de teste. Abra **http://localhost:8025**, use **Esqueci minha senha** no Fintry e abra o link recebido. Essa caixa é de avaliação local e não entrega mensagens para a internet. As portas 8025/1025 ficam ligadas somente ao localhost.
+
+O link de recuperação vale **15 minutos**, funciona uma única vez e encerra sessões anteriores depois da troca. A resposta é igual para e-mails cadastrados e desconhecidos. Convites são compartilhados manualmente e não dependem de SMTP.
+
+Para outra porta/endereço do Fintry, ajuste `APP_BASE_URL` em `.env` (por exemplo `http://localhost:8081`). Em acesso por outro computador, use o endereço acessível ao destinatário. Os links usam essa configuração, nunca o cabeçalho Host da requisição.
+
+Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTH`, `SMTP_STARTTLS`, `MAIL_FROM`, `APP_BASE_URL` e `MAIL_ENABLED=true`. Fora do Docker a recuperação fica desabilitada por padrão; a interface informa quando não está disponível. As variáveis precisam ser exportadas no processo Java: `.env` é lido automaticamente apenas pelo Compose. Veja [segurança](docs/03-architecture/security.md).
+
 ## O que já funciona
 
 - Cadastro de empresa e administrador; login e logout com sessão HTTP.
+- Recuperação de senha, convites, equipe com três perfis, troca de senha e histórico de alterações.
 - Isolamento dos dados por empresa, derivado da sessão autenticada.
 - Contas financeiras com saldo inicial e saldo calculado.
 - Receitas e despesas com valor, categoria, conta e vencimento.
@@ -141,7 +160,7 @@ Na pasta do projeto:
 
 ```bash
 git fetch origin
-git switch codex/fintry-v0.5-comprovantes-temas
+git switch codex/fintry-v0.6-equipe-seguranca
 git pull --ff-only origin codex/fintry-v0.5-comprovantes-temas
 docker compose up --build -d
 ```
