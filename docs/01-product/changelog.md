@@ -1,6 +1,40 @@
-# Histórico
+# Changelog do Fintry
 
-## 0.2.0 — Cadastros e edição
+As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
+
+## [0.3.0] - 2026-10-19
+
+### Funcionalidades
+
+- Parcelamento mensal de um valor total em 2 a 120 parcelas, com distribuição exata dos centavos.
+- Recorrências mensais de valor fixo com quantidade definida de repetições, de 2 a 120, sem renovação automática.
+- Tela de acompanhamento de séries com ocorrências realizadas, pendentes e canceladas, e consulta de todos os vencimentos.
+- Cancelamento das pendências de uma série preservando ocorrências já pagas ou recebidas.
+- Possibilidade de registrar apenas a primeira ocorrência como realizada na criação.
+
+### Melhorias
+
+- Formulário com escolha entre lançamento único, parcelamento e recorrência, campos adaptados ao formato e prévia de datas/valores.
+- Identificação de parcela/repetição nas listas de lançamentos.
+- Vencimentos ancorados na data original, ajustando meses curtos e anos bissextos sem deslocar os meses seguintes.
+- Criação atômica e proteção contra repetição da mesma solicitação, inclusive concorrente.
+- Versão visível na interface, fornecida pela configuração gerada a partir do Maven.
+- Regras de atualização e verificação automática de consistência entre versão, README e changelog.
+
+### Correções
+
+- Alinhada a versão técnica do projeto com a versão funcional; o Maven ainda declarava 0.0.1-SNAPSHOT.
+- Nome do JAR estabilizado como fintry.jar; Docker e artefatos da CI deixam de depender do número da versão.
+
+### Atualização
+
+- PostgreSQL V5 e H2 V3 adicionam séries e vínculos sem alterar as migrações anteriores.
+- Lançamentos existentes permanecem disponíveis. Não é necessário remover o banco ou o volume Docker.
+- Ocorrências de série não podem ser editadas individualmente nesta versão; é possível dar baixa, cancelar uma ocorrência ou cancelar as pendências e criar outra série.
+
+## [0.2.0] - 2026-10-19
+
+### Funcionalidades e melhorias
 
 - Clientes/fornecedores com busca, paginação, edição e inativação/reativação.
 - Categorias com classificação por receita/despesa e unicidade por empresa.
@@ -9,7 +43,9 @@
 - Migrações incrementais PostgreSQL V4 e H2 V2 preservam dados existentes.
 - Nomes registrados nos lançamentos mantêm o histórico após inativar ou renomear cadastros.
 
-## 0.1.0 — Primeira versão funcional
+## [0.1.0] - 2026-10-19
+
+### Funcionalidades e melhorias
 
 - Cadastro, autenticação com sessão e CSRF, isolamento por empresa.
 - Contas financeiras, receitas, despesas, baixa e cancelamento com histórico.
@@ -17,5 +53,8 @@
 - Dashboard, filtros e paginação, interface responsiva em português.
 - Dados fictícios opcionais, Docker Compose e modo H2 local.
 - Testes HTTP de regras financeiras, autenticação e isolamento.
+- CRUD global de empresas substituído por consulta e edição da própria empresa em /api/v1/companies/me. A criação da empresa ocorre no cadastro inicial; não há exclusão física de empresa exposta.
 
-O CRUD global de empresas foi substituído por consulta e edição da própria empresa em `/api/v1/companies/me`. A criação da empresa ocorre no cadastro inicial. Não há exclusão de empresa exposta nesta versão.
+### Correções
+
+- Execução do Maven Wrapper no Docker normaliza finais de linha CRLF de checkouts Windows e força LF no Git.

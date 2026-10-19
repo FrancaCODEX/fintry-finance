@@ -40,7 +40,7 @@ public class FinanceService {
     public record AccountView(UUID id, String name, BigDecimal initialBalance, BigDecimal balance) {}
     public record EntryView(UUID id, UUID accountId, String description, String category,
         FinancialEntry.Type type, BigDecimal amount, LocalDate dueDate, LocalDate paymentDate,
-        FinancialEntry.Status status, UUID transferId,UUID categoryId,UUID contactId,String contactName) {}
+        FinancialEntry.Status status, UUID transferId,UUID categoryId,UUID contactId,String contactName,UUID seriesId,Integer sequenceNumber,Integer seriesCount,FinancialSeries.Kind seriesKind) {}
     public record EntryPage(List<EntryView> content, long totalElements, int totalPages, int number) {}
     public record MonthView(String month, BigDecimal income, BigDecimal expense) {}
     public record Summary(BigDecimal balance, BigDecimal income, BigDecimal expense,
@@ -55,7 +55,7 @@ public class FinanceService {
     }
     public EntryView view(FinancialEntry e) {
         return new EntryView(e.getId(),e.getAccountId(),e.getDescription(),e.getCategory(),e.getType(),
-            e.getAmount(),e.getDueDate(),e.getPaymentDate(),e.getStatus(),e.getTransferId(),e.getCategoryId(),e.getContactId(),e.getContactName());
+            e.getAmount(),e.getDueDate(),e.getPaymentDate(),e.getStatus(),e.getTransferId(),e.getCategoryId(),e.getContactId(),e.getContactName(),e.getSeriesId(),e.getSequenceNumber(),e.getSeriesCount(),e.getSeriesKind());
     }
     public List<AccountView> accounts() {
         var company = current.companyId();
@@ -98,6 +98,7 @@ public class FinanceService {
     @Transactional
     public EntryView updateEntry(UUID id,EntryInput input) {
         var e=entries.lock(id,current.companyId()).orElseThrow(this::missing);
+        if(e.getSeriesId()!=null)throw invalid("Para ajustar uma série, cancele as pendências e crie outra série. Os registros realizados serão preservados.");
         if(e.getStatus()!=PENDING || e.getTransferId()!=null)
             throw invalid("Somente lançamentos pendentes podem ser editados. Para corrigir realizados, cancele e cadastre novamente.");
         if(input.paid())throw invalid("Use a ação de baixa para registrar o pagamento.");
@@ -107,7 +108,7 @@ public class FinanceService {
         return view(e);
     }
     public EntryPage list(LocalDate start, LocalDate end, FinancialEntry.Type type,
-            FinancialEntry.Status status, UUID accountId, String search, int page, int size) {
+            FinancialEntry.Status status, UUID accountId, String search, UUID seriesId, int page, int size) {
         if (page < 0 || size < 1 || size > 100) throw invalid("Paginação inválida.");
         if (start != null && end != null && start.isAfter(end)) throw invalid("Período inválido.");
         var company = current.companyId();
@@ -119,6 +120,7 @@ public class FinanceService {
             if (type != null) predicates.add(cb.equal(root.get("type"),type));
             if (status != null) predicates.add(cb.equal(root.get("status"),status));
             if (accountId != null) predicates.add(cb.equal(root.get("accountId"),accountId));
+            if (seriesId != null) predicates.add(cb.equal(root.get("seriesId"),seriesId));
             if (search != null && !search.isBlank()) {
                 var escaped = search.strip().toLowerCase(Locale.ROOT).replace("!","!!").replace("%","!%").replace("_","!_");
                 predicates.add(cb.like(cb.lower(root.get("description")),"%"+escaped+"%", '!'));

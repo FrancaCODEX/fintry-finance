@@ -118,6 +118,62 @@ class FinanceIntegrationTests {
         a.request("POST","/finance/entries",flexible,201);
     }
 
+    Map<String,Object> seriesInput(Browser b,String account,String kind,String value,int count) {
+        var input=b.entry(account,false,value,"EXPENSE");input.put("dueDate","2027-01-31");
+        return new HashMap<>(Map.of("requestId",UUID.randomUUID().toString(),"kind",kind,"occurrences",count,"entry",input));
+    }
+    @Test void installmentsKeepEveryCentDatesAndPaymentsWhenStopped() throws Exception {
+        var b=new Browser().signup();String account=b.account("Banco","1000");
+        var input=seriesInput(b,account,"INSTALLMENT","100",3);
+        var created=b.request("POST","/finance/series",input,201);String id=created.get("id").asText();
+        amount("100",created.get("totalAmount"));assertEquals(3,created.get("pending").asInt());
+        assertEquals("2027-03-31",created.get("lastDueDate").asText());
+        b.request("POST","/finance/series",input,200);
+        var rows=b.request("GET","/finance/entries?seriesId="+id,null,200).get("content");
+        assertEquals(3,rows.size());
+        var ordered=new ArrayList<JsonNode>();rows.forEach(ordered::add);ordered.sort(Comparator.comparingInt(e->e.get("sequenceNumber").asInt()));
+        amount("33.34",ordered.get(0).get("amount"));amount("33.33",ordered.get(1).get("amount"));amount("33.33",ordered.get(2).get("amount"));
+        assertEquals("2027-02-28",ordered.get(1).get("dueDate").asText());
+        String first=ordered.get(0).get("id").asText();b.request("POST","/finance/entries/"+first+"/pay",Map.of("paymentDate",today),200);
+        amount("966.66",b.summary().get("balance"));
+        b.request("PUT","/finance/entries/"+ordered.get(1).get("id").asText(),b.entry(account,false,"40","EXPENSE"),400);
+        var stopped=b.request("POST","/finance/series/"+id+"/stop",null,200);
+        assertEquals(1,stopped.get("paid").asInt());assertEquals(2,stopped.get("cancelled").asInt());assertEquals(0,stopped.get("pending").asInt());
+        b.request("POST","/finance/series/"+id+"/stop",null,200);amount("966.66",b.summary().get("balance"));
+        input.put("occurrences",4);b.request("POST","/finance/series",input,409);
+    }
+    @Test void recurringSeriesAreAtomicScopedAndSafeToRetryConcurrently() throws Exception {
+        var a=new Browser().signup();var b=new Browser().signup();String account=a.account("Conta","0");
+        var input=seriesInput(a,account,"RECURRING","250",4);
+        var pool=java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            var tasks=List.<java.util.concurrent.Callable<Integer>>of(
+                ()->a.call("POST","/finance/series",input,true).statusCode(),()->a.call("POST","/finance/series",input,true).statusCode());
+            var statuses=new ArrayList<Integer>();for(var result:pool.invokeAll(tasks))statuses.add(result.get());
+            Collections.sort(statuses);assertEquals(List.of(200,201),statuses);
+        }finally{pool.shutdownNow();}
+        var list=a.request("GET","/finance/series",null,200);assertEquals(1,list.get("totalElements").asInt());
+        var item=list.get("content").get(0);String id=item.get("id").asText();amount("1000",item.get("totalAmount"));
+        var rows=a.request("GET","/finance/entries?seriesId="+id,null,200).get("content");assertEquals(4,rows.size());
+        for(var row:rows)amount("250",row.get("amount"));
+        assertEquals(0,b.request("GET","/finance/series",null,200).get("totalElements").asInt());
+        assertEquals(0,b.request("GET","/finance/entries?seriesId="+id,null,200).get("totalElements").asInt());
+        b.request("POST","/finance/series/"+id+"/stop",null,404);
+        b.request("POST","/finance/series",input,404);
+        assertEquals(0,b.request("GET","/finance/series",null,200).get("totalElements").asInt());
+        a.request("POST","/finance/series",seriesInput(a,account,"INSTALLMENT","0.02",3),400);
+        a.request("POST","/finance/series",seriesInput(a,account,"RECURRING","1",121),400);
+        assertEquals(1,a.request("GET","/finance/series",null,200).get("totalElements").asInt());
+    }
+    @Test void seriesOnlySettlesFirstOccurrenceAndExposesVersion() throws Exception {
+        var b=new Browser().signup();var account=b.account("Conta","500");
+        var input=seriesInput(b,account,"RECURRING","50",3);
+        var template=b.entry(account,true,"50","EXPENSE");input.put("entry",template);
+        var item=b.request("POST","/finance/series",input,201);
+        assertEquals(1,item.get("paid").asInt());assertEquals(2,item.get("pending").asInt());amount("450",b.summary().get("balance"));
+        assertTrue(b.request("GET","/app",null,200).get("version").asText().matches("[0-9]+[.][0-9]+[.][0-9]+"));
+    }
+
     @Test void cashLifecycleAndAtomicTransfer() throws Exception {
         var b=new Browser().signup();String bank=b.account("Banco","1000.00"),cash=b.account("Caixa","0.00");
         var entry=b.request("POST","/finance/entries",b.entry(bank,false,"100.00","INCOME"),201);

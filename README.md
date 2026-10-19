@@ -2,6 +2,8 @@
 
 **Control today. Grow tomorrow.**
 
+**Versão atual: 0.3.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
 ![Dashboard do Fintry com dados fictícios](docs/screenshots/dashboard.webp)
@@ -13,7 +15,7 @@ Pré-requisito: Docker Desktop com Docker Compose. No Windows, abra o terminal n
 ```bash
 git clone https://github.com/FrancaCODEX/fintry-finance.git
 cd fintry-finance
-git switch codex/fintry-cadastros-e-edicao
+git switch codex/fintry-v0.3-recorrencias-parcelas
 docker compose up --build -d
 ```
 
@@ -61,6 +63,8 @@ Abra **http://localhost:8080**. O perfil `demo` usa H2 persistido em `backend/da
 - Isolamento dos dados por empresa, derivado da sessão autenticada.
 - Contas financeiras com saldo inicial e saldo calculado.
 - Receitas e despesas com valor, categoria, conta e vencimento.
+- Parcelamentos mensais e recorrências de valor fixo, com 2 a 120 ocorrências.
+- Prévia de datas/valores, acompanhamento e cancelamento de pendências de séries.
 - Lançamentos pendentes e realizados; baixa com data de pagamento.
 - Edição de lançamentos pendentes, sem alterar saldos realizados.
 - Cancelamento preservando o histórico; para corrigir um registro realizado, cancele e cadastre novamente.
@@ -112,7 +116,7 @@ A CI executa ambos com JDK 21 e também constrói a imagem Docker. A suíte cobr
 ## Próximas entregas
 
 - Recuperação de senha, convite de usuários e papéis de acesso.
-- Recorrências e parcelamento de lançamentos.
+- Recorrências sem prazo final, renovação automática e edição de ocorrências futuras.
 - Relatórios e exportações.
 - Produtos e estoque, após consolidar o financeiro.
 - Assinaturas e integrações bancárias, após validar o produto.
@@ -127,8 +131,8 @@ Na pasta do projeto:
 
 ```bash
 git fetch origin
-git switch codex/fintry-cadastros-e-edicao
-git pull --ff-only origin codex/fintry-cadastros-e-edicao
+git switch codex/fintry-v0.3-recorrencias-parcelas
+git pull --ff-only origin codex/fintry-v0.3-recorrencias-parcelas
 docker compose up --build -d
 ```
 
@@ -137,3 +141,21 @@ A atualização adiciona tabelas e vínculos por migração Flyway; não precisa
 Os novos menus são **Clientes e fornecedores** e **Categorias**. Cadastre os registros e selecione-os no formulário de lançamento. Um contato pode ser cliente, fornecedor ou ambos. Receitas aceitam clientes; despesas aceitam fornecedores. Categorias podem ser de receitas, despesas ou ambas.
 
 Inativar um cadastro preserva os lançamentos existentes. Um vínculo antigo inativo pode ser mantido ao editar sua pendência; novos vínculos exigem cadastros ativos. Nomes de contato/categoria ficam registrados no lançamento no momento em que ele é salvo, preservando o histórico em caso de renomeação. O tipo de um cadastro vinculado não pode ser alterado. CPF/CNPJ de contatos são opcionais; a validação nesta versão verifica formato e quantidade de dígitos, não consulta situação cadastral.
+
+## Parcelamentos e recorrências — v0.3.0
+
+No formulário **Novo lançamento**, escolha o formato:
+
+- **Lançamento único:** mantém o fluxo existente.
+- **Parcelar um valor total:** informe o total e a quantidade. R$ 100,00 em 3 parcelas gera R$ 33,34 + R$ 33,33 + R$ 33,33. Os centavos excedentes ficam nas primeiras parcelas.
+- **Repetir valor mensalmente:** informe o valor de cada mês e a quantidade. R$ 250,00 por 4 repetições gera quatro lançamentos de R$ 250,00. Não há renovação automática nesta versão.
+
+Confira a prévia antes de registrar. Vencimento em 31 de janeiro resulta em 28/29 de fevereiro e 31 de março. A opção de pagamento inicial vale somente para a primeira ocorrência; as demais ficam pendentes. As baixas continuam individuais em **Lançamentos**, selecionando o mês do vencimento.
+
+O menu **Parcelas e recorrências** mostra o progresso e todos os vencimentos. **Cancelar pendências** cancela todas as ocorrências pendentes da série, inclusive vencidas, preservando as realizadas. Não há edição individual de ocorrências de série; para ajustar, cancele as pendências e crie uma nova série. Lançamentos únicos pendentes continuam editáveis.
+
+A atualização é incremental e preserva contas, contatos, categorias e lançamentos. O JAR passa a ter nome estável: `backend/target/fintry.jar`. Para executar o pacote sem Docker: `java -jar backend/target/fintry.jar --spring.profiles.active=demo`.
+
+## Política de versões
+
+Toda entrega deve atualizar a versão em `backend/pom.xml`, o número acima e o changelog. Funcionalidades/melhorias incrementam MINOR (ex.: 0.3.0 → 0.4.0); correções isoladas incrementam PATCH (ex.: 0.3.0 → 0.3.1). A interface lê a versão do backend, sem manter um segundo número fixo. A CI executa `python3 scripts/check_release.py` para verificar a consistência.

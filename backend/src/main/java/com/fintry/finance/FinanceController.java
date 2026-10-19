@@ -19,9 +19,9 @@ public class FinanceController {
     @GetMapping("/entries")
     public FinanceService.EntryPage list(@RequestParam(required=false) LocalDate start, @RequestParam(required=false) LocalDate end,
         @RequestParam(required=false) FinancialEntry.Type type, @RequestParam(required=false) FinancialEntry.Status status,
-        @RequestParam(required=false) UUID accountId, @RequestParam(required=false) String search,
+        @RequestParam(required=false) UUID accountId, @RequestParam(required=false) String search, @RequestParam(required=false) UUID seriesId,
         @RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="20") int size) {
-        return service.list(start,end,type,status,accountId,search,page,size);
+        return service.list(start,end,type,status,accountId,search,seriesId,page,size);
     }
     @PostMapping("/entries") @ResponseStatus(HttpStatus.CREATED)
     public FinanceService.EntryView entry(@Valid @RequestBody FinanceService.EntryInput input) { return service.createEntry(input); }
