@@ -1,22 +1,29 @@
 spring:
-
   application:
     name: fintry
-
   datasource:
-    url: jdbc:postgresql://localhost:5432/fintry
-    username: fintry
-    password: fintry
-
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/fintry}
+    username: ${DB_USER:fintry}
+    password: ${DB_PASSWORD:fintry}
   jpa:
     hibernate:
       ddl-auto: validate
-
-    properties:
-      hibernate:
-        format_sql: true
-
     open-in-view: false
-
   flyway:
     enabled: true
+server:
+  port: ${PORT:8080}
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${COOKIE_SECURE:false}
+  error:
+    include-message: never
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

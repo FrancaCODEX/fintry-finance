@@ -14,6 +14,23 @@ import com.fintry.shared.dto.ErrorResponse;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleStatus(org.springframework.web.server.ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(Map.of(
+            "status", ex.getStatusCode().value(), "message", ex.getReason() == null ? "Operação inválida." : ex.getReason()));
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConflict(Exception ex) {
+        return ResponseEntity.status(409).body(Map.of("message", "Já existe um registro com esses dados. Confira o e-mail, CNPJ ou nome da conta."));
+    }
+
+    @ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class,
+        org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<Map<String, Object>> handleMalformed(Exception ex) {
+        return ResponseEntity.badRequest().body(Map.of("message", "Confira os valores e as datas informados."));
+    }
+
     @ExceptionHandler(CompanyAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleCompanyAlreadyExists(
             CompanyAlreadyExistsException ex) {

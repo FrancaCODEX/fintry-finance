@@ -1,21 +1,30 @@
 services:
-
-  postgres:
+  db:
     image: postgres:17-alpine
-    container_name: fintry-postgres
-
-    restart: unless-stopped
-
     environment:
       POSTGRES_DB: fintry
       POSTGRES_USER: fintry
-      POSTGRES_PASSWORD: fintry
-
-    ports:
-      - "5432:5432"
-
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-fintry-local}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
+      - fintry-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fintry -d fintry"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/fintry
+      DB_USER: fintry
+      DB_PASSWORD: ${DB_PASSWORD:-fintry-local}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 volumes:
-  postgres_data:
+  fintry-data:

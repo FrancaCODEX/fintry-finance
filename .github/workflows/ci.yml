@@ -1,0 +1,46 @@
+name: Fintry CI
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: node --check backend/src/main/resources/static/app.js
+      - name: H2 integration tests
+        working-directory: backend
+        run: sh mvnw -B verify
+      - name: PostgreSQL integration tests
+        working-directory: backend
+        run: sh mvnw -B -Dspring.profiles.active=postgres-test verify
+      - name: Docker image
+        run: docker build -t fintry-ci .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fintry-java21
+          path: backend/target/backend-0.0.1-SNAPSHOT.jar
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: fintry_test
+          POSTGRES_USER: fintry
+          POSTGRES_PASSWORD: fintry-test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fintry -d fintry_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
