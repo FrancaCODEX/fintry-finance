@@ -1,0 +1,172 @@
+package com.fintry.finance;
+
+import com.fintry.auth.CurrentUser;
+import jakarta.validation.constraints.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import java.math.BigDecimal;
+import java.time.*;
+import java.util.*;
+import static com.fintry.finance.FinancialEntry.Type.*;
+import static com.fintry.finance.FinancialEntry.Status.*;
+
+@Service @RequiredArgsConstructor @Transactional(readOnly=true)
+public class FinanceService {
+    private final CurrentUser current;
+    private final AccountRepository accounts;
+    private final EntryRepository entries;
+    public record AccountInput(@NotBlank @Size(max=100) String name,
+        @NotNull @Digits(integer=12,fraction=2) BigDecimal initialBalance) {}
+    public record EntryInput(@NotNull UUID accountId, @NotBlank @Size(max=255) String description,
+        @NotBlank @Size(max=80) String category, @NotNull FinancialEntry.Type type,
+        @NotNull @DecimalMin("0.01") @Digits(integer=12,fraction=2) BigDecimal amount,
+        @NotNull LocalDate dueDate, boolean paid, LocalDate paymentDate) {}
+    public record PaymentInput(@NotNull LocalDate paymentDate) {}
+    public record TransferInput(@NotNull UUID sourceId, @NotNull UUID destinationId,
+        @NotNull @DecimalMin("0.01") @Digits(integer=12,fraction=2) BigDecimal amount,
+        @NotNull LocalDate date, @NotBlank @Size(max=255) String description) {}
+    public record AccountView(UUID id, String name, BigDecimal initialBalance, BigDecimal balance) {}
+    public record EntryView(UUID id, UUID accountId, String description, String category,
+        FinancialEntry.Type type, BigDecimal amount, LocalDate dueDate, LocalDate paymentDate,
+        FinancialEntry.Status status, UUID transferId) {}
+    public record EntryPage(List<EntryView> content, long totalElements, int totalPages, int number) {}
+    public record MonthView(String month, BigDecimal income, BigDecimal expense) {}
+    public record Summary(BigDecimal balance, BigDecimal income, BigDecimal expense,
+        BigDecimal result, BigDecimal pendingIncome, BigDecimal pendingExpense, List<MonthView> flow) {}
+
+    private ResponseStatusException missing() { return new ResponseStatusException(HttpStatus.NOT_FOUND,"Registro não encontrado."); }
+    private ResponseStatusException invalid(String message) { return new ResponseStatusException(HttpStatus.BAD_REQUEST,message); }
+    private FinancialAccount account(UUID id) { return accounts.findByIdAndCompanyId(id,current.companyId()).orElseThrow(this::missing); }
+    private void validPaymentDate(LocalDate date) {
+        if (date == null || date.isAfter(LocalDate.now(ZoneId.of("America/Sao_Paulo"))))
+            throw invalid("A data de pagamento não pode estar no futuro.");
+    }
+    public EntryView view(FinancialEntry e) {
+        return new EntryView(e.getId(),e.getAccountId(),e.getDescription(),e.getCategory(),e.getType(),
+            e.getAmount(),e.getDueDate(),e.getPaymentDate(),e.getStatus(),e.getTransferId());
+    }
+    public List<AccountView> accounts() {
+        var company = current.companyId();
+        Map<UUID,BigDecimal> movements = new HashMap<>();
+        for (Object[] row : entries.balances(company)) {
+            var amount = (BigDecimal) row[2];
+            if (row[1] == EXPENSE) amount = amount.negate();
+            movements.merge((UUID)row[0],amount,BigDecimal::add);
+        }
+        return accounts.findByCompanyIdOrderByNameAsc(company).stream().map(a ->
+            new AccountView(a.getId(),a.getName(),a.getInitialBalance(),
+                a.getInitialBalance().add(movements.getOrDefault(a.getId(),BigDecimal.ZERO)))).toList();
+    }
+    @Transactional
+    public AccountView createAccount(AccountInput input) {
+        FinancialAccount a = new FinancialAccount(); a.setCompanyId(current.companyId());
+        a.setName(input.name().strip()); a.setInitialBalance(input.initialBalance()); accounts.save(a);
+        return new AccountView(a.getId(),a.getName(),a.getInitialBalance(),a.getInitialBalance());
+    }
+    @Transactional
+    public EntryView createEntry(EntryInput input) {
+        var a = account(input.accountId());
+        if (input.paid()) validPaymentDate(input.paymentDate());
+        FinancialEntry e = new FinancialEntry(); e.setCompanyId(a.getCompanyId()); e.setAccountId(a.getId());
+        e.setDescription(input.description().strip()); e.setCategory(input.category().strip());
+        e.setType(input.type()); e.setAmount(input.amount()); e.setDueDate(input.dueDate());
+        e.setStatus(input.paid() ? PAID : PENDING); e.setPaymentDate(input.paid() ? input.paymentDate() : null);
+        return view(entries.save(e));
+    }
+    public EntryPage list(LocalDate start, LocalDate end, FinancialEntry.Type type,
+            FinancialEntry.Status status, UUID accountId, String search, int page, int size) {
+        if (page < 0 || size < 1 || size > 100) throw invalid("Paginação inválida.");
+        if (start != null && end != null && start.isAfter(end)) throw invalid("Período inválido.");
+        var company = current.companyId();
+        Specification<FinancialEntry> filter = (root, query, cb) -> {
+            var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
+            predicates.add(cb.equal(root.get("companyId"), company));
+            if (start != null) predicates.add(cb.greaterThanOrEqualTo(root.get("dueDate"),start));
+            if (end != null) predicates.add(cb.lessThanOrEqualTo(root.get("dueDate"),end));
+            if (type != null) predicates.add(cb.equal(root.get("type"),type));
+            if (status != null) predicates.add(cb.equal(root.get("status"),status));
+            if (accountId != null) predicates.add(cb.equal(root.get("accountId"),accountId));
+            if (search != null && !search.isBlank()) {
+                var escaped = search.strip().toLowerCase(Locale.ROOT).replace("!","!!").replace("%","!%").replace("_","!_");
+                predicates.add(cb.like(cb.lower(root.get("description")),"%"+escaped+"%", '!'));
+            }
+            return cb.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
+        };
+        var result = entries.findAll(filter,PageRequest.of(page,size,Sort.by(Sort.Order.desc("dueDate"),Sort.Order.desc("createdAt"),Sort.Order.desc("id"))));
+        return new EntryPage(result.map(this::view).getContent(),result.getTotalElements(),result.getTotalPages(),result.getNumber());
+    }
+    @Transactional
+    public EntryView pay(UUID id, PaymentInput input) {
+        validPaymentDate(input.paymentDate());
+        var e = entries.lock(id,current.companyId()).orElseThrow(this::missing);
+        if (e.getStatus() == CANCELLED) throw invalid("Lançamento cancelado não pode ser pago.");
+        if (e.getStatus() == PAID) return view(e); // retry does not create a second movement
+        e.setStatus(PAID); e.setPaymentDate(input.paymentDate()); return view(e);
+    }
+    @Transactional
+    public EntryView cancel(UUID id) {
+        var e = entries.lock(id,current.companyId()).orElseThrow(this::missing);
+        if (e.getTransferId() != null) throw invalid("Transferências não podem ser canceladas individualmente. Faça a transferência inversa.");
+        e.setStatus(CANCELLED); return view(e);
+    }
+    @Transactional
+    public void transfer(TransferInput input) {
+        if (input.sourceId().equals(input.destinationId())) throw invalid("Escolha duas contas diferentes.");
+        var source = account(input.sourceId()); var destination = account(input.destinationId());
+        validPaymentDate(input.date()); var transferId = UUID.randomUUID();
+        for (var a : List.of(source,destination)) {
+            FinancialEntry e = new FinancialEntry(); e.setCompanyId(a.getCompanyId()); e.setAccountId(a.getId());
+            e.setDescription(input.description().strip()); e.setCategory("Transferência entre contas");
+            e.setType(a.getId().equals(source.getId()) ? EXPENSE : INCOME); e.setAmount(input.amount());
+            e.setDueDate(input.date()); e.setPaymentDate(input.date()); e.setStatus(PAID); e.setTransferId(transferId);
+            entries.save(e);
+        }
+    }
+    public Summary summary(YearMonth month) {
+        var company = current.companyId(); var start = month.minusMonths(5).atDay(1); var end = month.atEndOfMonth();
+        var paid = entries.paidBetween(company,start,end);
+        List<MonthView> flow = new ArrayList<>();
+        for (int i=5; i>=0; i--) {
+            var m = month.minusMonths(i); BigDecimal income=BigDecimal.ZERO, expense=BigDecimal.ZERO;
+            for (var e : paid) if (YearMonth.from(e.getPaymentDate()).equals(m)) {
+                if (e.getType()==INCOME) income=income.add(e.getAmount()); else expense=expense.add(e.getAmount());
+            }
+            flow.add(new MonthView(m.toString(),income,expense));
+        }
+        BigDecimal pendingIncome=BigDecimal.ZERO, pendingExpense=BigDecimal.ZERO;
+        for (Object[] row : entries.pending(company,month.atDay(1),end)) {
+            if (row[0]==INCOME) pendingIncome=(BigDecimal)row[1]; else pendingExpense=(BigDecimal)row[1];
+        }
+        var totals=flow.get(5);
+        return new Summary(accounts().stream().map(AccountView::balance).reduce(BigDecimal.ZERO,BigDecimal::add),
+            totals.income(),totals.expense(),totals.income().subtract(totals.expense()),pendingIncome,pendingExpense,flow);
+    }
+
+    @Transactional
+    public void sample() {
+        if (!accounts.findByCompanyIdOrderByNameAsc(current.companyId()).isEmpty())
+            throw invalid("Os exemplos só podem ser adicionados quando não há contas cadastradas.");
+        var bank = createAccount(new AccountInput("Banco principal", new BigDecimal("8500.00")));
+        var cash = createAccount(new AccountInput("Caixa da empresa", new BigDecimal("1200.00")));
+        var today = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+        for (int i=5;i>=0;i--) {
+            var date = YearMonth.from(today).minusMonths(i).atDay(1);
+            createEntry(new EntryInput(bank.id(),"Serviços prestados · cliente exemplo","Serviços",INCOME,
+                new BigDecimal(9600 + (5-i)*850),date,true,date));
+            createEntry(new EntryInput(bank.id(),"Custos operacionais · exemplo","Operação",EXPENSE,
+                new BigDecimal(4800 + (5-i)*310),date,true,date));
+        }
+        createEntry(new EntryInput(bank.id(),"Projeto em andamento · exemplo","Serviços",INCOME,
+            new BigDecimal("4200.00"),today,false,null));
+        createEntry(new EntryInput(bank.id(),"Assinaturas de ferramentas · exemplo","Software",EXPENSE,
+            new BigDecimal("389.90"),today,false,null));
+        createEntry(new EntryInput(cash.id(),"Material de escritório · exemplo","Escritório",EXPENSE,
+            new BigDecimal("145.50"),today,true,today));
+    }
+}

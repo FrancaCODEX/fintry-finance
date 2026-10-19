@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fintry_test
+    username: fintry
+    password: fintry-test
+  flyway:
+    locations: classpath:db/migration
