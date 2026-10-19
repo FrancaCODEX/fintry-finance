@@ -15,7 +15,7 @@ public class SecurityConfig {
     @Bean SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.securityContext(c -> c.securityContextRepository(new HttpSessionSecurityContextRepository()))
             .authorizeHttpRequests(a -> a
-                .requestMatchers("/", "/index.html", "/app.js", "/style.css", "/favicon.svg",
+                .requestMatchers("/", "/index.html", "/app.js", "/theme.js", "/style.css", "/favicon.svg",
                     "/api/v1/app", "/api/v1/auth/csrf", "/api/v1/auth/login", "/api/v1/auth/register", "/actuator/health", "/error").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(e -> e

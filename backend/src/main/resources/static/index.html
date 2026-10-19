@@ -10,12 +10,18 @@
     />
     <title>Fintry · Gestão financeira</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script src="/theme.js"></script>
     <link rel="stylesheet" href="/style.css" />
     <script src="/app.js" defer></script>
   </head>
   <body>
     <div id="root"><div class="boot">Preparando suas finanças…</div></div>
     <div id="toast" role="status" aria-live="polite"></div>
+    <dialog
+      id="details-drawer"
+      class="details-drawer"
+      aria-labelledby="drawer-title"
+    ></dialog>
     <dialog id="modal" aria-labelledby="modal-title"></dialog>
   </body>
 </html>

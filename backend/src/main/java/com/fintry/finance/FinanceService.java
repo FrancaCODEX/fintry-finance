@@ -41,6 +41,11 @@ public class FinanceService {
     public record EntryView(UUID id, UUID accountId, String description, String category,
         FinancialEntry.Type type, BigDecimal amount, LocalDate dueDate, LocalDate paymentDate,
         FinancialEntry.Status status, UUID transferId,UUID categoryId,UUID contactId,String contactName,UUID seriesId,Integer sequenceNumber,Integer seriesCount,FinancialSeries.Kind seriesKind) {}
+    public record EntryDetails(EntryView entry,String accountName,LocalDateTime createdAt,LocalDateTime updatedAt) {}
+    public EntryDetails details(UUID id) {
+        var e=entries.findByIdAndCompanyId(id,current.companyId()).orElseThrow(this::missing);
+        return new EntryDetails(view(e),account(e.getAccountId()).getName(),e.getCreatedAt(),e.getUpdatedAt());
+    }
     public record EntryPage(List<EntryView> content, long totalElements, int totalPages, int number) {}
     public record MonthView(String month, BigDecimal income, BigDecimal expense) {}
     public record Summary(BigDecimal balance, BigDecimal income, BigDecimal expense,

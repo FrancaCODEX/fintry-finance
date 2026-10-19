@@ -31,6 +31,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of("message", "Confira os valores e as datas informados."));
     }
 
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String,Object>> handleUploadSize(Exception ex) {
+        return ResponseEntity.status(413).body(Map.of("message","Cada comprovante pode ter até 5 MB. Envie um arquivo por vez."));
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class)
+    public ResponseEntity<Map<String,Object>> handleMissingFile(Exception ex) {
+        return ResponseEntity.badRequest().body(Map.of("message","Selecione um arquivo para enviar."));
+    }
+
     @ExceptionHandler(CompanyAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleCompanyAlreadyExists(
             CompanyAlreadyExistsException ex) {

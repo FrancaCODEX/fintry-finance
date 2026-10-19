@@ -2,6 +2,38 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.5.0] - 2026-10-19
+
+### Funcionalidades
+
+- Painel lateral de detalhes com conta, categoria, contato, situação, vencimento, baixa e identificação de parcela/repetição.
+- Acesso aos detalhes na lista, no dashboard e nos relatórios, com edição de pendências, baixa e cancelamento conforme as regras existentes.
+- Comprovantes PDF, PNG e JPEG vinculados a cada lançamento, com envio, download e remoção confirmada.
+- Metadados de nome, tamanho, data e usuário que enviou; arquivos e vínculos isolados por empresa e preservados após baixa/cancelamento.
+- Modo escuro com alternância, preferência salva no navegador e tema inicial baseado no sistema.
+
+### Melhorias
+
+- Bordas e indicação de foco mais visíveis em campos, seletores, datas e áreas de texto nos modos claro e escuro.
+- Superfícies, tabelas, cartões, gráficos, diálogos, estados e formulários adaptados aos temas.
+- Tema aplicado no carregamento inicial, antes da folha de estilos, e atualizado entre abas do navegador.
+- Painel responsivo com foco contido pelo diálogo nativo, fechamento por Escape e atualização após ações financeiras.
+- Comprovantes armazenados no banco junto dos metadados, incluídos no mesmo backup, sem uploads públicos ou novo volume.
+
+### Correções
+
+- Campos sobre fundo claro deixam de depender de bordas de contraste muito baixo para sua identificação.
+- Requisições de arquivo usam multipart com CSRF, sem cabeçalho JSON indevido, e exibem mensagens de tamanho/formato.
+- Validação do conteúdo real dos arquivos impede anexos disfarçados com extensão permitida.
+- Limite de 10 arquivos é verificado sob bloqueio do lançamento, inclusive para envios concorrentes.
+
+### Atualização
+
+- PostgreSQL V6 e H2 V4 adicionam comprovantes e vínculo composto de empresa/lançamento; migrações anteriores preservadas.
+- Até 10 arquivos por lançamento, 5 MB por arquivo e 20 megapixels por imagem. PDF sem senha; não há prévia inline dos arquivos.
+- Remover um comprovante exclui o arquivo, sem excluir ou alterar o lançamento. Não há novo histórico geral de auditoria nesta etapa.
+- Preserve o banco e seus volumes; os backups passam a incluir também o conteúdo dos comprovantes.
+
 ## [0.4.0] - 2026-10-19
 
 ### Funcionalidades
