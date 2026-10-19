@@ -174,6 +174,73 @@ class FinanceIntegrationTests {
         assertTrue(b.request("GET","/app",null,200).get("version").asText().matches("[0-9]+[.][0-9]+[.][0-9]+"));
     }
 
+    String reportQuery(String start,String end) { return "/reports?start="+start+"&end="+end; }
+    @Test void reportsSeparatePaymentDueAndExcludeTransfersAndCancelledAmounts() throws Exception {
+        var b=new Browser().signup();var account=b.account("Banco principal","1000");var cash=b.account("Caixa","100");
+        String person=b.request("POST","/contacts",contact("Cliente Alfa","CUSTOMER","",true),201).get("id").asText();
+        var income=b.entry(account,true,"500","INCOME");income.put("dueDate",LocalDate.parse(today).minusDays(10).toString());income.put("contactId",person);
+        b.request("POST","/finance/entries",income,201);
+        var expense=b.entry(account,true,"200","EXPENSE");expense.put("dueDate",LocalDate.parse(today).minusDays(40).toString());expense.put("category","Operação");b.request("POST","/finance/entries",expense,201);
+        var pending=b.entry(account,false,"300","INCOME");pending.put("dueDate",LocalDate.parse(today).plusDays(1).toString());b.request("POST","/finance/entries",pending,201);
+        pending=b.entry(account,false,"50","EXPENSE");pending.put("dueDate",LocalDate.parse(today).minusDays(1).toString());b.request("POST","/finance/entries",pending,201);
+        String cancelled=b.request("POST","/finance/entries",b.entry(account,true,"400","EXPENSE"),201).get("id").asText();b.request("POST","/finance/entries/"+cancelled+"/cancel",null,200);
+        b.request("POST","/finance/transfers",Map.of("sourceId",account,"destinationId",cash,"amount","100","date",today,"description","Transferência interna"),201);
+        var paid=b.request("GET",reportQuery(today,today),null,200);assertEquals(2,paid.get("totalElements").asInt());
+        amount("500",paid.get("totals").get("income"));amount("200",paid.get("totals").get("expense"));amount("300",paid.get("totals").get("result"));
+        amount("200",paid.get("categories").get(0).get("amount"));assertEquals("Operação",paid.get("categories").get(0).get("category").asText());
+        var due=b.request("GET",reportQuery(LocalDate.parse(today).minusDays(1).toString(),LocalDate.parse(today).plusDays(1).toString())+"&basis=DUE&status=PENDING",null,200);
+        assertEquals(2,due.get("totalElements").asInt());amount("300",due.get("totals").get("pendingIncome"));amount("50",due.get("totals").get("pendingExpense"));amount("0",due.get("totals").get("income"));
+        var cancelledReport=b.request("GET",reportQuery(today,today)+"&basis=DUE&status=CANCELLED",null,200);assertEquals(1,cancelledReport.get("totalElements").asInt());amount("0",cancelledReport.get("totals").get("expense"));
+        assertEquals(1,b.request("GET",reportQuery(today,today)+"&type=EXPENSE&category=Opera&accountId="+account,null,200).get("totalElements").asInt());
+        assertEquals(1,b.request("GET",reportQuery(today,today)+"&contact=Alfa",null,200).get("totalElements").asInt());
+        b.request("GET",reportQuery(today,today)+"&status=PENDING",null,400);
+        b.request("GET",reportQuery(today,LocalDate.parse(today).minusDays(1).toString()),null,400);
+        var other=new Browser().signup();assertEquals(0,other.request("GET",reportQuery(today,today),null,200).get("totalElements").asInt());
+        other.request("GET",reportQuery(today,today)+"&accountId="+account,null,404);
+        other.request("GET","/reports/forecast?accountId="+account,null,404);
+        other.request("GET","/reports/export?start="+today+"&end="+today+"&accountId="+account+"&format=csv",null,404);
+    }
+    @Test void forecastStartsAtCurrentBalanceAndHandlesOverdueWithoutSettlingEntries() throws Exception {
+        var b=new Browser().signup();var bank=b.account("Banco","1000");var cash=b.account("Caixa","200");
+        b.request("POST","/finance/entries",b.entry(bank,true,"100","INCOME"),201);b.request("POST","/finance/entries",b.entry(bank,true,"50","EXPENSE"),201);
+        b.request("POST","/finance/transfers",Map.of("sourceId",bank,"destinationId",cash,"amount","100","date",today,"description","Transferência"),201);
+        for(var item:List.of(new String[]{"1500","EXPENSE","1"},new String[]{"300","INCOME","2"},new String[]{"80","INCOME","-1"},new String[]{"20","EXPENSE","-2"},new String[]{"999","EXPENSE","40"})) {
+            var input=b.entry(bank,false,item[0],item[1]);input.put("dueDate",LocalDate.parse(today).plusDays(Integer.parseInt(item[2])).toString());b.request("POST","/finance/entries",input,201);
+        }
+        var forecast=b.request("GET","/reports/forecast?days=30",null,200);
+        amount("1250",forecast.get("openingBalance"));amount("50",forecast.get("closingBalance"));amount("-250",forecast.get("minimumBalance"));
+        assertEquals(LocalDate.parse(today).plusDays(1).toString(),forecast.get("firstNegativeDate").asText());assertEquals(31,forecast.get("days").size());
+        amount("80",forecast.get("overdueIncome"));amount("20",forecast.get("overdueExpense"));
+        forecast=b.request("GET","/reports/forecast?days=30&includeOverdue=true",null,200);amount("110",forecast.get("closingBalance"));amount("-190",forecast.get("minimumBalance"));amount("380",forecast.get("pendingIncome"));
+        amount("300",b.request("GET","/reports/forecast?days=30&accountId="+cash,null,200).get("closingBalance"));
+        amount("1250",b.summary().get("balance"));b.request("GET","/reports/forecast?days=0",null,400);b.request("GET","/reports/forecast?days=367",null,400);
+    }
+    @Test void exportsAreRealFilesAndProtectSpreadsheetText() throws Exception {
+        var b=new Browser().signup();var account=b.account("Banco São José","0");
+        var row=b.entry(account,true,"123.45","INCOME");row.put("description","=SUM(1,2) São José & Filhos <teste> 🎮");b.request("POST","/finance/entries",row,201);
+        String base="http://localhost:"+port+"/api/v1/reports/export?start="+today+"&end="+today+"&format=";
+        var csv=b.client.send(HttpRequest.newBuilder(URI.create(base+"csv")).GET().build(),HttpResponse.BodyHandlers.ofByteArray());assertEquals(200,csv.statusCode());
+        String csvText=new String(csv.body(),java.nio.charset.StandardCharsets.UTF_8);assertTrue(csvText.startsWith("\ufeff"));assertTrue(csvText.contains("'=SUM(1,2)"));assertTrue(csvText.contains("123,45"));assertTrue(csv.headers().firstValue("Cache-Control").orElse("").contains("no-store"));
+        var xlsx=b.client.send(HttpRequest.newBuilder(URI.create(base+"xlsx")).GET().build(),HttpResponse.BodyHandlers.ofByteArray());assertEquals(200,xlsx.statusCode());
+        var xmls=new HashMap<String,String>();try(var zip=new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(xlsx.body()))) {java.util.zip.ZipEntry part;while((part=zip.getNextEntry())!=null)xmls.put(part.getName(),new String(zip.readAllBytes(),java.nio.charset.StandardCharsets.UTF_8));}
+        String sheet=xmls.get("xl/worksheets/sheet1.xml");assertNotNull(sheet);assertTrue(sheet.contains("<v>123.45</v>"));assertTrue(sheet.contains("t=\"inlineStr\""));assertFalse(sheet.contains("<f>"));assertTrue(sheet.contains("&amp; Filhos &lt;teste&gt;"));
+        var factory=javax.xml.parsers.DocumentBuilderFactory.newInstance();factory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING,true);
+        for(var content:xmls.values())factory.newDocumentBuilder().parse(new java.io.ByteArrayInputStream(content.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        var pdf=b.client.send(HttpRequest.newBuilder(URI.create(base+"pdf")).GET().build(),HttpResponse.BodyHandlers.ofByteArray());assertEquals(200,pdf.statusCode());
+        try(var document=org.apache.pdfbox.Loader.loadPDF(pdf.body())){assertEquals(1,document.getNumberOfPages());String text=new org.apache.pdfbox.text.PDFTextStripper().getText(document);assertTrue(text.contains("São José"));assertTrue(text.contains("123,45"));}
+        for(int i=0;i<25;i++)b.request("POST","/finance/entries",b.entry(account,true,"1","EXPENSE"),201);
+        pdf=b.client.send(HttpRequest.newBuilder(URI.create(base+"pdf")).GET().build(),HttpResponse.BodyHandlers.ofByteArray());try(var document=org.apache.pdfbox.Loader.loadPDF(pdf.body())){assertTrue(document.getNumberOfPages()>1);}
+        b.request("GET","/reports/export?start="+today+"&end="+today+"&format=html",null,400);
+    }
+    @org.springframework.beans.factory.annotation.Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
+    @Test void reportTotalsCoverAllPagesAndExportRequiresRefiningLargeSelections() throws Exception {
+        var b=new Browser().signup();var account=b.account("Conta","0");String company=b.request("GET","/auth/me",null,200).get("companyId").asText();
+        var batch=new ArrayList<Object[]>();for(int i=0;i<5001;i++)batch.add(new Object[]{UUID.randomUUID(),UUID.fromString(company),UUID.fromString(account),"Registro de volume",LocalDate.parse(today),LocalDate.parse(today)});
+        jdbc.batchUpdate("INSERT INTO financial_entries(id,company_id,account_id,description,category,type,amount,due_date,payment_date,status,created_at,updated_at) VALUES(?,?,?,?,'Teste','INCOME',1,?,?,'PAID',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",batch);
+        var report=b.request("GET",reportQuery(today,today),null,200);assertEquals(5001,report.get("totalElements").asInt());assertEquals(20,report.get("content").size());amount("5001",report.get("totals").get("income"));
+        b.request("GET","/reports/export?start="+today+"&end="+today+"&format=csv",null,400);
+    }
+
     @Test void cashLifecycleAndAtomicTransfer() throws Exception {
         var b=new Browser().signup();String bank=b.account("Banco","1000.00"),cash=b.account("Caixa","0.00");
         var entry=b.request("POST","/finance/entries",b.entry(bank,false,"100.00","INCOME"),201);

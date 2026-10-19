@@ -5,6 +5,8 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.*;
 public interface EntryRepository extends JpaRepository<FinancialEntry, UUID>, JpaSpecificationExecutor<FinancialEntry> {
+    @Query("select e.dueDate,e.type,sum(e.amount) from FinancialEntry e where e.companyId=:company and e.status='PENDING' and e.transferId is null and e.dueDate<=:end and (:account is null or e.accountId=:account) group by e.dueDate,e.type")
+    List<Object[]> forecast(@Param("company")UUID company,@Param("account")UUID account,@Param("end")LocalDate end);
     List<FinancialEntry> findByCompanyIdAndSeriesIdIn(UUID companyId,List<UUID> ids);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select e from FinancialEntry e where e.seriesId=:id and e.companyId=:company order by e.sequenceNumber")

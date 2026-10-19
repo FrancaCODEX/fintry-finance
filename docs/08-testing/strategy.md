@@ -20,3 +20,11 @@ Na validação local desta entrega foi utilizado Java 17 como override (`-Djava.
 ## Séries mensais — 0.3.0
 
 Cobertura adicional para divisão exata dos centavos, datas ancoradas em meses curtos e anos bissextos, valores máximos, chave idempotente em chamadas concorrentes, isolamento de empresas, criação atômica, primeira ocorrência realizada e cancelamento da série sem reverter pagamentos. O teste de migração também aplica a nova migração sobre lançamentos existentes. A interface é verificada em navegador com lançamento único, parcelamento, recorrência, prévia, acompanhamento e cancelamento.
+
+## Relatórios e projeções — 0.4.0
+
+A suíte local totaliza 18 testes aprovados (14 de integração financeira HTTP, 2 de calendário de séries, 1 de migração e 1 de contexto). A cobertura adicional verifica separação entre pagamento e vencimento, cancelados/transferências fora dos totais, filtros, isolamento de empresas, totais sobre 5.001 registros com páginas de 20, limite de exportação e projeção a partir do saldo atual. Pendências vencidas podem entrar na projeção sem serem baixadas; a seleção de conta e a primeira data negativa são conferidas.
+
+CSV é inspecionado quanto a BOM, separador, centavos e neutralização de fórmulas. XLSX tem as partes XML analisadas e verifica valores numéricos e textos sem fórmulas. PDF é reaberto pelo PDFBox para conferir acentos, valores e múltiplas páginas. O build local usa Java 17 com override, mantendo Java 21 no projeto. PostgreSQL e Docker continuam dependendo da execução na CI ou em ambiente com esses serviços.
+
+A conferência em Chromium cobre dashboard, versão, filtros realizados/pendentes, resultado vazio, downloads nos três formatos, exportação com filtros aplicados, saldo projetado negativo e opção de vencidas. As telas são inspecionadas em 1440px e 390px, verificando ausência de rolagem horizontal da página e valores completos nos cartões. O Excel baixado também é aberto pelo openpyxl; o PDF é renderizado e inspecionado visualmente.
