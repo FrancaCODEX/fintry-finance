@@ -44,7 +44,9 @@ public class FinanceService {
     public record EntryPage(List<EntryView> content, long totalElements, int totalPages, int number) {}
     public record MonthView(String month, BigDecimal income, BigDecimal expense) {}
     public record Summary(BigDecimal balance, BigDecimal income, BigDecimal expense,
-        BigDecimal result, BigDecimal pendingIncome, BigDecimal pendingExpense, List<MonthView> flow) {}
+        BigDecimal result, BigDecimal pendingIncome, BigDecimal pendingExpense, List<MonthView> flow,
+        BigDecimal previousIncome,BigDecimal previousExpense,BigDecimal previousResult,List<CategoryExpense> categories) {}
+    public record CategoryExpense(String category,BigDecimal amount) {}
 
     private ResponseStatusException missing() { return new ResponseStatusException(HttpStatus.NOT_FOUND,"Registro não encontrado."); }
     private ResponseStatusException invalid(String message) { return new ResponseStatusException(HttpStatus.BAD_REQUEST,message); }
@@ -172,9 +174,14 @@ public class FinanceService {
         for (Object[] row : entries.pending(company,month.atDay(1),end)) {
             if (row[0]==INCOME) pendingIncome=(BigDecimal)row[1]; else pendingExpense=(BigDecimal)row[1];
         }
+        var categoryTotals=new HashMap<String,BigDecimal>();
+        for(var e:paid)if(e.getType()==EXPENSE && YearMonth.from(e.getPaymentDate()).equals(month))categoryTotals.merge(e.getCategory(),e.getAmount(),BigDecimal::add);
+        var categories=categoryTotals.entrySet().stream().map(e->new CategoryExpense(e.getKey(),e.getValue()))
+            .sorted(Comparator.comparing(CategoryExpense::amount).reversed().thenComparing(CategoryExpense::category)).toList();
+        var previous=flow.get(4);
         var totals=flow.get(5);
         return new Summary(accounts().stream().map(AccountView::balance).reduce(BigDecimal.ZERO,BigDecimal::add),
-            totals.income(),totals.expense(),totals.income().subtract(totals.expense()),pendingIncome,pendingExpense,flow);
+            totals.income(),totals.expense(),totals.income().subtract(totals.expense()),pendingIncome,pendingExpense,flow,previous.income(),previous.expense(),previous.income().subtract(previous.expense()),categories);
     }
 
     @Transactional

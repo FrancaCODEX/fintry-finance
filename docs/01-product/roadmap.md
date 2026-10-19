@@ -6,9 +6,9 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 |---|---|---|
 | 0.1.0 | Acesso, empresas, contas, lançamentos, transferências e dashboard | Incorporada à main |
 | 0.2.0 | Clientes, fornecedores, categorias, vínculos e edição de pendências | Incorporada à main |
-| 0.3.0 | Recorrências mensais finitas, parcelamentos e prévia no formulário | Entrega atual, em revisão |
-| 0.4.0 | Relatórios/exportações e fluxo de caixa projetado; evolução do dashboard | Próxima entrega planejada |
-| 0.5.0 | Comprovantes e painel lateral de detalhes de lançamentos | Planejada |
+| 0.3.0 | Recorrências mensais finitas, parcelamentos e prévia no formulário | Incorporada à main |
+| 0.4.0 | Relatórios/exportações e fluxo de caixa projetado; evolução do dashboard | Entrega atual, em revisão |
+| 0.5.0 | Comprovantes e painel lateral de detalhes de lançamentos | Próxima entrega planejada |
 | 0.6.0 | Recuperação de senha, usuários, permissões e histórico de alterações | Planejada |
 | 0.7.0 | Produtos, estoque e vendas | Planejada |
 

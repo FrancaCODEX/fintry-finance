@@ -3,6 +3,16 @@ const root = document.querySelector("#root");
 const modal = document.querySelector("#modal");
 const state = {
   user: null,
+  report: null,
+  reportPage: 0,
+  reportFilters: {
+    start: localDate().slice(0, 7) + "-01",
+    end: monthEnd(localDate().slice(0, 7)),
+    basis: "PAYMENT",
+    status: "PAID",
+  },
+  forecast: null,
+  forecastFilters: { days: "90", includeOverdue: "false" },
   version: "",
   series: null,
   seriesPage: 0,
@@ -146,6 +156,14 @@ function renderAuth(register = false) {
       state.entryPage = 0;
       state.filters = {};
       state.directoryFilters = { active: "true" };
+      state.reportPage = 0;
+      state.reportFilters = {
+        start: localDate().slice(0, 7) + "-01",
+        end: monthEnd(localDate().slice(0, 7)),
+        basis: "PAYMENT",
+        status: "PAID",
+      };
+      state.forecastFilters = { days: "90", includeOverdue: "false" };
       state.contactPage = 0;
       state.seriesPage = 0;
       await load();
@@ -157,6 +175,8 @@ function shell() {
     ["dashboard", "Visão geral", "dashboard"],
     ["entries", "Lançamentos", "entries"],
     ["accounts", "Contas", "wallet"],
+    ["reports", "Relatórios", "entries"],
+    ["forecast", "Fluxo projetado", "trend"],
     ["series", "Parcelas e recorrências", "entries"],
     ["contacts", "Clientes e fornecedores", "company"],
     ["categories", "Categorias", "entries"],
@@ -168,6 +188,52 @@ function shell() {
     .join(
       "",
     )}</nav><div class="side-bottom"><div class="side-note"><strong>Um passo de cada vez.</strong><p>O controle do seu negócio começa com boas informações.</p></div><div class="user-block"><div class="avatar">${e(u.name.slice(0, 1).toUpperCase())}</div><div class="user-info"><strong>${e(u.name)}</strong><small>Administrador</small></div><button class="logout" data-action="logout" title="Sair" aria-label="Sair da conta">${icon("exit")}</button></div></div></aside><main class="main"><header class="topbar"><div class="company-label">${icon("company")} ${e(u.companyName)}</div><span class="muted">Seu negócio, em boa direção.</span><button class="btn text small" data-action="logout">Sair ${icon("exit")}</button></header><div class="main-content"><div id="page-content"></div><footer class="footer"><span>Fintry v${e(state.version)} · © ${new Date().getFullYear()}</span><a href="mailto:vfranca.dev@gmail.com">Criado por Vinicius Azeredo França</a></footer></div></main></div>`;
+  requestAnimationFrame(syncNavigation);
+}
+function syncNavigation() {
+  const nav = document.querySelector(".sidebar nav"),
+    active = nav?.querySelector(".active");
+  if (nav && active && matchMedia("(max-width:700px)").matches)
+    nav.scrollLeft =
+      active.offsetLeft -
+      nav.offsetLeft -
+      (nav.clientWidth - active.clientWidth) / 2;
+}
+window.addEventListener("resize", syncNavigation);
+function monthEnd(month) {
+  const [y, m] = month.split("-").map(Number);
+  return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+}
+function queryParams(values) {
+  return new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(values).filter(
+        ([, value]) => value !== "" && value != null,
+      ),
+    ),
+  );
+}
+function comparison(value, previous) {
+  if (Number(previous) === 0)
+    return Number(value) === 0
+      ? "Sem movimentação no mês anterior"
+      : "Sem base de comparação anterior";
+  const delta =
+    ((Number(value) - Number(previous)) / Math.abs(Number(previous))) * 100;
+  return `${delta > 0 ? "+" : ""}${delta.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% vs. mês anterior`;
+}
+function categoryBreakdown(categories, total) {
+  if (!categories.length)
+    return '<p class="chart-caption">Nenhuma despesa realizada para os filtros selecionados.</p>';
+  return `<div class="category-breakdown">${categories
+    .slice(0, 5)
+    .map((item) => {
+      const percent = Number(total)
+        ? (Number(item.amount) / Number(total)) * 100
+        : 0;
+      return `<div><div class="category-line"><span>${e(item.category)}</span><strong>${money(item.amount)}</strong></div><svg viewBox="0 0 100 5" preserveAspectRatio="none" role="img" aria-label="${e(item.category)}: ${percent.toFixed(1)}% das despesas realizadas"><rect width="100" height="5" rx="2.5" fill="#edf2e9"/><rect width="${Math.min(100, percent)}" height="5" rx="2.5" fill="#18785a"/></svg></div>`;
+    })
+    .join("")}</div>`;
 }
 function monthInput() {
   return `<label><span class="eyebrow" hidden>Período</span><input class="period" id="month" type="month" aria-label="Mês de referência" value="${state.month}" min="2000-01" max="2100-12"></label>`;
@@ -176,7 +242,8 @@ function head(title, subtitle, actions) {
   return `<div class="page-head"><div><h1>${title}</h1><p class="muted">${subtitle}</p></div><div class="head-actions">${actions}</div></div>`;
 }
 function metric(title, value, foot, ic, cls = "") {
-  return `<article class="metric ${cls}"><div class="metric-top"><span>${title}</span><span class="metric-icon">${icon(ic)}</span></div><div class="metric-value">${money(value)}</div><span class="metric-foot">${foot}</span></article>`;
+  const formatted = money(value);
+  return `<article class="metric ${cls} ${Number(value) < 0 ? "negative-value" : ""}"><div class="metric-top"><span>${title}</span><span class="metric-icon">${icon(ic)}</span></div><div class="metric-value ${formatted.length > 18 ? "money-long" : formatted.length > 12 ? "money-medium" : ""}">${formatted}</div><span class="metric-foot">${foot}</span></article>`;
 }
 function empty(title, text, action = "entry", button = "Novo lançamento") {
   return `<div class="empty"><div class="empty-icon">${icon("wallet")}</div><h3>${title}</h3><p>${text}</p><div class="actions"><button class="btn" data-action="${action}">${icon("plus")}${button}</button>${!state.accounts.length ? '<button class="btn secondary" data-action="sample">Explorar com dados de exemplo</button>' : ""}</div></div>`;
@@ -232,9 +299,10 @@ function renderDashboard() {
       monthInput() +
         `<button class="btn" data-action="entry">${icon("plus")}Novo lançamento</button>`,
     ) +
-    `<section class="metrics" aria-label="Indicadores financeiros">${metric("Saldo disponível", s.balance, "Saldo atual de todas as contas", "wallet", "primary")}${metric("Receitas do mês", s.income, "Recebimentos realizados no período", "income")}${metric("Despesas do mês", s.expense, "Pagamentos realizados no período", "expense")}${metric("Resultado do mês", s.result, "Receitas menos despesas realizadas", "trend")}</section>` +
+    `<section class="metrics" aria-label="Indicadores financeiros">${metric("Saldo disponível", s.balance, "Saldo atual de todas as contas", "wallet", "primary")}${metric("Receitas do mês", s.income, comparison(s.income, s.previousIncome), "income")}${metric("Despesas do mês", s.expense, comparison(s.expense, s.previousExpense), "expense")}${metric("Resultado de caixa", s.result, comparison(s.result, s.previousResult), "trend")}</section>` +
     `<section class="grid-two"><article class="card"><div class="card-head"><div><h2>O ritmo do seu caixa</h2><p>Receitas e despesas realizadas · últimos 6 meses</p></div><div class="legend"><span><i class="dot"></i>Receitas</span><span><i class="dot expense"></i>Despesas</span></div></div>${chart(s.flow)}<div class="chart-caption">Valores em reais. Transferências entre contas não entram no resultado.</div></article><article class="card"><div class="card-head"><div><h2>No seu radar</h2><p>Vencimentos pendentes no mês selecionado</p></div>${icon("entries")}</div><div class="pending"><div class="pending-row"><div><p>A receber</p><small>Entradas previstas</small></div><strong class="positive">${money(s.pendingIncome)}</strong></div><div class="pending-row"><div><p>A pagar</p><small>Compromissos do período</small></div><strong>${money(s.pendingExpense)}</strong></div></div><div class="callout">Pendências entram no saldo quando você registra o pagamento ou recebimento.</div></article></section>` +
-    `<section class="card"><div class="card-head"><div><h2>Movimentações do período</h2><p>Organizadas pela data de vencimento</p></div><button class="btn text small" data-nav="entries">Ver todas →</button></div>${state.accounts.length ? entriesTable(state.entries.content.slice(0, 5)) : empty("Vamos organizar seu financeiro?", "Comece cadastrando uma conta ou explore um exemplo com dados fictícios.", "account", "Criar primeira conta")}</section>`
+    `<section class="card"><div class="card-head"><div><h2>Movimentações do período</h2><p>Organizadas pela data de vencimento</p></div><button class="btn text small" data-nav="entries">Ver todas →</button></div>${state.accounts.length ? entriesTable(state.entries.content.slice(0, 5)) : empty("Vamos organizar seu financeiro?", "Comece cadastrando uma conta ou explore um exemplo com dados fictícios.", "account", "Criar primeira conta")}</section>` +
+    `<section class="grid-two dashboard-analysis"><article class="card"><div class="card-head"><div><h2>Maiores despesas por categoria</h2><p>Até 5 categorias · pagamentos do mês selecionado</p></div></div>${categoryBreakdown(s.categories || [], s.expense)}</article><article class="card"><div class="card-head"><div><h2>Olhe para os próximos meses</h2><p>Saldo atual e vencimentos cadastrados</p></div></div><div class="analysis-copy"><p>Explore o saldo estimado com os valores a receber e a pagar. Escolha a conta e como considerar as pendências vencidas.</p><button class="btn soft" data-nav="forecast">Ver fluxo projetado →</button><button class="btn text" data-nav="reports">Abrir relatórios</button></div></article></section>`
   );
 }
 function renderEntries() {
@@ -259,6 +327,111 @@ function renderEntries() {
         "",
       )}</select><button class="btn secondary" type="submit">Filtrar</button></form>${entriesTable(state.entries.content)}<div class="pagination"><span>${state.entries.totalElements} lançamento(s)</span><div class="row-actions"><button class="btn secondary small" data-action="prev" ${state.entryPage === 0 ? "disabled" : ""}>Anterior</button><span>${state.entryPage + 1} / ${Math.max(1, state.entries.totalPages)}</span><button class="btn secondary small" data-action="next" ${state.entryPage + 1 >= state.entries.totalPages ? "disabled" : ""}>Próxima</button></div></div></section>`
   );
+}
+function reportRows(rows) {
+  if (!rows.length)
+    return '<div class="empty"><h3>Nenhum lançamento encontrado</h3><p>Ajuste o período ou os filtros. Transferências não fazem parte deste relatório.</p></div>';
+  return `<div class="table-wrap"><table><thead><tr><th>DESCRIÇÃO / CATEGORIA</th><th>CONTA</th><th>VENCIMENTO / BAIXA</th><th>VALOR</th><th>SITUAÇÃO</th></tr></thead><tbody>${rows.map((row) => `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}${row.sequenceNumber ? " · " + row.sequenceNumber + "/" + row.seriesCount : ""}</small></td><td>${e(row.accountName)}</td><td>${dateLabel(row.dueDate)}<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small></td><td class="${row.type === "INCOME" ? "positive" : "negative"}"><strong>${row.type === "INCOME" ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${row.status === "PENDING" ? "pending" : row.status === "CANCELLED" ? "cancelled" : ""}">${row.status === "PAID" ? "Realizado" : row.status === "PENDING" ? "Pendente" : "Cancelado"}</span></td></tr>`).join("")}</tbody></table></div>`;
+}
+function accountFilter(selected) {
+  return `<label class="field">Conta<select name="accountId"><option value="">Todas as contas</option>${state.accounts.map((a) => `<option value="${a.id}" ${a.id === selected ? "selected" : ""}>${e(a.name)}</option>`).join("")}</select></label>`;
+}
+function renderReports() {
+  const r = state.report,
+    f = state.reportFilters,
+    t = r.totals;
+  return (
+    head(
+      "Os números, com contexto.",
+      "Filtre, compare e exporte suas movimentações.",
+      `<button class="btn secondary" data-action="report-export" data-format="csv">CSV</button><button class="btn secondary" data-action="report-export" data-format="xlsx">Excel</button><button class="btn" data-action="report-export" data-format="pdf">PDF</button>`,
+    ) +
+    `<section class="card"><form class="report-filters" id="report-form">${field("Data inicial", "start", "date", "required", f.start)}${field("Data final", "end", "date", "required", f.end)}<label class="field">Base do período<select name="basis" id="report-basis"><option value="PAYMENT" ${f.basis === "PAYMENT" ? "selected" : ""}>Data do pagamento / recebimento</option><option value="DUE" ${f.basis === "DUE" ? "selected" : ""}>Data do vencimento</option></select></label>${accountFilter(f.accountId)}<label class="field">Tipo<select name="type"><option value="">Receitas e despesas</option><option value="INCOME" ${f.type === "INCOME" ? "selected" : ""}>Receitas</option><option value="EXPENSE" ${f.type === "EXPENSE" ? "selected" : ""}>Despesas</option></select></label><label class="field">Situação<select name="status" ${f.basis === "PAYMENT" ? "disabled" : ""}><option value="" ${!f.status ? "selected" : ""}>Todos os ativos</option><option value="PAID" ${f.status === "PAID" ? "selected" : ""}>Realizados</option><option value="PENDING" ${f.status === "PENDING" ? "selected" : ""}>Pendentes</option><option value="CANCELLED" ${f.status === "CANCELLED" ? "selected" : ""}>Cancelados</option></select></label>${field("Categoria contém", "category", "search", 'maxlength="80" placeholder="Todas as categorias"', f.category || "")}${field("Cliente / fornecedor contém", "contact", "search", 'maxlength="120" placeholder="Todos os contatos"', f.contact || "")}<div class="filter-actions"><small class="muted">As exportações usam todos os registros dos filtros aplicados, até 5.000 lançamentos.</small><button type="submit" class="btn">Aplicar filtros</button></div></form></section>` +
+    `<div class="report-context">${dateLabel(f.start)} a ${dateLabel(f.end)} · Por ${f.basis === "PAYMENT" ? "pagamento" : "vencimento"} · ${r.totalElements} lançamento(s)</div><section class="metrics">${metric("Receitas realizadas", t.income, "Nos filtros aplicados", "income")}${metric("Despesas realizadas", t.expense, "Nos filtros aplicados", "expense")}${metric("A receber", t.pendingIncome, "Pendências nos filtros aplicados", "income")}${metric("A pagar", t.pendingExpense, "Pendências nos filtros aplicados", "expense")}</section>` +
+    `<section class="grid-two"><article class="card"><div class="card-head"><h2>Despesas realizadas por categoria</h2></div>${categoryBreakdown(r.categories, t.expense)}</article><article class="card"><div class="card-head"><h2>Resultado de caixa realizado</h2></div><div class="report-result"><strong class="${Number(t.result) < 0 ? "negative" : "positive"}">${money(t.result)}</strong><p>Receitas realizadas menos despesas realizadas nos filtros aplicados. Transferências e cancelados não compõem os totais. Este indicador não representa lucro contábil.</p></div></article></section><section class="card">${reportRows(r.content)}<div class="pagination"><span>${r.totalElements} lançamento(s)</span><div class="row-actions"><button class="btn secondary small" data-action="reports-prev" ${state.reportPage === 0 ? "disabled" : ""}>Anterior</button><span>${state.reportPage + 1} / ${Math.max(1, r.totalPages)}</span><button class="btn secondary small" data-action="reports-next" ${state.reportPage + 1 >= r.totalPages ? "disabled" : ""}>Próxima</button></div></div></section>`
+  );
+}
+function forecastChart(f) {
+  const values = [
+    Number(f.openingBalance),
+    ...f.days.map((d) => Number(d.balance)),
+  ];
+  let low = Math.min(0, ...values),
+    high = Math.max(0, ...values);
+  if (high === low) high = low + 1;
+  const pad = (high - low) * 0.12;
+  low -= pad;
+  high += pad;
+  const x = (i) => 48 + (i / (f.days.length - 1)) * 530,
+    y = (v) => 20 + ((high - v) / (high - low)) * 160;
+  const points = f.days
+    .map((d, i) => `${x(i)},${y(Number(d.balance))}`)
+    .join(" ");
+  return `<div class="chart"><svg viewBox="0 0 600 220" role="img" aria-label="Evolução estimada do saldo até ${dateLabel(f.end)}"><line x1="48" x2="580" y1="${y(0)}" y2="${y(0)}" stroke="#c7d2c2" stroke-dasharray="4 4"/>${[high, (high + low) / 2, low].map((v) => `<text x="0" y="${y(v) + 4}">${v.toLocaleString("pt-BR", { notation: "compact", maximumFractionDigits: 1 })}</text>`).join("")}<polyline points="${points}" fill="none" stroke="#18785a" stroke-width="2.5"/>${f.days
+    .filter(
+      (d, i) =>
+        i === 0 || i === f.days.length - 1 || d.date === f.firstNegativeDate,
+    )
+    .map((d) => {
+      const i = f.days.indexOf(d);
+      return `<circle cx="${x(i)}" cy="${y(Number(d.balance))}" r="4" fill="${Number(d.balance) < 0 ? "#b54a49" : "#18785a"}"><title>${dateLabel(d.date)}: ${money(d.balance)}</title></circle>`;
+    })
+    .join(
+      "",
+    )}<text x="48" y="207">${dateLabel(f.start)}</text><text x="578" y="207" text-anchor="end">${dateLabel(f.end)}</text></svg></div>`;
+}
+function renderForecast() {
+  const f = state.forecast,
+    filters = state.forecastFilters;
+  const days = f.days.filter(
+    (d, i) =>
+      i === 0 ||
+      i === f.days.length - 1 ||
+      Number(d.income) ||
+      Number(d.expense),
+  );
+  return (
+    head(
+      "Enxergue o caminho do seu caixa.",
+      "Projeção a partir do saldo atual e dos vencimentos cadastrados.",
+      `<button class="btn secondary" data-nav="reports">Ver relatórios</button>`,
+    ) +
+    `<section class="card"><form class="forecast-filters" id="forecast-form"><label class="field">Horizonte<select name="days">${[30, 60, 90, 180, 366].map((n) => `<option value="${n}" ${String(n) === String(filters.days) ? "selected" : ""}>Até ${n} dias</option>`).join("")}</select></label>${accountFilter(filters.accountId)}<label class="check"><input type="checkbox" name="includeOverdue" ${filters.includeOverdue === "true" ? "checked" : ""}>Considerar vencidas como previstas para hoje</label><button type="submit" class="btn">Atualizar projeção</button></form></section>` +
+    `<div class="report-context">${dateLabel(f.start)} a ${dateLabel(f.end)} · Valores previstos, sem registrar baixas</div><section class="metrics">${metric("Saldo atual", f.openingBalance, "Ponto de partida da projeção", "wallet", "primary")}${metric("Saldo estimado ao final", f.closingBalance, "Considerando os vencimentos previstos", "trend")}${metric("A receber no horizonte", f.pendingIncome, "Entradas pendentes consideradas", "income")}${metric("A pagar no horizonte", f.pendingExpense, "Saídas pendentes consideradas", "expense")}</section>` +
+    `<section class="grid-two"><article class="card"><div class="card-head"><div><h2>Evolução estimada do saldo</h2><p>Valores em reais · saldo acumulado por dia</p></div></div>${forecastChart(f)}</article><article class="card"><div class="card-head"><h2>No radar da projeção</h2></div><div class="report-result"><span class="eyebrow">Menor saldo estimado</span><strong class="${Number(f.minimumBalance) < 0 ? "negative" : "positive"}">${money(f.minimumBalance)}</strong><p>${f.firstNegativeDate ? "Primeiro saldo negativo estimado em " + dateLabel(f.firstNegativeDate) + "." : "Nenhum saldo negativo no horizonte considerado."}</p><p>Vencidos a receber: <b>${money(f.overdueIncome)}</b><br>Vencidos a pagar: <b>${money(f.overdueExpense)}</b></p></div></article></section>` +
+    `<p class="notice">A estimativa considera somente as contas e os lançamentos cadastrados, sem alterar saldos ou registrar pagamentos. ${f.includeOverdue ? "Pendências vencidas foram somadas ao dia de hoje." : "Pendências vencidas não foram incluídas no saldo futuro."} Os totais são líquidos por dia; não representam horários de entrada e saída.</p><section class="card"><div class="card-head"><div><h2>Vencimentos e saldo estimado</h2><p>Datas com movimentação, além do início e fim do horizonte</p></div></div><div class="table-wrap"><table><thead><tr><th>DATA</th><th>A RECEBER</th><th>A PAGAR</th><th>SALDO ESTIMADO</th></tr></thead><tbody>${days.map((d) => `<tr><td>${dateLabel(d.date)}</td><td class="positive">${money(d.income)}</td><td class="negative">${money(d.expense)}</td><td class="${Number(d.balance) < 0 ? "negative" : ""}"><strong>${money(d.balance)}</strong></td></tr>`).join("")}</tbody></table></div></section>`
+  );
+}
+async function downloadReport(format, button) {
+  button.disabled = true;
+  try {
+    const response = await fetch(
+      "/api/v1/reports/export?" +
+        queryParams({ ...state.reportFilters, format }),
+    );
+    if (!response.ok) {
+      const data = await response.json();
+      if (response.status === 401) {
+        state.user = null;
+        renderAuth();
+      }
+      throw new Error(data.message || "Não foi possível exportar o relatório.");
+    }
+    const blob = await response.blob(),
+      url = URL.createObjectURL(blob),
+      link = document.createElement("a");
+    link.href = url;
+    link.download = `fintry-relatorio-${state.reportFilters.start}-${state.reportFilters.end}.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    toast("Arquivo preparado com os filtros aplicados.");
+  } catch (err) {
+    toast(err.message);
+  } finally {
+    button.disabled = false;
+  }
 }
 function renderAccounts() {
   return (
@@ -285,46 +458,72 @@ async function load() {
     size: state.page === "dashboard" ? "5" : "20",
     ...(state.page === "entries" ? state.filters : {}),
   });
-  const [accounts, entries, summary, categories, contacts, series] =
-    await Promise.all([
-      api("/finance/accounts"),
-      api("/finance/entries?" + query),
-      api("/finance/summary?month=" + state.month),
-      api("/categories"),
-      state.page === "contacts"
-        ? api(
-            "/contacts?" +
-              new URLSearchParams({
-                ...state.directoryFilters,
-                page: String(state.contactPage),
-                size: "20",
-              }),
-          )
-        : Promise.resolve(null),
-      state.page === "series"
-        ? api("/finance/series?page=" + state.seriesPage)
-        : Promise.resolve(null),
-    ]);
+  const [
+    accounts,
+    entries,
+    summary,
+    categories,
+    contacts,
+    series,
+    report,
+    forecast,
+  ] = await Promise.all([
+    api("/finance/accounts"),
+    api("/finance/entries?" + query),
+    api("/finance/summary?month=" + state.month),
+    api("/categories"),
+    state.page === "contacts"
+      ? api(
+          "/contacts?" +
+            new URLSearchParams({
+              ...state.directoryFilters,
+              page: String(state.contactPage),
+              size: "20",
+            }),
+        )
+      : Promise.resolve(null),
+    state.page === "series"
+      ? api("/finance/series?page=" + state.seriesPage)
+      : Promise.resolve(null),
+    state.page === "reports"
+      ? api(
+          "/reports?" +
+            queryParams({
+              ...state.reportFilters,
+              page: String(state.reportPage),
+            }),
+        )
+      : Promise.resolve(null),
+    state.page === "forecast"
+      ? api("/reports/forecast?" + queryParams(state.forecastFilters))
+      : Promise.resolve(null),
+  ]);
   if (id !== requestId || !state.user) return;
   state.accounts = accounts;
   state.entries = entries;
   state.summary = summary;
   state.series = series;
+  state.report = report;
+  state.forecast = forecast;
   state.categories = categories;
   state.contacts = contacts;
   shell();
   document.querySelector("#page-content").innerHTML =
-    state.page === "dashboard"
-      ? renderDashboard()
-      : state.page === "entries"
-        ? renderEntries()
-        : state.page === "series"
-          ? renderSeries()
-          : state.page === "contacts"
-            ? renderContacts()
-            : state.page === "categories"
-              ? renderCategories()
-              : renderAccounts();
+    state.page === "reports"
+      ? renderReports()
+      : state.page === "forecast"
+        ? renderForecast()
+        : state.page === "dashboard"
+          ? renderDashboard()
+          : state.page === "entries"
+            ? renderEntries()
+            : state.page === "series"
+              ? renderSeries()
+              : state.page === "contacts"
+                ? renderContacts()
+                : state.page === "categories"
+                  ? renderCategories()
+                  : renderAccounts();
   document
     .querySelector("#directory-filter")
     ?.addEventListener("submit", async (ev) => {
@@ -344,6 +543,30 @@ async function load() {
     state.seriesPage = 0;
     await safeLoad();
   });
+  document
+    .querySelector("#report-form")
+    ?.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      state.reportFilters = Object.fromEntries(new FormData(ev.currentTarget));
+      if (state.reportFilters.basis === "PAYMENT")
+        state.reportFilters.status = "PAID";
+      state.reportPage = 0;
+      await safeLoad();
+    });
+  document.querySelector("#report-basis")?.addEventListener("change", (ev) => {
+    const control = document.querySelector("#report-form [name=status]");
+    control.disabled = ev.target.value === "PAYMENT";
+    control.value = control.disabled ? "PAID" : "";
+  });
+  document
+    .querySelector("#forecast-form")
+    ?.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      const values = Object.fromEntries(new FormData(ev.currentTarget));
+      values.includeOverdue = values.includeOverdue === "on" ? "true" : "false";
+      state.forecastFilters = values;
+      await safeLoad();
+    });
   document
     .querySelector("#filter-form")
     ?.addEventListener("submit", async (ev) => {
@@ -863,6 +1086,12 @@ modal.addEventListener("click", (ev) => {
 async function act(btn) {
   const action = btn.dataset.action;
   if (action === "entry") return entryDialog();
+  if (action === "report-export")
+    return downloadReport(btn.dataset.format, btn);
+  if (action === "reports-prev" || action === "reports-next") {
+    state.reportPage += action === "reports-next" ? 1 : -1;
+    return safeLoad();
+  }
   if (action === "series-prev" || action === "series-next") {
     state.seriesPage += action === "series-next" ? 1 : -1;
     return safeLoad();
@@ -963,6 +1192,14 @@ async function act(btn) {
       state.csrf = null;
       state.filters = {};
       state.directoryFilters = { active: "true" };
+      state.reportPage = 0;
+      state.reportFilters = {
+        start: localDate().slice(0, 7) + "-01",
+        end: monthEnd(localDate().slice(0, 7)),
+        basis: "PAYMENT",
+        status: "PAID",
+      };
+      state.forecastFilters = { days: "90", includeOverdue: "false" };
       state.contactPage = 0;
       state.seriesPage = 0;
       await csrf();

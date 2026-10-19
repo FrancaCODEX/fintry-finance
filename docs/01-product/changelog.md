@@ -2,6 +2,37 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.4.0] - 2026-10-19
+
+### Funcionalidades
+
+- Relatórios por período (até 366 dias), conta, tipo, situação, categoria e cliente/fornecedor, com paginação e totais de todos os registros filtrados.
+- Escolha entre data de pagamento/recebimento e data de vencimento, separando realizados, pendentes e cancelados.
+- Exportações CSV, Excel nativo (.xlsx) e PDF paginado, com os filtros aplicados e até 5.000 lançamentos por arquivo.
+- Fluxo de caixa projetado por dia, conta e horizonte, partindo do saldo atual e considerando pendências e séries já cadastradas.
+- Opção de incluir vencidas como previstas para hoje; indicação do menor saldo estimado e da primeira data com saldo negativo.
+
+### Melhorias
+
+- Dashboard com comparação dos indicadores com o mês anterior e distribuição de despesas realizadas por categoria.
+- Novas telas responsivas com filtros, gráfico de saldo acumulado e atalhos entre relatórios e projeção.
+- Navegação no celular posiciona o menu ativo na área visível.
+- Exportações usam consultas isoladas por empresa; CSV neutraliza fórmulas e Excel armazena textos como strings e valores como números.
+- Cobertura de totais além da primeira página, projeção, isolamento e estrutura dos arquivos exportados.
+
+### Correções
+
+- Indicador identificado como resultado de caixa, com explicação para evitar sua interpretação como lucro contábil.
+- Limites explícitos de período e volume de exportação, com orientação para refinar os filtros.
+- Valores monetários nos cartões ajustam a fonte à largura disponível, evitando quebras de linha em saldos grandes ou negativos.
+- Valores monetários no PDF preservados integralmente, ajustando o tamanho da fonte quando necessário.
+
+### Atualização
+
+- Nenhuma nova migração de banco nesta versão; preserve dados e volumes existentes.
+- Consultas e exportações não alteram lançamentos nem registram pagamentos. Transferências não compõem receitas/despesas; cancelados não compõem totais.
+- Projeções representam valores líquidos diários, sem garantia de recebimento/pagamento nem previsão de horários de movimentação.
+
 ## [0.3.0] - 2026-10-19
 
 ### Funcionalidades

@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.3.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.4.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
@@ -15,7 +15,7 @@ Pré-requisito: Docker Desktop com Docker Compose. No Windows, abra o terminal n
 ```bash
 git clone https://github.com/FrancaCODEX/fintry-finance.git
 cd fintry-finance
-git switch codex/fintry-v0.3-recorrencias-parcelas
+git switch codex/fintry-v0.4-relatorios-fluxo
 docker compose up --build -d
 ```
 
@@ -73,7 +73,10 @@ Abra **http://localhost:8080**. O perfil `demo` usa H2 persistido em `backend/da
 - Vínculo opcional de lançamentos a clientes/fornecedores e categorias cadastradas.
 - Transferência atômica entre duas contas da mesma empresa.
 - Busca, filtro por tipo/status, período mensal e paginação de lançamentos.
-- Dashboard: saldo atual, receitas/despesas realizadas, resultado, pendências e gráfico de seis meses.
+- Dashboard com saldo atual, resultado de caixa, comparação com o mês anterior, despesas por categoria e gráfico de seis meses.
+- Relatórios por período, conta, tipo, situação, categoria e cliente/fornecedor.
+- Exportações CSV, Excel (.xlsx) e PDF com os filtros aplicados.
+- Fluxo de caixa projetado por dia, com horizonte e conta selecionáveis e indicação de saldo negativo.
 - Layout responsivo e dados de exemplo opcionais.
 - Migrações Flyway e testes de integração HTTP.
 
@@ -91,6 +94,7 @@ backend/src/main/java/com/fintry/
   company/    # dados da própria empresa
   finance/    # contas, lançamentos, transferências e indicadores
   directory/  # clientes, fornecedores e categorias financeiras
+  report/     # relatórios, exportações e projeção de caixa
   shared/     # configuração, entidades base e erros
 backend/src/main/resources/
   static/           # interface
@@ -111,13 +115,13 @@ Por padrão, os testes usam H2. Para repetir a suíte contra um PostgreSQL local
 sh mvnw -Dspring.profiles.active=postgres-test verify
 ```
 
-A CI executa ambos com JDK 21 e também constrói a imagem Docker. A suíte cobre autenticação, CSRF, isolamento entre empresas, valores inválidos, datas, filtros, baixa repetida, cancelamento e transferências.
+A CI executa ambos com JDK 21 e também constrói a imagem Docker. A suíte cobre autenticação, CSRF, isolamento entre empresas, valores inválidos, datas, filtros, baixa repetida, cancelamento, transferências, séries mensais, relatórios, projeções e arquivos exportados.
 
 ## Próximas entregas
 
 - Recuperação de senha, convite de usuários e papéis de acesso.
 - Recorrências sem prazo final, renovação automática e edição de ocorrências futuras.
-- Relatórios e exportações.
+- Comprovantes e painel lateral de detalhes de lançamentos.
 - Produtos e estoque, após consolidar o financeiro.
 - Assinaturas e integrações bancárias, após validar o produto.
 
@@ -131,8 +135,8 @@ Na pasta do projeto:
 
 ```bash
 git fetch origin
-git switch codex/fintry-v0.3-recorrencias-parcelas
-git pull --ff-only origin codex/fintry-v0.3-recorrencias-parcelas
+git switch codex/fintry-v0.4-relatorios-fluxo
+git pull --ff-only origin codex/fintry-v0.4-relatorios-fluxo
 docker compose up --build -d
 ```
 
@@ -155,6 +159,16 @@ Confira a prévia antes de registrar. Vencimento em 31 de janeiro resulta em 28/
 O menu **Parcelas e recorrências** mostra o progresso e todos os vencimentos. **Cancelar pendências** cancela todas as ocorrências pendentes da série, inclusive vencidas, preservando as realizadas. Não há edição individual de ocorrências de série; para ajustar, cancele as pendências e crie uma nova série. Lançamentos únicos pendentes continuam editáveis.
 
 A atualização é incremental e preserva contas, contatos, categorias e lançamentos. O JAR passa a ter nome estável: `backend/target/fintry.jar`. Para executar o pacote sem Docker: `java -jar backend/target/fintry.jar --spring.profiles.active=demo`.
+
+## Relatórios e fluxo projetado — v0.4.0
+
+No menu **Relatórios**, aplique um período de até 366 dias. A base **pagamento / recebimento** considera somente realizados pela data da baixa; **vencimento** permite consultar realizados, pendentes ou cancelados. Totais e despesas por categoria consideram todos os registros filtrados, independentemente da página. Transferências ficam fora do relatório; cancelados podem ser consultados, mas não compõem os totais.
+
+Os botões **CSV**, **Excel** e **PDF** exportam até 5.000 registros com os filtros já aplicados. CSV contém os lançamentos; Excel e PDF também trazem empresa, período, filtros e totais. Valores do Excel são numéricos e textos não viram fórmulas. No PDF, textos longos são abreviados e caracteres fora da fonte ocidental são substituídos; CSV e Excel preservam o texto completo.
+
+Em **Fluxo projetado**, escolha a conta e um horizonte de até 366 dias. O saldo atual é o ponto de partida; pendências entram pela data do vencimento, incluindo parcelas e recorrências já cadastradas. A projeção inclui hoje e o último dia do horizonte. Pendências vencidas são exibidas à parte e ficam excluídas por padrão; a opção de incluí-las as considera previstas para hoje. A tela mostra saldo final, menor saldo e primeira data com saldo negativo, usando os valores líquidos de cada dia. Nenhuma consulta ou exportação registra baixas ou altera o saldo realizado.
+
+A 0.4.0 não modifica o schema do banco. Atualize a aplicação preservando seus dados e volumes.
 
 ## Política de versões
 
