@@ -25,6 +25,7 @@ jobs:
         run: python3 scripts/check_release.py --base "${{ github.event.pull_request.base.sha }}"
       - name: JavaScript syntax
         run: |
+          node --check backend/src/main/resources/static/commerce.js
           node --check backend/src/main/resources/static/app.js
           node --check backend/src/main/resources/static/theme.js
       - name: H2 integration tests

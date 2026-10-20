@@ -59,6 +59,8 @@ const dateLabel = (date) =>
       )
     : "—";
 const icons = {
+  box: '<path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8M7 5.8l9 5"/>',
+  cart: '<path d="M3 3h2l3 12h11l3-8H6M9 19h.01M18 19h.01"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>',
   shield:
     '<path d="M12 3 3 7v6c0 5 9 9 9 9s9-4 9-9V7z"/><path d="m8 12 3 3 5-6"/>',
   dashboard:
@@ -192,6 +194,7 @@ function readAccessLink() {
 }
 window.addEventListener("hashchange", readAccessLink);
 function renderAuth(mode = "login", notice = "") {
+  if (!state.user) resetCommerce();
   if (typeof mode === "boolean") mode = mode ? "register" : "login";
   const register = mode === "register",
     invite = mode === "invite",
@@ -275,6 +278,7 @@ function renderAuth(mode = "login", notice = "") {
         return;
       }
       if (register) await send("/auth/register", data);
+      resetCommerce();
       state.user = await send("/auth/login", {
         email: data.email,
         password: data.password,
@@ -371,6 +375,10 @@ const auditActions = {
   PASSWORD_RESET: "Redefiniu a senha",
   PASSWORD_CHANGE: "Alterou a senha",
   RESET_REQUEST: "Solicitou recuperação",
+  STOCK_MOVE: "Movimentou estoque",
+  SALE_CREATE: "Criou venda",
+  SALE_CONFIRM: "Confirmou venda",
+  SALE_CANCEL: "Cancelou venda",
 };
 const resources = {
   ENTRY: "Lançamentos e comprovantes",
@@ -382,6 +390,9 @@ const resources = {
   COMPANY: "Empresa",
   USER: "Equipe",
   ACCESS: "Segurança do acesso",
+  PRODUCT: "Produtos",
+  STOCK: "Estoque",
+  SALE: "Vendas",
 };
 function auditValue(v) {
   return (
@@ -397,6 +408,13 @@ function auditValue(v) {
       false: "Não",
       RECURRING: "Recorrência",
       INSTALLMENT: "Parcelamento",
+      DRAFT: "Rascunho",
+      CONFIRMED: "Confirmada",
+      INITIAL: "Estoque inicial",
+      IN: "Entrada",
+      OUT: "Saída",
+      SALE: "Venda",
+      RETURN: "Devolução",
     }[v] ||
     v ||
     "—"
@@ -419,7 +437,7 @@ function renderAudit() {
       )
       .join(
         "",
-      )}</select></label>${field("Buscar no histórico", "search", "search", 'maxlength="120" placeholder="Pessoa ou registro"', state.auditFilters.search || "")}<button class="btn secondary" type="submit">Filtrar histórico</button></form><div class="audit-list">${a.content.map((item) => `<article class="audit-item"><div class="audit-marker" aria-hidden="true">${icon(item.resource === "ACCESS" ? "shield" : "entries")}</div><div class="audit-body"><div class="audit-title"><strong>${e(auditActions[item.action] || item.action)}</strong><time datetime="${e(item.occurredAt)}">${timestamp(item.occurredAt)}</time></div><p>${e(item.label)}</p><small>${e(item.actorName)} · ${e(resources[item.resource] || item.resource)}</small>${item.changes.length ? `<details><summary>Ver ${item.changes.length} campo(s) alterado(s)</summary><div class="audit-changes">${item.changes.map((c) => `<div><strong>${e(c.field)}</strong><span><small>Antes</small>${e(auditValue(c.before))}</span><span><small>Depois</small>${e(auditValue(c.after))}</span></div>`).join("")}</div></details>` : ""}${item.resource === "ENTRY" && item.resourceId ? `<button class="btn text small" data-action="details" data-id="${item.resourceId}">Abrir lançamento →</button>` : ""}</div></article>`).join("") || '<div class="empty"><h3>Nenhuma alteração neste período</h3><p>Ajuste os filtros para consultar outros registros.</p></div>'}</div>${pager("audit", a, state.auditPage)}</section><p class="notice">Horários de Brasília. O histórico começa na versão 0.6.0. Senhas, links de acesso e conteúdo de comprovantes não são registrados. Consulte até 366 dias por vez.</p>`
+      )}</select></label>${field("Buscar no histórico", "search", "search", 'maxlength="120" placeholder="Pessoa ou registro"', state.auditFilters.search || "")}<button class="btn secondary" type="submit">Filtrar histórico</button></form><div class="audit-list">${a.content.map((item) => `<article class="audit-item"><div class="audit-marker" aria-hidden="true">${icon(item.resource === "ACCESS" ? "shield" : "entries")}</div><div class="audit-body"><div class="audit-title"><strong>${e(auditActions[item.action] || item.action)}</strong><time datetime="${e(item.occurredAt)}">${timestamp(item.occurredAt)}</time></div><p>${e(item.label)}</p><small>${e(item.actorName)} · ${e(resources[item.resource] || item.resource)}</small>${item.changes.length ? `<details><summary>Ver ${item.changes.length} campo(s) alterado(s)</summary><div class="audit-changes">${item.changes.map((c) => `<div><strong>${e(c.field)}</strong><span><small>Antes</small>${e(auditValue(c.before))}</span><span><small>Depois</small>${e(auditValue(c.after))}</span></div>`).join("")}</div></details>` : ""}${item.resource === "SALE" && item.resourceId ? `<button class="btn text small" data-action="sale-details" data-id="${item.resourceId}">Abrir venda →</button>` : ""}${item.resource === "ENTRY" && item.resourceId ? `<button class="btn text small" data-action="details" data-id="${item.resourceId}">Abrir lançamento →</button>` : ""}</div></article>`).join("") || '<div class="empty"><h3>Nenhuma alteração neste período</h3><p>Ajuste os filtros para consultar outros registros.</p></div>'}</div>${pager("audit", a, state.auditPage)}</section><p class="notice">Horários de Brasília. O histórico começa na versão 0.6.0. Senhas, links de acesso e conteúdo de comprovantes não são registrados. Consulte até 366 dias por vez.</p>`
   );
 }
 function renderSecurity() {
@@ -584,6 +602,9 @@ function shell() {
     ["series", "Parcelas e recorrências", "entries"],
     ["contacts", "Clientes e fornecedores", "company"],
     ["categories", "Categorias", "entries"],
+    ["products", "Produtos", "box"],
+    ["stock", "Estoque", "box"],
+    ["sales", "Vendas", "cart"],
     ...(isAdmin()
       ? [
           ["team", "Equipe", "company"],
@@ -697,7 +718,7 @@ function entriesTable(rows) {
         paid = row.status === "PAID",
         cancelled = row.status === "CANCELLED";
       const overdue = !paid && !cancelled && row.dueDate < localDate();
-      return `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}${row.transferId ? " · Transferência" : ""}${row.seriesId ? `<br><span class="series-label">${row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição"} ${row.sequenceNumber}/${row.seriesCount}</span>` : ""}</small></td><td>${dateLabel(row.dueDate)}${paid ? `<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small>` : ""}</td><td>${e(names.get(row.accountId) || "Conta")}</td><td class="${income ? "positive" : "negative"}"><strong>${income ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${cancelled ? "cancelled" : paid ? "" : "pending"}">${cancelled ? "Cancelado" : paid ? (income ? "Recebido" : "Pago") : overdue ? "Em atraso" : "Pendente"}</span></td><td><div class="row-actions"><button class="btn secondary small" data-action="details" data-id="${row.id}" aria-label="Detalhes de ${e(row.description)}">Detalhes</button>${!paid && !cancelled ? `<button class="btn soft small" data-action="pay" data-id="${row.id}">${income ? "Receber" : "Pagar"}</button>${!row.seriesId ? `<button class="btn secondary small" data-action="edit-entry" data-id="${row.id}" aria-label="Editar ${e(row.description)}">Editar</button>` : ""}` : ""}${!cancelled && !row.transferId ? `<button class="btn text small" data-action="cancel" data-id="${row.id}" aria-label="Cancelar ${e(row.description)}">Cancelar</button>` : row.transferId ? '<small class="muted">Entre contas</small>' : "—"}</div></td></tr>`;
+      return `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}${row.transferId ? " · Transferência" : ""}${row.seriesId ? `<br><span class="series-label">${row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição"} ${row.sequenceNumber}/${row.seriesCount}</span>` : ""}</small></td><td>${dateLabel(row.dueDate)}${paid ? `<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small>` : ""}</td><td>${e(names.get(row.accountId) || "Conta")}</td><td class="${income ? "positive" : "negative"}"><strong>${income ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${cancelled ? "cancelled" : paid ? "" : "pending"}">${cancelled ? "Cancelado" : paid ? (income ? "Recebido" : "Pago") : overdue ? "Em atraso" : "Pendente"}</span></td><td><div class="row-actions"><button class="btn secondary small" data-action="details" data-id="${row.id}" aria-label="Detalhes de ${e(row.description)}">Detalhes</button>${!paid && !cancelled ? `<button class="btn soft small" data-action="pay" data-id="${row.id}">${income ? "Receber" : "Pagar"}</button>${!row.seriesId && !row.saleId ? `<button class="btn secondary small" data-action="edit-entry" data-id="${row.id}" aria-label="Editar ${e(row.description)}">Editar</button>` : ""}` : ""}${!cancelled && !row.transferId && !row.saleId ? `<button class="btn text small" data-action="cancel" data-id="${row.id}" aria-label="Cancelar ${e(row.description)}">Cancelar</button>` : row.transferId ? '<small class="muted">Entre contas</small>' : "—"}</div></td></tr>`;
     })
     .join("")}</tbody></table></div>`;
 }
@@ -860,6 +881,8 @@ let requestId = 0;
 async function load() {
   const id = ++requestId;
   if (!root.querySelector(".shell")) shell();
+  if (["products", "stock", "sales"].includes(state.page))
+    return loadCommerce(id);
   if (["team", "audit", "security"].includes(state.page)) {
     if (state.page !== "security" && !isAdmin()) {
       state.page = "dashboard";
@@ -1037,6 +1060,11 @@ function showDialog(title, subtitle, fields, action, submit = "Salvar") {
       modal.close();
       await safeLoad();
       if (state.invitationToShow) showInviteLink();
+      if (commerce.pendingSale) {
+        const id = commerce.pendingSale;
+        commerce.pendingSale = null;
+        await saleDetails(id);
+      }
       if (drawer.open) {
         await loadDetails();
         drawer.querySelector("#drawer-title")?.focus();
@@ -1550,6 +1578,7 @@ modal.addEventListener("click", (ev) => {
 async function act(btn) {
   const action = btn.dataset.action;
   if (action === "theme") return window.fintryTheme.toggle();
+  if (await commerceAction(btn)) return;
   if (await accessAction(btn)) return;
   if (
     !canWrite() &&
@@ -1793,7 +1822,7 @@ function renderDetails() {
           : "Pendente";
   const item = (label, value) =>
     `<div><dt>${label}</dt><dd>${e(value || "—")}</dd></div>`;
-  drawer.innerHTML = `<div class="drawer-header"><div><span class="eyebrow">${row.transferId ? "Transferência entre contas" : row.type === "INCOME" ? "Receita" : "Despesa"}</span><h2 id="drawer-title" tabindex="-1">${e(row.description)}</h2></div><button class="close" data-action="drawer-close" aria-label="Fechar detalhes">×</button></div><div class="drawer-amount ${row.type === "INCOME" ? "positive" : "negative"}">${money(row.amount)}</div><span class="badge ${row.status === "PENDING" ? "pending" : row.status === "CANCELLED" ? "cancelled" : ""}">${status}</span><dl class="detail-grid">${item("Conta", data.accountName)}${item("Categoria", row.category)}${item("Cliente / fornecedor", row.contactName)}${item("Vencimento", dateLabel(row.dueDate))}${item("Pagamento / recebimento", dateLabel(row.paymentDate))}${item("Registrado em", dateLabel(data.createdAt?.slice(0, 10)))}${item("Última alteração", dateLabel(data.updatedAt?.slice(0, 10)))}${row.seriesId ? item(row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição mensal", row.sequenceNumber + " de " + row.seriesCount) : ""}</dl><div class="drawer-actions">${row.status === "PENDING" ? `<button class="btn" data-action="pay" data-id="${row.id}">${row.type === "INCOME" ? "Receber" : "Pagar"}</button>${!row.seriesId && !row.transferId ? `<button class="btn secondary" data-action="edit-entry" data-id="${row.id}">Editar lançamento</button>` : ""}` : ""}${row.status !== "CANCELLED" && !row.transferId ? `<button class="btn text" data-action="cancel" data-id="${row.id}">Cancelar lançamento</button>` : ""}</div><section class="attachments-section" aria-labelledby="attachments-title"><div class="card-head"><div><h3 id="attachments-title">Comprovantes</h3><p>${detailFiles.length} de 10 arquivos · PDF, PNG ou JPEG</p></div></div><p class="muted attachment-hint">Os arquivos ficam vinculados somente a este lançamento, inclusive após a baixa ou o cancelamento.</p><div class="attachment-list">${detailFiles.length ? detailFiles.map((file) => `<article class="attachment-item"><div class="attachment-type" aria-hidden="true">${file.contentType === "application/pdf" ? "PDF" : "IMG"}</div><div class="attachment-info"><strong>${e(file.filename)}</strong><small>${fileSize(file.byteCount)} · ${dateLabel(file.createdAt?.slice(0, 10))}<br>Enviado por ${e(file.uploadedByName)}</small></div><div class="attachment-actions"><button class="btn secondary small" data-action="attachment-download" data-file="${file.id}" aria-label="Baixar ${e(file.filename)}">Baixar</button><button class="btn text small" data-action="attachment-remove" data-file="${file.id}" aria-label="Remover ${e(file.filename)}">Remover</button></div>${removalId === file.id ? `<div class="remove-confirm" role="alert"><p>Remover este comprovante? O arquivo será excluído. O lançamento será preservado.</p><button class="btn danger small" data-action="attachment-confirm" data-file="${file.id}">Confirmar remoção</button><button class="btn secondary small" data-action="attachment-keep">Manter arquivo</button></div>` : ""}</article>`).join("") : '<div class="attachment-empty">Nenhum comprovante anexado. Adicione notas, recibos ou comprovantes de pagamento.</div>'}</div>${detailFiles.length < 10 ? `<form id="attachment-form"><label class="field">Adicionar comprovante<input name="file" type="file" required accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg" aria-describedby="attachment-help"></label><p id="attachment-help" class="muted attachment-hint">Até 5 MB por arquivo e 10 arquivos por lançamento.</p><p id="attachment-error" class="form-error" role="alert"></p><button type="submit" class="btn">Anexar comprovante</button></form>` : '<p class="notice">Limite de 10 comprovantes atingido. Remova um arquivo para anexar outro.</p>'}</section><div class="drawer-footer">${themeToggle()}<button class="btn secondary" data-action="drawer-close">Fechar detalhes</button></div>`;
+  drawer.innerHTML = `<div class="drawer-header"><div><span class="eyebrow">${row.transferId ? "Transferência entre contas" : row.type === "INCOME" ? "Receita" : "Despesa"}</span><h2 id="drawer-title" tabindex="-1">${e(row.description)}</h2></div><button class="close" data-action="drawer-close" aria-label="Fechar detalhes">×</button></div><div class="drawer-amount ${row.type === "INCOME" ? "positive" : "negative"}">${money(row.amount)}</div><span class="badge ${row.status === "PENDING" ? "pending" : row.status === "CANCELLED" ? "cancelled" : ""}">${status}</span><dl class="detail-grid">${item("Conta", data.accountName)}${item("Categoria", row.category)}${item("Cliente / fornecedor", row.contactName)}${item("Vencimento", dateLabel(row.dueDate))}${item("Pagamento / recebimento", dateLabel(row.paymentDate))}${item("Registrado em", dateLabel(data.createdAt?.slice(0, 10)))}${item("Última alteração", dateLabel(data.updatedAt?.slice(0, 10)))}${row.seriesId ? item(row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição mensal", row.sequenceNumber + " de " + row.seriesCount) : ""}</dl><div class="drawer-actions">${row.status === "PENDING" ? `<button class="btn" data-action="pay" data-id="${row.id}">${row.type === "INCOME" ? "Receber" : "Pagar"}</button>${!row.seriesId && !row.transferId && !row.saleId ? `<button class="btn secondary" data-action="edit-entry" data-id="${row.id}">Editar lançamento</button>` : ""}` : ""}${row.status !== "CANCELLED" && !row.transferId && !row.saleId ? `<button class="btn text" data-action="cancel" data-id="${row.id}">Cancelar lançamento</button>` : ""}</div>${row.saleId ? `<p class="notice">Receita vinculada a uma venda. Para devolver itens e estornar a receita, cancele pela página Vendas.</p><button class="btn secondary" data-action="sale-details" data-id="${row.saleId}">Abrir venda vinculada</button>` : ""}<section class="attachments-section" aria-labelledby="attachments-title"><div class="card-head"><div><h3 id="attachments-title">Comprovantes</h3><p>${detailFiles.length} de 10 arquivos · PDF, PNG ou JPEG</p></div></div><p class="muted attachment-hint">Os arquivos ficam vinculados somente a este lançamento, inclusive após a baixa ou o cancelamento.</p><div class="attachment-list">${detailFiles.length ? detailFiles.map((file) => `<article class="attachment-item"><div class="attachment-type" aria-hidden="true">${file.contentType === "application/pdf" ? "PDF" : "IMG"}</div><div class="attachment-info"><strong>${e(file.filename)}</strong><small>${fileSize(file.byteCount)} · ${dateLabel(file.createdAt?.slice(0, 10))}<br>Enviado por ${e(file.uploadedByName)}</small></div><div class="attachment-actions"><button class="btn secondary small" data-action="attachment-download" data-file="${file.id}" aria-label="Baixar ${e(file.filename)}">Baixar</button><button class="btn text small" data-action="attachment-remove" data-file="${file.id}" aria-label="Remover ${e(file.filename)}">Remover</button></div>${removalId === file.id ? `<div class="remove-confirm" role="alert"><p>Remover este comprovante? O arquivo será excluído. O lançamento será preservado.</p><button class="btn danger small" data-action="attachment-confirm" data-file="${file.id}">Confirmar remoção</button><button class="btn secondary small" data-action="attachment-keep">Manter arquivo</button></div>` : ""}</article>`).join("") : '<div class="attachment-empty">Nenhum comprovante anexado. Adicione notas, recibos ou comprovantes de pagamento.</div>'}</div>${detailFiles.length < 10 ? `<form id="attachment-form"><label class="field">Adicionar comprovante<input name="file" type="file" required accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg" aria-describedby="attachment-help"></label><p id="attachment-help" class="muted attachment-hint">Até 5 MB por arquivo e 10 arquivos por lançamento.</p><p id="attachment-error" class="form-error" role="alert"></p><button type="submit" class="btn">Anexar comprovante</button></form>` : '<p class="notice">Limite de 10 comprovantes atingido. Remova um arquivo para anexar outro.</p>'}</section><div class="drawer-footer">${themeToggle()}<button class="btn secondary" data-action="drawer-close">Fechar detalhes</button></div>`;
   applyPermissions(drawer);
   drawer
     .querySelector("#attachment-form")

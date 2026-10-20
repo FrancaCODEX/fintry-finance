@@ -2,6 +2,43 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.7.0] - 2026-10-19
+
+### Funcionalidades
+
+- Catálogo com SKU único por empresa, unidade, preço, custo de referência, estoque inicial/mínimo e inativação sem excluir registros.
+- Busca, filtros e indicadores de produtos ativos, estoque baixo e valor do estoque a custo atual.
+- Histórico de estoque com origem, motivo, autor, horário de Brasília, quantidade e saldo após cada movimento; filtro por produto e paginação.
+- Vendas em rascunho com cliente opcional, até 100 itens, quantidades de três casas e total calculado no servidor, com arredondamento por item.
+- Confirmação transacional: baixa dos produtos e criação de receita vinculada, pendente ou já recebida, na conta escolhida.
+- Cancelamento com devolução integral ao estoque e estorno da receita, preservando os itens, comprovantes e histórico.
+- Auditoria de produtos, movimentações e criação/confirmação/cancelamento de vendas.
+
+### Melhorias
+
+- Telas Produtos, Estoque e Vendas com cartões responsivos, disponibilidade destacada, etapas da venda e formulários com prévia exata do total.
+- Seletor de produtos com busca no servidor e cliente opcional a partir dos cadastros ativos.
+- Painel do lançamento identifica a venda vinculada e oferece acesso aos itens; baixa e comprovantes continuam no financeiro.
+- Interface reflete as permissões: Administrador/Financeiro gerenciam; Somente leitura consulta.
+- Estado do módulo comercial limpo ao trocar de usuário, evitando manter filtros e seleções de outra empresa.
+
+### Correções e consistência
+
+- Bloqueios e validações impedem estoque negativo, inclusive em confirmações concorrentes para a última unidade.
+- Chaves de solicitação impedem duplicação de rascunhos e movimentos manuais em retentativas; uso com outros dados retorna conflito.
+- Confirmar/cancelar novamente uma venda não duplica receitas, saídas ou devoluções.
+- Falha em qualquer item, conta ou data reverte toda a confirmação, incluindo movimentos e eventos de auditoria.
+- Saúde da aplicação não depende de SMTP quando a recuperação de senha está desabilitada, permitindo avaliação local sem servidor de e-mail.
+- Receita de venda protegida contra edição/cancelamento isolado, para manter estoque e financeiro coerentes.
+- Itens preservam nome, SKU, unidade e preço combinados, mesmo após alterações/inativação no catálogo.
+
+### Atualização
+
+- PostgreSQL V8 e H2 V6 adicionam catálogo, vendas, itens, movimentos e vínculo da receita; migrações anteriores preservadas.
+- Vendas antigas não são reconstruídas. Cadastros e lançamentos existentes seguem funcionando e dados/volumes devem ser preservados.
+- Produtos começam no catálogo vazio, sem dados fictícios adicionados automaticamente.
+- Valor do estoque é indicativo a custo atual dos produtos ativos. Ajustes de estoque não geram despesas; esta versão não inclui custo médio, NF-e, cobrança automática ou devolução parcial.
+
 ## [0.6.0] - 2026-10-19
 
 ### Funcionalidades
