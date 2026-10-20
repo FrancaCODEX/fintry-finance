@@ -15,7 +15,7 @@ As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem vers
 
 ### Visual e uso
 
-- Fluxo com três etapas, cartões de validação, filtros por situação e resumo da seleção com totais de receitas e despesas.
+- Fluxo com três etapas, cartões de validação, filtros por situação e resumo da seleção com totais de receitas e despesas, preservando centavos mesmo em somas elevadas.
 - Prévia em tabela com cabeçalho fixo no desktop e cartões no celular; confirmação acessível, estados de processamento, erros e conclusão nos dois temas.
 - Acesso pelo menu e pela página Lançamentos para Administrador/Financeiro. Permissões, CSRF e isolamento por empresa mantidos no servidor.
 - Sem alterações em migrações ou dados existentes. OFX, conciliação bancária e importação de vendas/séries/anexos permanecem fora desta entrega.
