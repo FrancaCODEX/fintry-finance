@@ -2,6 +2,16 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.10.1] - 2026-10-20
+
+### Correções visuais
+
+- Corrigido conflito entre a regra antiga da barra lateral e a personalização de rolagem: o menu deixa de exibir a barra cinza nativa no Chromium.
+- Removidas as setas das extremidades das barras WebKit; trilho transparente e indicador arredondado seguem as cores do tema em menu, página, tabelas e painéis.
+- Corrigida também a precedência da barra da página; navegação móvel e fallback por propriedades padrão preservados.
+- Barras continuam nativas, com rolagem por mouse, toque e teclado; cores do sistema respeitadas no modo de alto contraste.
+- Sem alterações em dados, migrações ou regras financeiras. Importação CSV permanece como próxima funcionalidade.
+
 ## [0.10.0] - 2026-10-20
 
 ### Navegação e visual

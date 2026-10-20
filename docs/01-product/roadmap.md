@@ -13,7 +13,8 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.7.0 | Produtos, estoque e vendas | Incorporada à main |
 | 0.8.0 | Central de pendências, vencimentos no dashboard, cartões no celular e melhorias de formulários/carregamento | Incorporada à main |
 | 0.9.0 | Orçamento por categoria e dados de exemplo completos | Incorporada à main |
-| 0.10.0 | Prioridade visual: navegação, rolagem e refinamento do front-end | Entrega atual |
+| 0.10.0 | Prioridade visual: navegação, rolagem e refinamento do front-end | Incorporada à main |
+| 0.10.1 | Correção da barra de rolagem do menu e da página | Entrega atual |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
