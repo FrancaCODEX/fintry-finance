@@ -17,6 +17,7 @@ As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem vers
 
 ### Correções e consistência
 
+- Campos de senha preservam o espaço do botão Mostrar/Ocultar com a nova padronização dos formulários.
 - Estrutura da navegação preservada entre consultas, evitando reiniciar a posição da barra lateral a cada atualização dos dados.
 - Item ativo mantido visível sem deslocar toda a página. Troca de página retorna o conteúdo ao topo, enquanto filtros permanecem na mesma tela.
 - Estado de busca limpo ao sair/trocar de acesso; itens administrativos continuam limitados às permissões da sessão.

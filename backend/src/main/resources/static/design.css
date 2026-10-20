@@ -931,3 +931,8 @@ body.navigation-open {
     scrollbar-color: auto;
   }
 }
+
+/* Keep the show/hide control clear of password text after shared field sizing. */
+.field .password-control input {
+  padding-right: 85px;
+}
