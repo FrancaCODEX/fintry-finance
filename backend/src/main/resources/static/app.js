@@ -232,6 +232,7 @@ function renderAuth(mode = "login", notice = "") {
     resetCommerce();
     resetPending();
     resetPlanning();
+    resetEntryImport();
     resetNavigation();
     state.dashboardPending = null;
   }
@@ -807,6 +808,9 @@ function renderEntries() {
       "Cada movimento, no lugar.",
       "Registre entradas, saídas e acompanhe os vencimentos.",
       monthInput() +
+        (canWrite()
+          ? '<button class="btn secondary" data-nav="imports">Importar CSV</button>'
+          : "") +
         `<button class="btn" data-action="entry">${icon("plus")}Novo lançamento</button>`,
     ) +
     `<section class="card"><form class="filters" id="filter-form"><input name="search" type="search" placeholder="Buscar pela descrição…" aria-label="Buscar lançamentos" maxlength="255" value="${e(f.search || "")}"><select name="type" aria-label="Tipo"><option value="">Todos os tipos</option><option value="INCOME" ${f.type === "INCOME" ? "selected" : ""}>Receitas</option><option value="EXPENSE" ${f.type === "EXPENSE" ? "selected" : ""}>Despesas</option></select><select name="status" aria-label="Status"><option value="">Todos os status</option>${[
@@ -981,6 +985,7 @@ async function load() {
 }
 async function loadData(id) {
   if (!root.querySelector(".shell")) shell();
+  if (state.page === "imports") return loadImports(id);
   if (["budgets", "examples"].includes(state.page)) return loadPlanning(id);
   if (state.page === "pending") return loadPending(id);
   if (["products", "stock", "sales"].includes(state.page))
@@ -1698,6 +1703,7 @@ async function act(btn) {
   const action = btn.dataset.action;
   if (navigationAction(btn)) return;
   if (action === "theme") return window.fintryTheme.toggle();
+  if (await importAction(btn)) return;
   if (await planningAction(btn)) return;
   if (await pendingAction(btn)) return;
   if (await commerceAction(btn)) return;

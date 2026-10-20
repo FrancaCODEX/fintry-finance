@@ -2,6 +2,24 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.11.0] - 2026-10-20
+
+### Funcionalidades
+
+- Importação CSV de receitas/despesas por conta, com modelo para baixar, prévia sem gravação, seleção individual e confirmação explícita.
+- CSV UTF-8 com BOM opcional, separador ponto e vírgula ou vírgula, aspas escapadas e campos com quebras de linha; limite de 1 MB e 500 registros.
+- Validação de descrição, tipo, valor decimal exato, datas, categoria e situação. Realizados exigem pagamento até hoje; pendentes não aceitam data de pagamento.
+- Possíveis duplicidades por empresa/conta, descrição sem diferenciar maiúsculas, tipo, valor e vencimento; cancelados e transferências excluídos da comparação. Repetições no arquivo também são ignoradas.
+- Confirmação transacional revalida o arquivo e serializa importações da mesma empresa; reenvio não cria novos lançamentos enquanto os registros correspondentes estiverem ativos.
+- Categorias cadastradas são vinculadas por nome; categorias desconhecidas ficam avulsas. Categorias inativas/incompatíveis geram erro. Lançamentos usam o serviço financeiro e o histórico existentes.
+
+### Visual e uso
+
+- Fluxo com três etapas, cartões de validação, filtros por situação e resumo da seleção com totais de receitas e despesas.
+- Prévia em tabela com cabeçalho fixo no desktop e cartões no celular; confirmação acessível, estados de processamento, erros e conclusão nos dois temas.
+- Acesso pelo menu e pela página Lançamentos para Administrador/Financeiro. Permissões, CSRF e isolamento por empresa mantidos no servidor.
+- Sem alterações em migrações ou dados existentes. OFX, conciliação bancária e importação de vendas/séries/anexos permanecem fora desta entrega.
+
 ## [0.10.1] - 2026-10-20
 
 ### Correções visuais

@@ -18,6 +18,7 @@ function navigationGroups() {
         ["reports", "Relatórios", "chart"],
         ["forecast", "Fluxo projetado", "trend"],
         ["series", "Parcelas e recorrências", "repeat"],
+        ...(canWrite() ? [["imports", "Importar CSV", "entries"]] : []),
       ],
     ],
     [
