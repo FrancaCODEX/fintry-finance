@@ -22,6 +22,7 @@ As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem vers
 
 ### Correções e consistência
 
+- H2 aguarda bloqueios por até 30 segundos, permitindo inclusão concorrente de exemplos mesmo na primeira geração de PDFs.
 - Exemplos adicionados uma vez por empresa, com bloqueio transacional para evitar duplicação concorrente; repetição preserva edições posteriores.
 - Inclusão aditiva, identificada por Exemplo/DEMO, sem substituir registros existentes ou criar usuários, credenciais ou convites.
 - Um limite por categoria/mês; vínculos por id resistem à renomeação/inativação. Mudança de tipo de categoria com orçamento é bloqueada.

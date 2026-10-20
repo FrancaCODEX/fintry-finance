@@ -28,6 +28,13 @@ class PlanningIntegrationTests {
   }
 
   @LocalServerPort int port;
+
+  @org.springframework.beans.factory.annotation.Autowired
+  com.fintry.company.repository.CompanyRepository companies;
+
+  @org.springframework.beans.factory.annotation.Autowired
+  org.springframework.transaction.PlatformTransactionManager transactions;
+
   static final AtomicLong DOCS = new AtomicLong(50000000000000L);
   final JsonMapper json = JsonMapper.builder().build();
   final LocalDate today = LocalDate.of(2026, 10, 19);
@@ -474,14 +481,42 @@ class PlanningIntegrationTests {
   @Test
   void concurrentSampleRequestsDoNotDuplicatePack() throws Exception {
     var b = new Browser().signup();
-    var pool = java.util.concurrent.Executors.newFixedThreadPool(2);
+    var pool = java.util.concurrent.Executors.newFixedThreadPool(3);
+    var held = new java.util.concurrent.CountDownLatch(1);
+    var release = new java.util.concurrent.CountDownLatch(1);
+    var company =
+        UUID.fromString(b.request("GET", "/auth/me", null, 200).get("companyId").asText());
     try {
-      var calls =
-          List.<java.util.concurrent.Callable<Integer>>of(
-              () -> b.raw("POST", "/finance/sample", null).statusCode(),
-              () -> b.raw("POST", "/finance/sample", null).statusCode());
-      for (var f : pool.invokeAll(calls)) assertEquals(201, f.get());
+      var holder =
+          pool.submit(
+              () ->
+                  new org.springframework.transaction.support.TransactionTemplate(transactions)
+                      .execute(
+                          tx -> {
+                            companies.lock(company).orElseThrow();
+                            held.countDown();
+                            try {
+                              if (!release.await(15, java.util.concurrent.TimeUnit.SECONDS))
+                                throw new IllegalStateException("lock test timeout");
+                            } catch (InterruptedException ex) {
+                              Thread.currentThread().interrupt();
+                              throw new IllegalStateException(ex);
+                            }
+                            return null;
+                          }));
+      assertTrue(held.await(10, java.util.concurrent.TimeUnit.SECONDS));
+      var first = pool.submit(() -> b.raw("POST", "/finance/sample", null).statusCode());
+      var second = pool.submit(() -> b.raw("POST", "/finance/sample", null).statusCode());
+      // A slow first load must wait past H2's former two-second default, not fail with 500.
+      Thread.sleep(2500);
+      assertFalse(first.isDone(), "A solicitação deve aguardar o bloqueio da empresa.");
+      assertFalse(second.isDone(), "A segunda solicitação deve aguardar sem duplicar.");
+      release.countDown();
+      holder.get(20, java.util.concurrent.TimeUnit.SECONDS);
+      assertEquals(201, first.get(30, java.util.concurrent.TimeUnit.SECONDS));
+      assertEquals(201, second.get(30, java.util.concurrent.TimeUnit.SECONDS));
     } finally {
+      release.countDown();
       pool.shutdownNow();
     }
     assertEquals(3, b.request("GET", "/finance/accounts", null, 200).size());
