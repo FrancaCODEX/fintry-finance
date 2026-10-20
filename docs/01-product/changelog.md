@@ -2,6 +2,28 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.10.0] - 2026-10-20
+
+### Navegação e visual
+
+- Menu dividido em Financeiro, Comercial, Cadastros e Seu espaço, com ícones específicos e destaque da página atual.
+- Menu recolhível no desktop, com preferência local, rótulos acessíveis e identificação dos ícones.
+- Busca de páginas por nome no menu, insensível a acentos, com atalho / e estado sem resultados.
+- Painel de navegação no celular/tablet (até 900 px), usando dialog nativo com foco contido, Escape, clique externo e fechamento ao selecionar a página.
+- Cabeçalho fixo com seção/página atual e opção de tema; botão Voltar ao topo em páginas longas e atalho de teclado para pular ao conteúdo.
+- Barras de rolagem discretas e nas cores do tema em página, menu, tabelas e painéis, mantendo controles nativos de mouse, toque e teclado.
+- Camada visual própria com superfícies, bordas, sombras, espaçamento, botões, campos, tabelas e indicadores consistentes em claro/escuro.
+- Estados de foco/hover e respeito a movimento reduzido/cores forçadas; seleção ativa identificada também por texto e marca visual.
+
+### Correções e consistência
+
+- Campos de senha preservam o espaço do botão Mostrar/Ocultar com a nova padronização dos formulários.
+- Estrutura da navegação preservada entre consultas, evitando reiniciar a posição da barra lateral a cada atualização dos dados.
+- Item ativo mantido visível sem deslocar toda a página. Troca de página retorna o conteúdo ao topo, enquanto filtros permanecem na mesma tela.
+- Estado de busca limpo ao sair/trocar de acesso; itens administrativos continuam limitados às permissões da sessão.
+- Redimensionar para desktop fecha o menu móvel e libera a rolagem, preservando o foco em um controle visível.
+- Sem alterações em dados, migrações ou regras financeiras. Importação CSV permanece como próxima etapa funcional após a prioridade visual solicitada.
+
 ## [0.9.0] - 2026-10-20
 
 ### Funcionalidades

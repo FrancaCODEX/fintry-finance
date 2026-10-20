@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.9.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.10.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
@@ -57,6 +57,16 @@ cd backend
 ```
 
 Abra **http://localhost:8080**. O perfil `demo` usa H2 persistido em `./data/` relativo à pasta de execução (`backend/data/` nos comandos acima), sem precisar instalar PostgreSQL. H2 é uma alternativa para avaliação local; PostgreSQL é o banco principal. Os dois ambientes têm bancos separados. Não há credencial padrão: crie seu próprio acesso.
+
+## Interface e navegação (0.10.0)
+
+O menu está organizado em Financeiro, Comercial, Cadastros e Seu espaço. No desktop, use **Recolher menu** para trabalhar com uma lateral compacta; a preferência fica salva neste navegador. A busca **Buscar no menu** filtra as páginas por nome, incluindo termos sem acentos. O atalho **/** leva à busca quando você não está preenchendo um campo nem em um formulário modal.
+
+Em telas de até 900 px, **Abrir menu** mostra um painel com as mesmas páginas e permissões. Feche com Escape, pelo botão ou tocando fora; selecionar uma página fecha o painel. O foco permanece no painel enquanto ele está aberto.
+
+O cabeçalho fixo mostra a seção e a página atual. A rolagem do menu é preservada entre consultas e mantém a página ativa visível; mudar de página retorna o conteúdo ao topo. Barras de rolagem usam as cores do tema, inclusive nas listas, formulários e comprovantes. Em páginas longas, **Voltar ao topo** retorna ao título. A interface respeita movimento reduzido e oferece **Ir para o conteúdo** para navegação por teclado.
+
+A camada visual `design.css` mantém a identidade verde com espaçamentos, superfícies, tabelas, botões e campos consistentes em claro/escuro e celular. Nenhuma regra financeira ou estrutura de dados mudou nesta versão.
 
 ## Orçamento por categoria (0.9.0)
 
@@ -182,7 +192,7 @@ A CI executa ambos com JDK 21 e também constrói a imagem Docker. A suíte cobr
 
 A sequência está no [roadmap](docs/01-product/roadmap.md):
 
-- **Entregue até 0.9.0:** controle financeiro, relatórios/projeções, comprovantes, acesso/equipe, produtos/estoque/vendas, central de pendências, orçamentos e exemplos completos.
+- **Entregue até 0.10.0:** controle financeiro, relatórios/projeções, comprovantes, acesso/equipe, produtos/estoque/vendas, central de pendências, orçamentos, exemplos completos e navegação/visual renovados.
 - **Próximas prioridades:** importação CSV com prévia e detecção de duplicidades e evolução de serviços/propostas, conforme o roadmap.
 
 Depois da base: importações/conciliação, integrações bancárias, cobrança, planos/assinaturas, recorrências sem prazo final e organização avançada dos comprovantes.

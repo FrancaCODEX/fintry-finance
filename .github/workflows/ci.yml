@@ -29,6 +29,7 @@ jobs:
           node --check backend/src/main/resources/static/pending.js
           node --check backend/src/main/resources/static/budgets.js
           node --check backend/src/main/resources/static/commerce.js
+          node --check backend/src/main/resources/static/navigation.js
           node --check backend/src/main/resources/static/app.js
           node --check backend/src/main/resources/static/theme.js
       - name: H2 integration tests

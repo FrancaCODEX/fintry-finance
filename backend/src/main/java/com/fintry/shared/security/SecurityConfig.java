@@ -33,6 +33,8 @@ public class SecurityConfig {
                         "/budgets.js",
                         "/theme.js",
                         "/style.css",
+                        "/design.css",
+                        "/navigation.js",
                         "/favicon.svg",
                         "/api/v1/app",
                         "/api/v1/auth/csrf",
