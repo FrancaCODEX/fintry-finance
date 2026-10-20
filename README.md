@@ -174,12 +174,12 @@ A CI executa ambos com JDK 21 e também constrói a imagem Docker. A suíte cobr
 
 A sequência está no [roadmap](docs/01-product/roadmap.md):
 
-- **0.6.0:** recuperação de senha, usuários, permissões e histórico de alterações.
-- **0.7.0:** produtos, estoque e vendas.
+- **Entregue até 0.8.0:** controle financeiro, relatórios/projeções, comprovantes, acesso/equipe, produtos/estoque/vendas e central de pendências.
+- **Próximas prioridades:** orçamento por categoria, importação CSV com prévia e detecção de duplicidades e evolução de serviços/propostas, conforme o roadmap.
 
 Depois da base: importações/conciliação, integrações bancárias, cobrança, planos/assinaturas, recorrências sem prazo final e organização avançada dos comprovantes.
 
-Esta é uma primeira versão funcional para desenvolvimento e demonstração. Antes de oferecer o serviço a clientes, faltam recuperação de senha, limitação de tentativas de login, backups, observabilidade e validação operacional. Para publicar, configure HTTPS, `COOKIE_SECURE=true`, credenciais próprias e a infraestrutura de acesso; o Compose padrão expõe a aplicação apenas no computador local. Sessões são armazenadas no processo e expiram em 30 minutos de inatividade; reiniciar a aplicação exige novo login.
+Esta é uma versão funcional para desenvolvimento e demonstração. A recuperação de senha já está implementada e requer a configuração de e-mail. Antes de oferecer o serviço a clientes, é necessário definir e testar backups, observabilidade e a operação em produção. Para publicar, configure HTTPS, `COOKIE_SECURE=true`, credenciais próprias e a infraestrutura de acesso; o Compose padrão expõe a aplicação apenas no computador local. Sessões são armazenadas no processo e expiram em 30 minutos de inatividade; reiniciar a aplicação exige novo login.
 
 Contato: **vfranca.dev@gmail.com**
 
