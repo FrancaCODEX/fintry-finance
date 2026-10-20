@@ -214,6 +214,7 @@ function renderAuth(mode = "login", notice = "") {
   if (!state.user) {
     resetCommerce();
     resetPending();
+    resetPlanning();
     state.dashboardPending = null;
   }
   if (typeof mode === "boolean") mode = mode ? "register" : "login";
@@ -379,6 +380,8 @@ function renderTeam() {
 }
 const auditActions = {
   CREATE: "Criou",
+  DELETE: "Removeu",
+  SAMPLE_LOAD: "Adicionou dados de exemplo",
   UPDATE: "Alterou",
   PAY: "Registrou baixa",
   CANCEL: "Cancelou",
@@ -414,6 +417,8 @@ const resources = {
   PRODUCT: "Produtos",
   STOCK: "Estoque",
   SALE: "Vendas",
+  BUDGET: "Orçamentos",
+  SAMPLE: "Dados de exemplo",
 };
 function auditValue(v) {
   return (
@@ -618,6 +623,7 @@ function shell() {
     ["dashboard", "Visão geral", "dashboard"],
     ["entries", "Lançamentos", "entries"],
     ["pending", "Pendências", "calendar"],
+    ["budgets", "Orçamentos", "wallet"],
     ["accounts", "Contas", "wallet"],
     ["reports", "Relatórios", "entries"],
     ["forecast", "Fluxo projetado", "trend"],
@@ -634,6 +640,7 @@ function shell() {
         ]
       : []),
     ["security", "Minha segurança", "shield"],
+    ["examples", "Dados de exemplo", "entries"],
   ]
     .map(
       ([page, label, ic]) =>
@@ -692,7 +699,7 @@ function categoryBreakdown(categories, total) {
 function monthInput() {
   return `<label><span class="eyebrow" hidden>Período</span><input class="period" id="month" type="month" aria-label="Mês de referência" value="${state.month}" min="2000-01" max="2100-12"></label>`;
 }
-function head(title, subtitle, actions) {
+function head(title, subtitle, actions = "") {
   return `<div class="page-head"><div><h1>${title}</h1><p class="muted">${subtitle}</p></div><div class="head-actions">${actions}</div></div>`;
 }
 function metric(title, value, foot, ic, cls = "") {
@@ -988,6 +995,7 @@ async function load() {
 }
 async function loadData(id) {
   if (!root.querySelector(".shell")) shell();
+  if (["budgets", "examples"].includes(state.page)) return loadPlanning(id);
   if (state.page === "pending") return loadPending(id);
   if (["products", "stock", "sales"].includes(state.page))
     return loadCommerce(id);
@@ -1699,6 +1707,7 @@ modal.addEventListener("click", (ev) => {
 async function act(btn) {
   const action = btn.dataset.action;
   if (action === "theme") return window.fintryTheme.toggle();
+  if (await planningAction(btn)) return;
   if (await pendingAction(btn)) return;
   if (await commerceAction(btn)) return;
   if (await accessAction(btn)) return;
@@ -1846,11 +1855,6 @@ async function act(btn) {
       state.seriesPage = 0;
       await csrf();
       renderAuth();
-    }
-    if (action === "sample") {
-      await send("/finance/sample");
-      toast("Dados fictícios adicionados. Explore o Fintry!");
-      await load();
     }
   } catch (err) {
     toast(err.message);

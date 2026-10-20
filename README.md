@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.8.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.9.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
@@ -22,7 +22,7 @@ docker compose up --build -d
 
 Abra **http://localhost:8080**, clique em **Criar conta** e preencha seu nome, empresa, CNPJ com 14 dígitos, e-mail e uma senha com pelo menos 10 caracteres. Para uma avaliação, use dados fictícios.
 
-Na tela inicial, escolha **Explorar com dados de exemplo** para cadastrar duas contas e movimentações fictícias dos últimos seis meses. Essa ação é opcional e só fica disponível antes de cadastrar contas. Também é possível começar do zero.
+Abra **Dados de exemplo** no menu (ou **Explorar com dados de exemplo** no primeiro acesso) e confirme **Adicionar exemplos**. O pacote opcional preenche contas, contatos, categorias, seis meses de financeiro, séries, produtos/estoque, vendas, orçamentos e comprovantes fictícios. Pode ser adicionado uma vez por empresa, inclusive se já houver cadastros: preserva seus registros e não duplica ao repetir. Os valores entram nos indicadores da empresa; use uma empresa de avaliação para explorar sem misturar com dados reais. Não é carregado automaticamente.
 
 O primeiro build baixa as dependências Java. Para acompanhar a inicialização:
 
@@ -57,6 +57,14 @@ cd backend
 ```
 
 Abra **http://localhost:8080**. O perfil `demo` usa H2 persistido em `./data/` relativo à pasta de execução (`backend/data/` nos comandos acima), sem precisar instalar PostgreSQL. H2 é uma alternativa para avaliação local; PostgreSQL é o banco principal. Os dois ambientes têm bancos separados. Não há credencial padrão: crie seu próprio acesso.
+
+## Orçamento por categoria (0.9.0)
+
+Em **Orçamentos**, selecione o mês e defina limites para categorias cadastradas de despesa ou mistas. O acompanhamento usa o vencimento no mês: **pago + pendente** compõem o valor comprometido. Atenção a partir de 80%, excedido acima de 100%; valores acima do limite não bloqueiam lançamentos nem reservam saldo. Transferências e cancelados ficam fora.
+
+Os indicadores incluem somente categorias com limite definido. O bloco **Despesas sem orçamento** mostra separadamente categorias sem limite e lançamentos com categoria avulsa. Renomear ou inativar uma categoria preserva seu acompanhamento pelo vínculo; para criar novos limites, escolha categorias ativas.
+
+Copie limites do mês anterior sem duplicar categorias existentes no destino nem copiar lançamentos. Remover um orçamento preserva despesas e histórico. Administrador/Financeiro gerenciam; Somente leitura consulta. A tela oferece cartões responsivos e suporte a claro/escuro.
 
 ## Central de pendências e uso diário (0.8.0)
 
@@ -174,8 +182,8 @@ A CI executa ambos com JDK 21 e também constrói a imagem Docker. A suíte cobr
 
 A sequência está no [roadmap](docs/01-product/roadmap.md):
 
-- **Entregue até 0.8.0:** controle financeiro, relatórios/projeções, comprovantes, acesso/equipe, produtos/estoque/vendas e central de pendências.
-- **Próximas prioridades:** orçamento por categoria, importação CSV com prévia e detecção de duplicidades e evolução de serviços/propostas, conforme o roadmap.
+- **Entregue até 0.9.0:** controle financeiro, relatórios/projeções, comprovantes, acesso/equipe, produtos/estoque/vendas, central de pendências, orçamentos e exemplos completos.
+- **Próximas prioridades:** importação CSV com prévia e detecção de duplicidades e evolução de serviços/propostas, conforme o roadmap.
 
 Depois da base: importações/conciliação, integrações bancárias, cobrança, planos/assinaturas, recorrências sem prazo final e organização avançada dos comprovantes.
 
