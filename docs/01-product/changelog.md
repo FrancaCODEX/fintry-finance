@@ -2,6 +2,40 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.8.0] - 2026-10-20
+
+### Funcionalidades
+
+- Central de pendências com vencidas, hoje, próximos 7 dias e de 8 a 30 dias, além da consulta de todas as datas.
+- Filtros por descrição, tipo, conta e origem; identificação de parcelas, recorrências e receitas de vendas.
+- Indicadores por grupo e totais a receber/a pagar calculados sobre todos os resultados filtrados, sem depender da página exibida.
+- Ações de detalhes, baixa, edição e cancelamento conforme permissões e regras do lançamento, sem criar outra forma de realizar pagamentos.
+- Dashboard com os primeiros cinco vencimentos de hoje aos próximos sete dias e acesso direto à central/atrasos.
+
+### Melhorias
+
+- Cartões de lançamentos no celular, com conta, valor, datas, situação e ações; tabela com cabeçalho fixo e rolagem acessível no desktop.
+- Identificação explícita de receitas/despesas e destaque para vencidas e vencendo hoje, nos temas claro e escuro.
+- Skeletons e indicação de carregamento nas páginas, botão de nova tentativa em falhas e proteção contra respostas atrasadas substituírem a navegação atual.
+- Erros de validação ao lado dos campos, aria-invalid/aria-describedby, mensagens em português e foco no primeiro campo inválido.
+- Indicação de processamento nos botões de formulário; mensagens locais removidas ao corrigir o campo.
+- Comparação de senhas identifica o campo de confirmação. Filtros preservam o foco quando possível; páginas carregadas orientam o foco ao título.
+
+### Correções e consistência
+
+- Data de referência calculada no servidor em America/Sao_Paulo, incluindo a fronteira UTC em que o dia brasileiro ainda é o anterior.
+- Grupos não se sobrepõem: hoje, dias 1–7 e dias 8–30; todas as pendências inclui também datas posteriores a 30 dias.
+- Consulta com snapshot transacional para manter lista, paginação e totais consistentes; indicadores respeitam conta, tipo, origem e busca literal por %, _ e !.
+- Realizados, cancelados e transferências excluídos da central. Leituras não alteram saldo, estoque ou auditoria.
+- Página reajustada após a última pendência de uma página sair do filtro, evitando uma página vazia desnecessária.
+- Carregamentos/falhas não deixam ações de uma página anterior disponíveis. Estado das pendências limpo ao encerrar/trocar o acesso.
+
+### Atualização
+
+- PostgreSQL V9 e H2 V7 adicionam apenas um índice de empresa/situação/vencimento; dados e migrações anteriores preservados.
+- A central consulta lançamentos existentes, sem criar ou duplicar compromissos. Não há notificações automáticas, recorrência infinita ou baixa em lote nesta versão.
+- O bloco de vencimentos do dashboard usa a data atual, independentemente do mês escolhido nos demais indicadores.
+
 ## [0.7.0] - 2026-10-19
 
 ### Funcionalidades
