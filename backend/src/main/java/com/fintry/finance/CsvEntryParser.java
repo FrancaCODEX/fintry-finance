@@ -32,7 +32,7 @@ final class CsvEntryParser {
     if (csv.indexOf('\u0000') >= 0 || csv.indexOf('\ufffd') >= 0)
       throw invalid("Salve o arquivo como CSV UTF-8 antes de importar.");
     if (csv.startsWith("\ufeff")) csv = csv.substring(1);
-    String header = csv.split("\\r?\\n", 2)[0];
+    String header = csv.lines().filter(line -> !line.isBlank()).findFirst().orElse("");
     char delimiter = header.indexOf(';') >= 0 ? ';' : ',';
     var records = records(csv, delimiter);
     if (records.size() < 2) throw invalid("O CSV precisa de pelo menos um lançamento.");

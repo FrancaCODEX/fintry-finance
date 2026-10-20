@@ -29,6 +29,22 @@ class CsvEntryParserTests {
   }
 
   @Test
+  void detectsDelimiterAfterBlankLinesAndWithCrOnlyLineEndings() {
+    var rows =
+        CsvEntryParser.parse(
+            "\r\n"
+                + "  \r\n"
+                + "descricao;tipo;valor;vencimento;categoria\r\n"
+                + "Teste;receita;10;2026-10-20;Outros");
+    assertEquals(1, rows.size());
+    var comma =
+        CsvEntryParser.parse(
+            "descricao,tipo,valor,vencimento,categoria\r"
+                + "Texto; com ponto e vírgula,receita,10,2026-10-20,Outros");
+    assertEquals("Texto; com ponto e vírgula", comma.get(0).fields().get("descricao"));
+  }
+
+  @Test
   void rejectsBrokenStructureAndUnsupportedHeaders() {
     for (var csv :
         List.of(
