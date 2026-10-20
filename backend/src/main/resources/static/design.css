@@ -962,3 +962,427 @@ body.navigation-open {
 .field .password-control input {
   padding-right: 85px;
 }
+
+/* CSV import: a readable review before any financial write. */
+.import-steps {
+  display: flex;
+  gap: 30px;
+  padding: 0;
+  margin: 0 0 28px;
+  list-style: none;
+  color: var(--muted);
+  font-size: 12px;
+}
+.import-steps li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.import-steps li > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-weight: 700;
+}
+.import-steps .current {
+  color: var(--green);
+  font-weight: 700;
+}
+.import-steps .current > span,
+.import-steps .complete > span {
+  background: var(--soft);
+  border-color: var(--green);
+  color: var(--green);
+}
+.import-upload {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 36px;
+}
+.import-upload h2,
+.import-success h2 {
+  font-size: 23px;
+  letter-spacing: -0.5px;
+  margin: 10px 0;
+}
+.import-upload p,
+.import-help p,
+.import-review-note,
+.import-success p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.import-upload .field {
+  margin-top: 20px;
+}
+.import-file-box {
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  background: var(--hover-surface);
+  padding: 22px;
+  min-width: 0;
+}
+.import-file-box .field {
+  margin: 0;
+}
+.import-file-heading {
+  font-size: 12px;
+  font-weight: 650;
+  margin-bottom: 12px;
+}
+.import-file-trigger {
+  position: relative;
+  cursor: pointer;
+}
+.import-file-box .import-file-trigger input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.import-file-trigger:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+.import-file-trigger:has(input:disabled) {
+  opacity: 0.55;
+  cursor: wait;
+}
+#import-file-note strong,
+#import-file-note span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.import-error {
+  margin-top: 16px;
+}
+.import-help {
+  margin-top: 20px;
+  padding: 20px 24px;
+}
+.import-help summary {
+  cursor: pointer;
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.6;
+}
+.import-help > div {
+  padding-top: 12px;
+}
+.import-help p + p {
+  margin-top: 12px;
+}
+.import-review {
+  margin-top: 24px;
+  padding: 0;
+  overflow: clip;
+}
+.import-review > .card-head {
+  padding: 24px 24px 16px;
+  margin: 0;
+}
+.import-review h2 {
+  margin: 6px 0;
+}
+.import-counts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0 24px 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.import-counts > div {
+  padding: 16px 20px;
+  min-width: 0;
+}
+.import-counts > div + div {
+  border-left: 1px solid var(--line);
+}
+.import-counts strong {
+  display: block;
+  font-size: 26px;
+  letter-spacing: -1px;
+}
+.import-counts span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.import-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 0 24px 18px;
+  flex-wrap: wrap;
+}
+.import-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.import-filters button[aria-pressed="true"] {
+  background: var(--soft);
+  border-color: var(--green);
+  color: var(--green);
+}
+.import-table-wrap {
+  overflow: auto;
+  max-height: 620px;
+  overscroll-behavior: contain;
+}
+.import-table {
+  width: 100%;
+  min-width: 880px;
+}
+.import-table th {
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+  z-index: 1;
+}
+.import-table td {
+  vertical-align: top;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.import-table td:nth-child(2) {
+  min-width: 180px;
+  max-width: 280px;
+}
+.import-table td:last-child {
+  min-width: 210px;
+  max-width: 320px;
+}
+.import-table td strong {
+  display: block;
+  line-height: 1.65;
+  font-weight: 600;
+  white-space: pre-line;
+}
+.import-table td small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.import-record-number {
+  font-size: 10px;
+  color: var(--muted);
+}
+.import-select input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+.import-select input:disabled {
+  cursor: default;
+}
+.import-table .import-amount {
+  white-space: nowrap;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.import-no-results {
+  padding: 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.import-review-note {
+  padding: 18px 24px;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+.import-confirm-bar {
+  padding: 22px 24px;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  position: sticky;
+  bottom: 16px;
+  z-index: 20;
+  box-shadow: 0 6px 30px #071f2420;
+}
+.import-confirm-bar strong {
+  display: block;
+  font-size: 14px;
+}
+.import-confirm-bar span {
+  display: block;
+  font-size: 12px;
+  margin-top: 7px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.import-success {
+  padding: 28px;
+  max-width: 800px;
+}
+.import-success .empty-icon {
+  margin: 0 0 22px;
+}
+.import-success dl {
+  display: flex;
+  gap: 40px;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+.import-success dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+.import-success dd {
+  margin: 8px 0 0;
+  font-size: 22px;
+  font-weight: 650;
+}
+.import-success .head-actions {
+  justify-content: start;
+  margin-top: 24px;
+}
+@media (max-width: 1100px) {
+  .import-upload {
+    gap: 22px;
+  }
+  .import-steps {
+    gap: 20px;
+  }
+}
+@media (max-width: 700px) {
+  .import-upload {
+    padding: 18px;
+    grid-template-columns: 1fr;
+  }
+  .import-file-box {
+    padding: 16px;
+  }
+  .import-steps {
+    gap: 12px;
+    font-size: 10px;
+    justify-content: space-between;
+  }
+  .import-steps li {
+    flex-direction: column;
+    align-items: start;
+    gap: 6px;
+    flex: 1;
+  }
+  .import-counts {
+    margin: 0 16px 18px;
+  }
+  .import-counts > div {
+    padding: 12px 10px;
+  }
+  .import-counts strong {
+    font-size: 24px;
+  }
+  .import-counts span {
+    font-size: 11px;
+  }
+  .import-review > .card-head,
+  .import-toolbar {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .import-table-wrap {
+    padding: 0 16px 16px;
+    max-height: none;
+    overflow: visible;
+  }
+  .import-table,
+  .import-table tbody {
+    display: block;
+    min-width: 0;
+  }
+  .import-table thead {
+    display: none;
+  }
+  .import-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+    gap: 12px;
+    margin-bottom: 12px;
+    background: var(--paper);
+  }
+  .import-table td {
+    display: block;
+    padding: 0;
+    border: 0;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+  .import-table td::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    margin-bottom: 7px;
+  }
+  .import-table td:nth-child(2),
+  .import-table td:last-child {
+    grid-column: 1 / -1;
+  }
+  .import-select {
+    grid-column: 1 / -1;
+  }
+  .import-table .import-amount {
+    white-space: normal;
+  }
+  .import-confirm-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 18px;
+    bottom: 10px;
+    gap: 12px;
+  }
+  .import-confirm-bar .btn {
+    width: 100%;
+  }
+  .import-review-note {
+    padding: 16px;
+  }
+  .import-help {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 380px) {
+  .import-counts {
+    grid-template-columns: 1fr;
+  }
+  .import-counts > div {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    align-items: center;
+    gap: 12px;
+  }
+  .import-counts > div + div {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .import-counts span {
+    font-size: 12px;
+  }
+  .import-success {
+    padding: 20px;
+  }
+}

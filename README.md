@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.10.1** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.11.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
@@ -37,6 +37,10 @@ docker compose down
 ```
 
 Os dados do PostgreSQL ficam no volume `fintry-data`. Não use `docker compose down -v` se quiser preservá-los. Para mudar a porta, copie `.env.example` para `.env` e ajuste `APP_PORT` (por exemplo, `8081`). Se já houver um banco criado por uma versão anterior do projeto, este Compose usa seu próprio volume; os dados anteriores não são importados automaticamente.
+
+## Importar lançamentos CSV
+
+Em **Importar CSV**, baixe o modelo e escolha uma conta de destino. Envie um CSV UTF-8 (até 1 MB e 500 registros), revise os erros/possíveis duplicidades, selecione os registros prontos e confirme. A prévia não salva dados. São aceitas receitas/despesas pendentes e realizadas; realizados exigem a data de pagamento. Nomes de categorias existentes são vinculados; novas categorias ficam avulsas. Reenvios e registros com a mesma conta, descrição, tipo, valor e vencimento são ignorados por possível duplicidade. Veja o [formato e as regras de importação](docs/05-api/csv-imports.md).
 
 ## Rodar sem Docker
 

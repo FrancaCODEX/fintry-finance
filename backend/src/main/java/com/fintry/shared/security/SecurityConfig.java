@@ -31,6 +31,7 @@ public class SecurityConfig {
                         "/ux.js",
                         "/pending.js",
                         "/budgets.js",
+                        "/imports.js",
                         "/theme.js",
                         "/style.css",
                         "/design.css",
