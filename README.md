@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.7.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.8.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
@@ -58,6 +58,18 @@ cd backend
 
 Abra **http://localhost:8080**. O perfil `demo` usa H2 persistido em `./data/` relativo à pasta de execução (`backend/data/` nos comandos acima), sem precisar instalar PostgreSQL. H2 é uma alternativa para avaliação local; PostgreSQL é o banco principal. Os dois ambientes têm bancos separados. Não há credencial padrão: crie seu próprio acesso.
 
+## Central de pendências e uso diário (0.8.0)
+
+Em **Pendências**, acompanhe lançamentos ainda não realizados de todas as datas, incluindo receitas de vendas, parcelas e recorrências. Os grupos usam a data atual do servidor no horário de Brasília: **Vencidas**, **Vencem hoje**, **Próximos 7 dias** (amanhã até o sétimo dia) e **De 8 a 30 dias**. **Todas as pendências** também inclui datas posteriores a 30 dias.
+
+Filtre por descrição, tipo, conta e origem (sem série, recorrências ou parcelamentos). Os indicadores respeitam esses filtros e mostram todos os grupos; o grupo selecionado restringe a lista e seus totais. Totais incluem todas as páginas, sem tratar valores pendentes como saldo realizado. Realizados, cancelados e transferências ficam fora da central.
+
+Use Detalhes, Pagar/Receber ou as ações permitidas para o lançamento. A confirmação continua exigindo a data da baixa; não há pagamento automático ou baixa em lote. Receitas de vendas continuam protegidas contra cancelamento isolado. O perfil Somente leitura consulta sem ações de escrita.
+
+O dashboard mostra os primeiros cinco vencimentos entre hoje e os próximos sete dias e um atalho para atrasos. Esse bloco usa datas atuais, independentemente do mês selecionado nos indicadores financeiros acima. Na central, consulte todos os resultados.
+
+Lançamentos passam a usar cartões no celular, com valores, datas, conta, situação e ações visíveis. No desktop, a tabela permite rolagem com cabeçalho fixo. Carregamentos mostram skeletons e erros de consulta oferecem nova tentativa. Os formulários apresentam erros junto aos campos, preservam as descrições acessíveis e levam o foco ao primeiro erro; botões indicam processamento para evitar submissões repetidas. As mesmas melhorias se aplicam aos temas claro e escuro.
+
 ## Produtos, estoque e vendas (0.7.0)
 
 Em **Produtos**, cadastre SKU/código único, nome, unidade, preço, custo de referência, estoque inicial e estoque mínimo. O catálogo mostra disponibilidade e alerta para saldo igual ou abaixo do mínimo; oferece busca, filtros, inativação e histórico. A unidade é fixa após cadastrar; para outro tipo de unidade, crie outro produto. Quantidades aceitam até três casas decimais.
@@ -95,6 +107,7 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 - Cadastro de empresa e administrador; login e logout com sessão HTTP.
 - Recuperação de senha, convites, equipe com três perfis, troca de senha e histórico de alterações.
 - Catálogo de produtos, estoque mínimo, movimentações e vendas integradas às receitas.
+- Central de pendências com indicadores por vencimento, filtros, totais completos e ações rápidas.
 - Isolamento dos dados por empresa, derivado da sessão autenticada.
 - Contas financeiras com saldo inicial e saldo calculado.
 - Receitas e despesas com valor, categoria, conta e vencimento.
@@ -161,12 +174,12 @@ A CI executa ambos com JDK 21 e também constrói a imagem Docker. A suíte cobr
 
 A sequência está no [roadmap](docs/01-product/roadmap.md):
 
-- **0.6.0:** recuperação de senha, usuários, permissões e histórico de alterações.
-- **0.7.0:** produtos, estoque e vendas.
+- **Entregue até 0.8.0:** controle financeiro, relatórios/projeções, comprovantes, acesso/equipe, produtos/estoque/vendas e central de pendências.
+- **Próximas prioridades:** orçamento por categoria, importação CSV com prévia e detecção de duplicidades e evolução de serviços/propostas, conforme o roadmap.
 
 Depois da base: importações/conciliação, integrações bancárias, cobrança, planos/assinaturas, recorrências sem prazo final e organização avançada dos comprovantes.
 
-Esta é uma primeira versão funcional para desenvolvimento e demonstração. Antes de oferecer o serviço a clientes, faltam recuperação de senha, limitação de tentativas de login, backups, observabilidade e validação operacional. Para publicar, configure HTTPS, `COOKIE_SECURE=true`, credenciais próprias e a infraestrutura de acesso; o Compose padrão expõe a aplicação apenas no computador local. Sessões são armazenadas no processo e expiram em 30 minutos de inatividade; reiniciar a aplicação exige novo login.
+Esta é uma versão funcional para desenvolvimento e demonstração. A recuperação de senha já está implementada e requer a configuração de e-mail. Antes de oferecer o serviço a clientes, é necessário definir e testar backups, observabilidade e a operação em produção. Para publicar, configure HTTPS, `COOKIE_SECURE=true`, credenciais próprias e a infraestrutura de acesso; o Compose padrão expõe a aplicação apenas no computador local. Sessões são armazenadas no processo e expiram em 30 minutos de inatividade; reiniciar a aplicação exige novo login.
 
 Contato: **vfranca.dev@gmail.com**
 

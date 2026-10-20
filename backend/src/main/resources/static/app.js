@@ -59,6 +59,8 @@ const dateLabel = (date) =>
       )
     : "—";
 const icons = {
+  calendar:
+    '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18M8 15h2M14 15h2"/>',
   box: '<path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8M7 5.8l9 5"/>',
   cart: '<path d="M3 3h2l3 12h11l3-8H6M9 19h.01M18 19h.01"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/>',
   shield:
@@ -126,12 +128,15 @@ async function api(path, options = {}) {
         "Sua sessão foi encerrada. Entre novamente para continuar.",
       );
     }
-    throw new Error(
+    const error = new Error(
       data?.message ||
         (data?.errors
           ? Object.values(data.errors).join(" ")
           : "Não foi possível concluir a operação."),
     );
+    error.fields = data?.errors || {};
+    error.status = res.status;
+    throw error;
   }
   return data;
 }
@@ -140,22 +145,34 @@ const send = (path, body) =>
 function field(label, name, type = "text", extra = "", value = "") {
   return `<label class="field">${label}<input name="${name}" type="${type}" value="${e(value)}" ${extra}></label>`;
 }
-function formError(form, message) {
-  form.querySelector(".form-error").textContent = message;
+function formError(form, message, fields = {}) {
+  uxErrors(form, message, fields);
 }
 async function submitForm(event, action) {
   event.preventDefault();
   const form = event.currentTarget;
   const button = form.querySelector("[type=submit]");
+  const label = button.innerHTML;
   button.disabled = true;
+  button.setAttribute("aria-busy", "true");
+  button.textContent = "Processando…";
   formError(form, "");
   try {
     await action(Object.fromEntries(new FormData(form)), form);
   } catch (err) {
-    if (form.isConnected) formError(form, err.message);
+    if (form.isConnected)
+      formError(
+        form,
+        err.fields && Object.keys(err.fields).length
+          ? "Confira os campos destacados."
+          : err.message,
+        err.fields,
+      );
     else toast(err.message);
   } finally {
     button.disabled = false;
+    button.removeAttribute("aria-busy");
+    button.innerHTML = label;
   }
 }
 const roles = {
@@ -194,7 +211,11 @@ function readAccessLink() {
 }
 window.addEventListener("hashchange", readAccessLink);
 function renderAuth(mode = "login", notice = "") {
-  if (!state.user) resetCommerce();
+  if (!state.user) {
+    resetCommerce();
+    resetPending();
+    state.dashboardPending = null;
+  }
   if (typeof mode === "boolean") mode = mode ? "register" : "login";
   const register = mode === "register",
     invite = mode === "invite",
@@ -244,7 +265,7 @@ function renderAuth(mode = "login", notice = "") {
   form.onsubmit = (ev) =>
     submitForm(ev, async (data) => {
       if (data.confirmation != null && data.password !== data.confirmation)
-        throw new Error("As senhas precisam ser iguais.");
+        throw uxFieldError("confirmation", "As senhas precisam ser iguais.");
       if (forgot) {
         const result = await send("/auth/forgot-password", {
           email: data.email,
@@ -466,7 +487,7 @@ function bindAccessPages() {
   document.querySelector("#security-form")?.addEventListener("submit", (ev) =>
     submitForm(ev, async (data) => {
       if (data.password !== data.confirmation)
-        throw new Error("As senhas precisam ser iguais.");
+        throw uxFieldError("confirmation", "As senhas precisam ser iguais.");
       await send("/auth/change-password", {
         currentPassword: data.currentPassword,
         password: data.password,
@@ -596,6 +617,7 @@ function shell() {
   root.innerHTML = `<div class="shell"><aside class="sidebar"><div class="brand"><img src="/favicon.svg" alt="">fintry.</div><div class="nav-label">SEU NEGÓCIO</div><nav aria-label="Navegação principal">${[
     ["dashboard", "Visão geral", "dashboard"],
     ["entries", "Lançamentos", "entries"],
+    ["pending", "Pendências", "calendar"],
     ["accounts", "Contas", "wallet"],
     ["reports", "Relatórios", "entries"],
     ["forecast", "Fluxo projetado", "trend"],
@@ -705,22 +727,69 @@ function chart(flow) {
     })
     .join("")}</svg></div>`;
 }
-function entriesTable(rows) {
+function entryStatus(row, today = localDate()) {
+  const paid = row.status === "PAID",
+    cancelled = row.status === "CANCELLED",
+    overdue = !paid && !cancelled && row.dueDate < today;
+  return {
+    label: cancelled
+      ? "Cancelado"
+      : paid
+        ? row.type === "INCOME"
+          ? "Recebido"
+          : "Pago"
+        : overdue
+          ? "Em atraso"
+          : row.dueDate === today
+            ? "Vence hoje"
+            : "Pendente",
+    className: cancelled
+      ? "cancelled"
+      : paid
+        ? ""
+        : overdue
+          ? "pending overdue-badge"
+          : "pending",
+  };
+}
+function entryActions(row) {
+  return `<div class="row-actions"><button class="btn secondary small" data-action="details" data-id="${row.id}" aria-label="Detalhes de ${e(row.description)}">Detalhes</button>${canWrite() && row.status === "PENDING" ? `<button class="btn soft small" data-action="pay" data-id="${row.id}">${row.type === "INCOME" ? "Receber" : "Pagar"}</button>${!row.seriesId && !row.saleId ? `<button class="btn secondary small" data-action="edit-entry" data-id="${row.id}" aria-label="Editar ${e(row.description)}">Editar</button>` : ""}` : ""}${canWrite() && row.status !== "CANCELLED" && !row.transferId && !row.saleId ? `<button class="btn text small" data-action="cancel" data-id="${row.id}" aria-label="Cancelar ${e(row.description)}">Cancelar</button>` : ""}</div>`;
+}
+function entryOrigin(row) {
+  return row.seriesId
+    ? `<span class="series-label">${row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição"} ${row.sequenceNumber}/${row.seriesCount}</span>`
+    : row.saleId
+      ? '<span class="series-label">Venda vinculada</span>'
+      : row.transferId
+        ? '<span class="series-label">Transferência entre contas</span>'
+        : "";
+}
+function entriesTable(rows, options = {}) {
   if (!rows.length)
-    return empty(
-      "Nenhum lançamento por aqui",
-      "Cadastre suas receitas e despesas para acompanhar cada movimento.",
+    return (
+      options.empty ||
+      empty(
+        "Nenhum lançamento por aqui",
+        "Cadastre suas receitas e despesas para acompanhar cada movimento.",
+      )
     );
-  const names = new Map(state.accounts.map((a) => [a.id, a.name]));
-  return `<div class="table-wrap"><table><thead><tr><th>DESCRIÇÃO / CATEGORIA</th><th>VENCIMENTO</th><th>CONTA</th><th>VALOR</th><th>STATUS</th><th>AÇÕES</th></tr></thead><tbody>${rows
+  const names = new Map(state.accounts.map((a) => [a.id, a.name])),
+    today = options.today || localDate();
+  return `<div class="table-wrap entry-table" tabindex="0" role="region" aria-label="Lançamentos em tabela, com rolagem"><table><thead><tr>${["DESCRIÇÃO / CATEGORIA", "VENCIMENTO", "CONTA", "VALOR", "STATUS", "AÇÕES"].map((l) => `<th scope="col">${l}</th>`).join("")}</tr></thead><tbody>${rows
     .map((row) => {
-      const income = row.type === "INCOME",
-        paid = row.status === "PAID",
-        cancelled = row.status === "CANCELLED";
-      const overdue = !paid && !cancelled && row.dueDate < localDate();
-      return `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}${row.transferId ? " · Transferência" : ""}${row.seriesId ? `<br><span class="series-label">${row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição"} ${row.sequenceNumber}/${row.seriesCount}</span>` : ""}</small></td><td>${dateLabel(row.dueDate)}${paid ? `<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small>` : ""}</td><td>${e(names.get(row.accountId) || "Conta")}</td><td class="${income ? "positive" : "negative"}"><strong>${income ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${cancelled ? "cancelled" : paid ? "" : "pending"}">${cancelled ? "Cancelado" : paid ? (income ? "Recebido" : "Pago") : overdue ? "Em atraso" : "Pendente"}</span></td><td><div class="row-actions"><button class="btn secondary small" data-action="details" data-id="${row.id}" aria-label="Detalhes de ${e(row.description)}">Detalhes</button>${!paid && !cancelled ? `<button class="btn soft small" data-action="pay" data-id="${row.id}">${income ? "Receber" : "Pagar"}</button>${!row.seriesId && !row.saleId ? `<button class="btn secondary small" data-action="edit-entry" data-id="${row.id}" aria-label="Editar ${e(row.description)}">Editar</button>` : ""}` : ""}${!cancelled && !row.transferId && !row.saleId ? `<button class="btn text small" data-action="cancel" data-id="${row.id}" aria-label="Cancelar ${e(row.description)}">Cancelar</button>` : row.transferId ? '<small class="muted">Entre contas</small>' : "—"}</div></td></tr>`;
+      const status = entryStatus(row, today),
+        income = row.type === "INCOME";
+      return `<tr><td class="description"><strong>${e(row.description)}</strong><small>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}</small>${entryOrigin(row)}</td><td>${dateLabel(row.dueDate)}${row.paymentDate ? `<br><small class="muted">Baixa: ${dateLabel(row.paymentDate)}</small>` : ""}</td><td>${e(names.get(row.accountId) || "Conta")}</td><td class="${income ? "positive" : "negative"}"><strong>${income ? "+" : "−"} ${money(row.amount)}</strong></td><td><span class="badge ${status.className}">${status.label}</span></td><td>${entryActions(row)}</td></tr>`;
     })
-    .join("")}</tbody></table></div>`;
+    .join(
+      "",
+    )}</tbody></table></div><div class="entry-cards" role="list" aria-label="Lançamentos em cartões">${rows
+    .map((row) => {
+      const status = entryStatus(row, today),
+        income = row.type === "INCOME";
+      return `<article class="entry-card" role="listitem"><div class="entry-card-head"><span class="entry-direction ${income ? "positive" : "negative"}">${icon(income ? "income" : "expense")}${income ? "Receita" : "Despesa"}</span><span class="badge ${status.className}">${status.label}</span></div><h3>${e(row.description)}</h3><p>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}</p>${entryOrigin(row)}<strong class="entry-card-amount ${income ? "positive" : "negative"}">${income ? "+" : "−"} ${money(row.amount)}</strong><dl><div><dt>Vencimento</dt><dd>${dateLabel(row.dueDate)}</dd></div><div><dt>Conta</dt><dd>${e(names.get(row.accountId) || "Conta")}</dd></div>${row.paymentDate ? `<div><dt>Baixa</dt><dd>${dateLabel(row.paymentDate)}</dd></div>` : ""}</dl>${entryActions(row)}</article>`;
+    })
+    .join("")}</div>`;
 }
 function renderDashboard() {
   const s = state.summary;
@@ -733,6 +802,7 @@ function renderDashboard() {
     ) +
     `<section class="metrics" aria-label="Indicadores financeiros">${metric("Saldo disponível", s.balance, "Saldo atual de todas as contas", "wallet", "primary")}${metric("Receitas do mês", s.income, comparison(s.income, s.previousIncome), "income")}${metric("Despesas do mês", s.expense, comparison(s.expense, s.previousExpense), "expense")}${metric("Resultado de caixa", s.result, comparison(s.result, s.previousResult), "trend")}</section>` +
     `<section class="grid-two"><article class="card"><div class="card-head"><div><h2>O ritmo do seu caixa</h2><p>Receitas e despesas realizadas · últimos 6 meses</p></div><div class="legend"><span><i class="dot"></i>Receitas</span><span><i class="dot expense"></i>Despesas</span></div></div>${chart(s.flow)}<div class="chart-caption">Valores em reais. Transferências entre contas não entram no resultado.</div></article><article class="card"><div class="card-head"><div><h2>No seu radar</h2><p>Vencimentos pendentes no mês selecionado</p></div>${icon("entries")}</div><div class="pending"><div class="pending-row"><div><p>A receber</p><small>Entradas previstas</small></div><strong class="positive">${money(s.pendingIncome)}</strong></div><div class="pending-row"><div><p>A pagar</p><small>Compromissos do período</small></div><strong>${money(s.pendingExpense)}</strong></div></div><div class="callout">Pendências entram no saldo quando você registra o pagamento ou recebimento.</div></article></section>` +
+    pendingDashboard() +
     `<section class="card"><div class="card-head"><div><h2>Movimentações do período</h2><p>Organizadas pela data de vencimento</p></div><button class="btn text small" data-nav="entries">Ver todas →</button></div>${state.accounts.length ? entriesTable(state.entries.content.slice(0, 5)) : empty("Vamos organizar seu financeiro?", "Comece cadastrando uma conta ou explore um exemplo com dados fictícios.", "account", "Criar primeira conta")}</section>` +
     `<section class="grid-two dashboard-analysis"><article class="card"><div class="card-head"><div><h2>Maiores despesas por categoria</h2><p>Até 5 categorias · pagamentos do mês selecionado</p></div></div>${categoryBreakdown(s.categories || [], s.expense)}</article><article class="card"><div class="card-head"><div><h2>Olhe para os próximos meses</h2><p>Saldo atual e vencimentos cadastrados</p></div></div><div class="analysis-copy"><p>Explore o saldo estimado com os valores a receber e a pagar. Escolha a conta e como considerar as pendências vencidas.</p><button class="btn soft" data-nav="forecast">Ver fluxo projetado →</button><button class="btn text" data-nav="reports">Abrir relatórios</button></div></article></section>`
   );
@@ -879,8 +949,46 @@ function renderAccounts() {
 }
 let requestId = 0;
 async function load() {
-  const id = ++requestId;
+  const id = ++requestId,
+    page = state.page;
+  const focused = document.activeElement?.closest("#page-content")
+    ? document.activeElement.name
+    : null;
+  shell();
+  let container = document.querySelector("#page-content");
+  container.setAttribute("aria-busy", "true");
+  container.innerHTML = uxLoading(page);
+  try {
+    await loadData(id);
+    if (id !== requestId || !state.user) return;
+    container = document.querySelector("#page-content");
+    container?.setAttribute("aria-busy", "false");
+    if (!modal.open && !drawer.open) {
+      const restored = focused
+        ? Array.from(container?.querySelectorAll("[name]") || []).find(
+            (x) => x.name === focused,
+          )
+        : null;
+      const target = restored || container?.querySelector(".page-head h1");
+      if (target) {
+        if (!restored) target.tabIndex = -1;
+        target.focus({ preventScroll: true });
+      }
+    }
+  } catch (err) {
+    if (id !== requestId || !state.user) return;
+    container = document.querySelector("#page-content");
+    if (container) {
+      container.setAttribute("aria-busy", "false");
+      container.innerHTML = uxLoadError(err.message);
+      container.querySelector("h2")?.focus({ preventScroll: true });
+    }
+    throw err;
+  }
+}
+async function loadData(id) {
   if (!root.querySelector(".shell")) shell();
+  if (state.page === "pending") return loadPending(id);
   if (["products", "stock", "sales"].includes(state.page))
     return loadCommerce(id);
   if (["team", "audit", "security"].includes(state.page)) {
@@ -927,6 +1035,7 @@ async function load() {
     series,
     report,
     forecast,
+    dashboardPending,
   ] = await Promise.all([
     api("/finance/accounts"),
     api("/finance/entries?" + query),
@@ -957,8 +1066,20 @@ async function load() {
     state.page === "forecast"
       ? api("/reports/forecast?" + queryParams(state.forecastFilters))
       : Promise.resolve(null),
+    state.page === "dashboard"
+      ? api("/finance/pending?group=UPCOMING&size=5")
+      : Promise.resolve(null),
   ]);
   if (id !== requestId || !state.user) return;
+  if (
+    state.page === "entries" &&
+    state.entryPage > 0 &&
+    state.entryPage >= entries.totalPages
+  ) {
+    state.entryPage = Math.max(0, entries.totalPages - 1);
+    return load();
+  }
+  state.dashboardPending = dashboardPending;
   state.accounts = accounts;
   state.entries = entries;
   state.summary = summary;
@@ -1041,7 +1162,7 @@ async function safeLoad() {
   try {
     await load();
   } catch (err) {
-    toast(err.message);
+    if (!document.querySelector(".load-error")) toast(err.message);
     if (
       state.user &&
       !document.querySelector("#page-content")?.children.length
@@ -1578,6 +1699,7 @@ modal.addEventListener("click", (ev) => {
 async function act(btn) {
   const action = btn.dataset.action;
   if (action === "theme") return window.fintryTheme.toggle();
+  if (await pendingAction(btn)) return;
   if (await commerceAction(btn)) return;
   if (await accessAction(btn)) return;
   if (
