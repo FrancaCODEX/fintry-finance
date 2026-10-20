@@ -174,6 +174,8 @@ const uxPageNames = {
   dashboard: "Visão geral",
   entries: "Lançamentos",
   pending: "Central de pendências",
+  budgets: "Orçamentos",
+  examples: "Dados de exemplo",
   accounts: "Contas",
   contacts: "Clientes e fornecedores",
   categories: "Categorias",

@@ -30,6 +30,7 @@ public class SecurityConfig {
                         "/commerce.js",
                         "/ux.js",
                         "/pending.js",
+                        "/budgets.js",
                         "/theme.js",
                         "/style.css",
                         "/favicon.svg",

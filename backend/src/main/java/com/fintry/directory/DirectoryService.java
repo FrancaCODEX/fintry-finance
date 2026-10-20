@@ -22,6 +22,7 @@ public class DirectoryService {
   private final ContactRepository contacts;
   private final CategoryRepository categories;
   private final EntryRepository entries;
+  private final com.fintry.budget.BudgetRepository budgets;
 
   public record ContactInput(
       @NotBlank @Size(max = 120) String name,
@@ -188,8 +189,9 @@ public class DirectoryService {
             : categories.lock(id, current.companyId()).orElseThrow(this::missing);
     if (id != null
         && c.getKind() != input.kind()
-        && entries.existsByCategoryIdAndCompanyId(id, current.companyId()))
-      throw invalid("Uma categoria com lançamentos vinculados deve manter seu tipo.");
+        && (entries.existsByCategoryIdAndCompanyId(id, current.companyId())
+            || budgets.existsByCategoryIdAndCompanyId(id, current.companyId())))
+      throw invalid("Uma categoria com lançamentos ou orçamentos vinculados deve manter seu tipo.");
     var before = id == null ? Map.<String, String>of() : categoryFields(c);
     c.setCompanyId(current.companyId());
     c.setName(input.name().strip());

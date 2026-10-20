@@ -11,10 +11,12 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.5.0 | Comprovantes, painel lateral de detalhes, modo escuro e contraste dos formulários | Incorporada à main |
 | 0.6.0 | Recuperação de senha, usuários, permissões e histórico de alterações | Incorporada à main (PRs #6 e #7) |
 | 0.7.0 | Produtos, estoque e vendas | Incorporada à main |
-| 0.8.0 | Central de pendências, vencimentos no dashboard, cartões no celular e melhorias de formulários/carregamento | Entrega atual |
+| 0.8.0 | Central de pendências, vencimentos no dashboard, cartões no celular e melhorias de formulários/carregamento | Incorporada à main |
+
+| 0.9.0 | Orçamento por categoria e dados de exemplo completos | Entrega atual |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
 Depois da base: orçamentos, importações/conciliação, integrações bancárias, cobrança, planos/assinaturas e recorrência sem prazo final. A identidade visual mantém verde escuro, verde claro e fundo suave; a evolução deve priorizar hierarquia, estados de carregamento, feedback de ações, detalhes acessíveis e uso no celular.
 
-Próximas prioridades propostas: orçamento por categoria; importação CSV com prévia/deduplicação; catálogo de serviços e propostas comerciais. As entregas seguintes continuam incluindo melhorias de uso e visual.
+Próximas prioridades propostas: importação CSV com prévia/deduplicação; catálogo de serviços e propostas comerciais. As entregas seguintes continuam incluindo melhorias de uso e visual.

@@ -2,6 +2,31 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.9.0] - 2026-10-20
+
+### Funcionalidades
+
+- Orçamento mensal por categoria de despesa/mista, com criação, edição, remoção e cópia de limites do mês anterior.
+- Acompanhamento por vencimento: pago, pendente, comprometido, disponível, percentual e alertas a partir de 80% / acima de 100%.
+- Despesas sem orçamento exibidas separadamente, incluindo categorias avulsas; transferências, receitas e cancelados excluídos do consumo.
+- Tela Dados de exemplo para adicionar explicitamente um pacote completo, também em empresas com cadastros existentes.
+- Pacote com 3 contas, 6 contatos com campos preenchidos, 8 categorias, seis meses de financeiro, atrasos/previstos, séries, 6 produtos, estoque, 4 vendas, orçamentos de dois meses e 2 comprovantes PDF fictícios.
+
+### Melhorias
+
+- Cartões de orçamento com progresso, valores e situação em claro/escuro e celular; cópia preserva limites existentes e ignora categorias inativas.
+- Contatos de exemplo com documento, e-mail, telefone e observações fictícios; exemplos demonstram cadastros inativos, estoque baixo/zerado, vendas recebidas/pendentes/canceladas e histórico.
+- Comprovantes identificados como exemplo e sem validade; vínculos financeiros e movimentos comerciais criados pelos serviços existentes.
+- Confirmação na interface explica o efeito dos exemplos nos indicadores; status do pacote e atalhos para explorar as telas.
+
+### Correções e consistência
+
+- Exemplos adicionados uma vez por empresa, com bloqueio transacional para evitar duplicação concorrente; repetição preserva edições posteriores.
+- Inclusão aditiva, identificada por Exemplo/DEMO, sem substituir registros existentes ou criar usuários, credenciais ou convites.
+- Um limite por categoria/mês; vínculos por id resistem à renomeação/inativação. Mudança de tipo de categoria com orçamento é bloqueada.
+- Histórico de criação/edição/remoção de limites e da inclusão dos exemplos; consultas não alteram financeiro ou auditoria.
+- PostgreSQL V10 / H2 V8 adicionam tabelas e restrições, sem editar migrações publicadas ou apagar dados.
+
 ## [0.8.0] - 2026-10-20
 
 ### Funcionalidades
