@@ -2726,6 +2726,7 @@ button[aria-busy="true"] {
   gap: 16px;
 }
 .budget-metrics article {
+  container-type: inline-size;
   padding: 23px;
   display: grid;
   gap: 13px;
@@ -2737,8 +2738,9 @@ button[aria-busy="true"] {
   color: var(--muted);
 }
 .budget-metrics strong {
-  font-size: 25px;
-  overflow-wrap: anywhere;
+  font-size: min(25px, var(--money-size, 12cqw));
+  white-space: nowrap;
+  overflow-wrap: normal;
 }
 .budget-rule {
   font-size: 12px;
@@ -2952,7 +2954,7 @@ button[aria-busy="true"] {
     padding: 18px;
   }
   .budget-metrics strong {
-    font-size: 20px;
+    font-size: min(20px, var(--money-size, 12cqw));
   }
   .budget-card {
     padding: 20px;
@@ -2969,4 +2971,11 @@ button[aria-busy="true"] {
   .examples-intro h2 {
     font-size: 21px;
   }
+}
+
+.budget-metrics .money-medium {
+  --money-size: 9cqw;
+}
+.budget-metrics .money-long {
+  --money-size: 6.5cqw;
 }

@@ -699,7 +699,7 @@ function categoryBreakdown(categories, total) {
 function monthInput() {
   return `<label><span class="eyebrow" hidden>Período</span><input class="period" id="month" type="month" aria-label="Mês de referência" value="${state.month}" min="2000-01" max="2100-12"></label>`;
 }
-function head(title, subtitle, actions) {
+function head(title, subtitle, actions = "") {
   return `<div class="page-head"><div><h1>${title}</h1><p class="muted">${subtitle}</p></div><div class="head-actions">${actions}</div></div>`;
 }
 function metric(title, value, foot, ic, cls = "") {

@@ -14,6 +14,7 @@ As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem vers
 
 ### Melhorias
 
+- Valores dos indicadores adaptados à largura do cartão, preservando números inteiros no celular.
 - Cartões de orçamento com progresso, valores e situação em claro/escuro e celular; cópia preserva limites existentes e ignora categorias inativas.
 - Contatos de exemplo com documento, e-mail, telefone e observações fictícios; exemplos demonstram cadastros inativos, estoque baixo/zerado, vendas recebidas/pendentes/canceladas e histórico.
 - Comprovantes identificados como exemplo e sem validade; vínculos financeiros e movimentos comerciais criados pelos serviços existentes.
