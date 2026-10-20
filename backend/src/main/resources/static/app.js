@@ -59,6 +59,23 @@ const dateLabel = (date) =>
       )
     : "—";
 const icons = {
+  menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  close: '<path d="m6 6 12 12M18 6 6 18"/>',
+  panel:
+    '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16m6-11-3 3 3 3"/>',
+  search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/>',
+  arrowUp: '<path d="m6 11 6-6 6 6M12 5v15"/>',
+  budget:
+    '<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 10h18M8 2v4M16 2v4m-8 9 3 3 5-5"/>',
+  chart: '<path d="M4 3v17h17M8 15v-4M13 15V7M18 15v-6"/>',
+  repeat: '<path d="M4 8h15l-3-3m4 11H5l3 3M20 8v4M4 16v-4"/>',
+  stock: '<path d="M3 21V8l9-5 9 5v13M7 21V11h10v10M7 15h10M7 18h10"/>',
+  tag: '<path d="M20 13 11 22 2 13V3h10l8 8z"/><circle cx="7" cy="8" r="1"/>',
+  users:
+    '<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 5v2"/>',
+  history: '<path d="M3 5v5h5M3.5 10A9 9 0 1 1 4 17m8-10v5l3 2"/>',
+  sparkles:
+    '<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5zM20 3v4m-2-2h4"/>',
   calendar:
     '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18M8 15h2M14 15h2"/>',
   box: '<path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8M7 5.8l9 5"/>',
@@ -215,6 +232,7 @@ function renderAuth(mode = "login", notice = "") {
     resetCommerce();
     resetPending();
     resetPlanning();
+    resetNavigation();
     state.dashboardPending = null;
   }
   if (typeof mode === "boolean") mode = mode ? "register" : "login";
@@ -618,49 +636,17 @@ async function accessAction(btn) {
 }
 
 function shell() {
-  const u = state.user;
-  root.innerHTML = `<div class="shell"><aside class="sidebar"><div class="brand"><img src="/favicon.svg" alt="">fintry.</div><div class="nav-label">SEU NEGÓCIO</div><nav aria-label="Navegação principal">${[
-    ["dashboard", "Visão geral", "dashboard"],
-    ["entries", "Lançamentos", "entries"],
-    ["pending", "Pendências", "calendar"],
-    ["budgets", "Orçamentos", "wallet"],
-    ["accounts", "Contas", "wallet"],
-    ["reports", "Relatórios", "entries"],
-    ["forecast", "Fluxo projetado", "trend"],
-    ["series", "Parcelas e recorrências", "entries"],
-    ["contacts", "Clientes e fornecedores", "company"],
-    ["categories", "Categorias", "entries"],
-    ["products", "Produtos", "box"],
-    ["stock", "Estoque", "box"],
-    ["sales", "Vendas", "cart"],
-    ...(isAdmin()
-      ? [
-          ["team", "Equipe", "company"],
-          ["audit", "Histórico", "entries"],
-        ]
-      : []),
-    ["security", "Minha segurança", "shield"],
-    ["examples", "Dados de exemplo", "entries"],
-  ]
-    .map(
-      ([page, label, ic]) =>
-        `<button class="nav-btn ${state.page === page ? "active" : ""}" data-nav="${page}" ${state.page === page ? 'aria-current="page"' : ""}>${icon(ic)}${label}</button>`,
-    )
-    .join(
-      "",
-    )}</nav><div class="side-bottom"><div class="user-block"><div class="avatar">${e(u.name.slice(0, 1).toUpperCase())}</div><div class="user-info"><strong>${e(u.name)}</strong><small>${e(roles[u.role])}</small></div><button class="logout" data-action="logout" title="Sair" aria-label="Sair da conta">${icon("exit")}</button></div></div></aside><main class="main"><header class="topbar"><div class="company-label">${icon("company")} ${e(u.companyName)}</div><span class="muted topbar-message">Seu negócio, em boa direção.</span>${themeToggle()}<button class="btn text small" data-action="logout">Sair ${icon("exit")}</button></header><div class="main-content">${!canWrite() ? '<p class="readonly-banner">' + icon("shield") + " Seu acesso é de somente leitura. Você pode consultar e exportar as informações da empresa.</p>" : ""}<div id="page-content"></div><footer class="footer"><span>Fintry v${e(state.version)} · © ${new Date().getFullYear()}</span><a href="mailto:vfranca.dev@gmail.com">Criado por Vinicius Azeredo França</a></footer></div></main></div>`;
-  requestAnimationFrame(syncNavigation);
+  const u = state.user,
+    current = root.querySelector(".shell");
+  const key = JSON.stringify([u.id, u.role, u.name, u.companyName]);
+  if (current?.dataset.session === key) {
+    syncNavigation();
+    return;
+  }
+  root.innerHTML = renderAppShell(u);
+  root.querySelector(".shell").dataset.session = key;
+  navigationMount();
 }
-function syncNavigation() {
-  const nav = document.querySelector(".sidebar nav"),
-    active = nav?.querySelector(".active");
-  if (nav && active && matchMedia("(max-width:700px)").matches)
-    nav.scrollLeft =
-      active.offsetLeft -
-      nav.offsetLeft -
-      (nav.clientWidth - active.clientWidth) / 2;
-}
-window.addEventListener("resize", syncNavigation);
 function monthEnd(month) {
   const [y, m] = month.split("-").map(Number);
   return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
@@ -1690,6 +1676,10 @@ document.addEventListener("click", (ev) => {
 root.addEventListener("click", async (ev) => {
   const nav = ev.target.closest("[data-nav]");
   if (nav) {
+    ev.preventDefault();
+    closeNavigation();
+    navigation.query = "";
+    window.scrollTo({ top: 0, behavior: "instant" });
     state.page = nav.dataset.nav;
     state.entryPage = 0;
     state.contactPage = 0;
@@ -1706,6 +1696,7 @@ modal.addEventListener("click", (ev) => {
 });
 async function act(btn) {
   const action = btn.dataset.action;
+  if (navigationAction(btn)) return;
   if (action === "theme") return window.fintryTheme.toggle();
   if (await planningAction(btn)) return;
   if (await pendingAction(btn)) return;
