@@ -39,3 +39,13 @@ build/
 # Dados da demonstração H2
 backend/data/
 data/
+
+# Operação e cópias de segurança
+deploy/production.env
+/backups/
+*.dump
+*.dump.json
+
+# Python operation tooling
+__pycache__/
+*.pyc

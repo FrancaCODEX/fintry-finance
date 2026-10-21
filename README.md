@@ -2,11 +2,21 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.13.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.14.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
 ![Dashboard do Fintry com dados fictícios](docs/screenshots/dashboard.webp)
+
+## Publicação e operação
+
+A 0.14.0 acrescenta uma configuração de produção separada, com HTTPS pelo Caddy, SMTP autenticado com TLS, diagnóstico **Ambiente** para Administrador e rotinas de backup/restauração PostgreSQL. O Docker local continua funcionando pelos comandos abaixo.
+
+- [Publicar no servidor](docs/07-devops/deployment.md): domínio/HTTPS, configuração, atualização e recuperação.
+- [Backups e restauração](docs/07-devops/backups.md): arquivo com SHA-256, teste isolado e exemplos de timers.
+- [Monitoramento](docs/07-devops/monitoring.md): prontidão, logs e teste de e-mail para o próprio acesso.
+
+A configuração está pronta para ser preenchida e validada; a integração no GitHub não cria hospedagem nem publica um domínio. Para colocar online, ainda são necessários servidor, domínio, SMTP e armazenamento externo de cópias.
 
 ## OFX e conciliação bancária
 

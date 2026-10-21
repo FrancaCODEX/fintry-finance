@@ -1,0 +1,82 @@
+name: fintry-prod
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-fintry}
+      POSTGRES_USER: fintry
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD no arquivo de produção}
+    volumes:
+      - database:/var/lib/postgresql/data
+    networks: [database]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    logging: *logging
+  app:
+    image: ${FINTRY_IMAGE:-fintry:production}
+    build:
+      context: ..
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-fintry}
+      DB_USER: fintry
+      DB_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD}
+      APP_BASE_URL: https://${FINTRY_DOMAIN:?Configure FINTRY_DOMAIN}
+      MAIL_ENABLED: "true"
+      MAIL_FROM: ${MAIL_FROM:?Configure MAIL_FROM}
+      SMTP_HOST: ${SMTP_HOST:?Configure SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:?Configure SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:?Configure SMTP_PASSWORD}
+      SMTP_AUTH: "true"
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
+      SMTP_SSL: ${SMTP_SSL:-false}
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError -Duser.home=/tmp
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [database, web]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 1g
+    stop_grace_period: 45s
+    restart: unless-stopped
+    logging: *logging
+  proxy:
+    image: caddy:2-alpine
+    environment:
+      FINTRY_DOMAIN: ${FINTRY_DOMAIN:?Configure FINTRY_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?Configure ACME_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - certificates:/data
+      - proxy-config:/config
+    networks: [web]
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    logging: *logging
+volumes:
+  database:
+  certificates:
+  proxy-config:
+networks:
+  database:
+    internal: true
+  web:

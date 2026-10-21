@@ -23,8 +23,11 @@ jobs:
       - name: Version increment against PR base
         if: github.event_name == 'pull_request'
         run: python3 scripts/check_release.py --base "${{ github.event.pull_request.base.sha }}"
+      - name: Host operation failure paths
+        run: python3 -m unittest discover -s scripts -p test_ops.py -v
       - name: JavaScript syntax
         run: |
+          node --check backend/src/main/resources/static/operations.js
           node --check backend/src/main/resources/static/ux.js
           node --check backend/src/main/resources/static/pending.js
           node --check backend/src/main/resources/static/imports.js
@@ -43,6 +46,8 @@ jobs:
         run: sh mvnw -B -Dspring.profiles.active=postgres-test verify
       - name: Docker image
         run: docker build -t fintry-ci .
+      - name: Production TLS, SMTP and backup restoration
+        run: python3 scripts/production_smoke.py
       - uses: actions/upload-artifact@v4
         with:
           name: fintry-java21

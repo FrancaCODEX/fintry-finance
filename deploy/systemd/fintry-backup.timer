@@ -1,0 +1,11 @@
+[Unit]
+Description=Backup diário do Fintry às 03h de Brasília
+
+[Timer]
+OnCalendar=*-*-* 06:00:00 UTC
+Persistent=true
+RandomizedDelaySec=300
+Unit=fintry-backup.service
+
+[Install]
+WantedBy=timers.target

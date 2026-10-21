@@ -17,6 +17,15 @@ public class SessionAccessFilter extends OncePerRequestFilter {
   }
 
   @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    // Probes must keep working during a database outage, even with an old session cookie.
+    return request.getMethod().equals("GET")
+        && java.util.Set.of(
+                "/actuator/health", "/actuator/health/liveness", "/actuator/health/readiness")
+            .contains(request.getServletPath());
+  }
+
+  @Override
   protected void doFilterInternal(
       HttpServletRequest req, HttpServletResponse res, FilterChain chain)
       throws ServletException, IOException {

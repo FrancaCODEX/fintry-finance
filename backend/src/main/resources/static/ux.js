@@ -176,6 +176,7 @@ const uxPageNames = {
   pending: "Central de pendências",
   budgets: "Orçamentos",
   imports: "Importar CSV",
+  operations: "Ambiente",
   reconciliation: "Conciliação bancária",
   examples: "Dados de exemplo",
   accounts: "Contas",

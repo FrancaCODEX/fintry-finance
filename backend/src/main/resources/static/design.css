@@ -2020,3 +2020,115 @@ body.navigation-open {
     flex-direction: column;
   }
 }
+
+/* Administration diagnostics: company-safe status without infrastructure secrets. */
+.operations-banner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 26px;
+  margin-bottom: 22px;
+}
+.operations-banner > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.operations-banner h2 {
+  margin: 8px 0;
+  font-size: 1.25rem;
+}
+.operations-banner p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.operations-status-dot {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 0 7px var(--soft);
+}
+.operations-status-dot.is-up {
+  background: var(--green);
+}
+.operations-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.operations-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.operations-card-icon {
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  background: var(--soft);
+  color: var(--green);
+}
+.operations-card-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.operations-card h2 {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin: 22px 0 10px;
+}
+.operations-card > strong {
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+.operations-card p {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.8;
+  flex: 1;
+}
+.operations-version {
+  margin: 22px 0;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.operations-version h2 {
+  margin: 8px 0 0;
+  font-size: 1.15rem;
+}
+.operations-version p {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+@media (max-width: 1100px) {
+  .operations-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .operations-banner {
+    padding: 20px;
+    flex-wrap: wrap;
+  }
+  .operations-banner > .badge {
+    margin-left: 34px;
+  }
+  .operations-card {
+    padding: 20px;
+  }
+  .operations-version {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
+    gap: 12px;
+  }
+}

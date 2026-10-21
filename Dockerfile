@@ -9,8 +9,12 @@ RUN sh ./mvnw -B -DskipTests package
 
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
-RUN groupadd --system fintry && useradd --system --gid fintry fintry
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system fintry && useradd --system --gid fintry fintry
 COPY --from=build --chown=fintry:fintry /build/target/fintry.jar app.jar
 USER fintry
 EXPOSE 8080
+HEALTHCHECK --interval=15s --timeout=5s --start-period=90s --retries=5 \
+  CMD curl --fail --silent --max-time 4 http://localhost:8080/actuator/health/readiness > /dev/null || exit 1
 ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -3,3 +3,9 @@
 **/target
 **/data
 .env
+
+.env.*
+**/production.env
+backups
+*.dump
+*.dump.json

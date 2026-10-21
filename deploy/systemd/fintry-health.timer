@@ -1,0 +1,10 @@
+[Unit]
+Description=Verificar o Fintry a cada cinco minutos
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Unit=fintry-health.service
+
+[Install]
+WantedBy=timers.target

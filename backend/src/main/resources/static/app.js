@@ -424,6 +424,7 @@ const auditActions = {
   SALE_CREATE: "Criou venda",
   SALE_CONFIRM: "Confirmou venda",
   SALE_CANCEL: "Cancelou venda",
+  OPERATIONS_MAIL_TEST: "Testou envio de e-mail",
   STATEMENT_IMPORT: "Importou movimento bancário",
   RECONCILE_LINK: "Conciliou lançamento",
   RECONCILE_CREATE: "Criou lançamento do extrato",
@@ -447,6 +448,7 @@ const resources = {
   PRODUCT: "Produtos e serviços",
   PROPOSAL: "Propostas comerciais",
   RECONCILIATION: "Conciliação bancária",
+  OPERATIONS: "Ambiente",
   STOCK: "Estoque",
   SALE: "Vendas",
   BUDGET: "Orçamentos",
@@ -1002,6 +1004,7 @@ async function loadData(id) {
   if (!root.querySelector(".shell")) shell();
   if (["services", "proposals"].includes(state.page)) return loadCommercial(id);
   if (state.page === "imports") return loadImports(id);
+  if (state.page === "operations") return loadOperations(id);
   if (state.page === "reconciliation") return loadReconciliation(id);
   if (["budgets", "examples"].includes(state.page)) return loadPlanning(id);
   if (state.page === "pending") return loadPending(id);
@@ -1726,6 +1729,7 @@ async function act(btn) {
   if (navigationAction(btn)) return;
   if (action === "theme") return window.fintryTheme.toggle();
   if (await importAction(btn)) return;
+  if (await operationsAction(btn)) return;
   if (await reconciliationAction(btn)) return;
   if (await planningAction(btn)) return;
   if (await pendingAction(btn)) return;
