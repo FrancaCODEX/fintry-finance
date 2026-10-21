@@ -2521,3 +2521,90 @@ body.navigation-open {
     flex-direction: column;
   }
 }
+
+/* Mensalidades: leitura rápida e ações acessíveis no celular. */
+.subscription-invoices {
+  margin-top: 1.5rem;
+}
+.subscription-invoices .plan-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.subscription-invoice-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+.subscription-invoice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1.25rem;
+  min-width: 0;
+}
+.subscription-invoice > div:first-child {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.subscription-invoice strong {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+.subscription-invoice small,
+.subscription-invoice > div > span:not(.badge) {
+  color: var(--muted);
+}
+.subscription-invoice .badge {
+  justify-self: start;
+}
+.subscription-invoice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+.subscription-order {
+  display: grid;
+  gap: 0.35rem;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.subscription-order strong {
+  font-size: 2rem;
+  color: var(--green);
+}
+.subscription-empty {
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  margin-top: 1rem;
+}
+.subscription-empty p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+@media (max-width: 640px) {
+  .subscription-invoice {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+  .subscription-invoice-actions {
+    justify-content: stretch;
+  }
+  .subscription-invoice-actions .btn {
+    flex: 1 1 100%;
+  }
+}

@@ -69,3 +69,12 @@ fintry:
 
   saas:
     mode: ${SAAS_MODE:EVALUATION}
+    payments:
+      enabled: ${SAAS_PAYMENTS_ENABLED:false}
+      environment: ${SAAS_PAYMENTS_ENVIRONMENT:SANDBOX}
+      account: ${SAAS_PAYMENTS_ACCOUNT:}
+      api-key: ${SAAS_PAYMENTS_API_KEY:}
+      webhook-token: ${SAAS_PAYMENTS_WEBHOOK_TOKEN:}
+      essential: ${SAAS_PRICE_ESSENTIAL:}
+      pro: ${SAAS_PRICE_PRO:}
+      business: ${SAAS_PRICE_BUSINESS:}

@@ -29,10 +29,18 @@ public class SecurityConfig {
                 c.ignoringRequestMatchers(
                     org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
                         .withDefaults()
-                        .matcher(org.springframework.http.HttpMethod.POST, "/webhooks/asaas/{id}")))
+                        .matcher(org.springframework.http.HttpMethod.POST, "/webhooks/asaas/{id}"),
+                    org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
+                        .withDefaults()
+                        .matcher(
+                            org.springframework.http.HttpMethod.POST,
+                            "/webhooks/fintry-subscription/asaas")))
         .authorizeHttpRequests(
             a ->
-                a.requestMatchers(org.springframework.http.HttpMethod.POST, "/webhooks/asaas/{id}")
+                a.requestMatchers(
+                        org.springframework.http.HttpMethod.POST,
+                        "/webhooks/asaas/{id}",
+                        "/webhooks/fintry-subscription/asaas")
                     .permitAll()
                     .requestMatchers(
                         "/",
