@@ -9,3 +9,7 @@
 backups
 *.dump
 *.dump.json
+**/*.dump
+**/*.dump.json
+**/.env
+**/.env.*
