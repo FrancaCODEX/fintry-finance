@@ -2,6 +2,26 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.16.0] - 2026-10-21
+
+### Funcionalidades
+
+- Catálogo SaaS Essencial, Profissional e Gestão com limites de pessoas, contas e armazenamento; todos os planos mantêm os módulos e lançamentos sem limite de quantidade. Preços permanecem a definir pelo responsável comercial.
+- Novas empresas no modo comercial iniciam teste de 14 dias. Empresas existentes recebem acesso legado preservado, sem bloqueio retroativo.
+- Solicitação de plano/renovação, cancelamento da solicitação e programação de encerramento ao fim do período ativo. Selecionar um plano não confirma pagamento nem concede acesso pago.
+- Ativação manual pelo operador via ferramenta local de administração, com conferência comercial, referência, prazo, auditoria, transação, revalidação de capacidade e repetição idempotente. Não há endpoint público de ativação.
+- Ambiente de avaliação permite experimentar planos sem cobrança; produção exige modo comercial e não transforma simulação em assinatura paga.
+
+### Visual, melhorias e correções
+
+- Página Plano e assinatura com cartões comparativos, indicadores de capacidade, estado de acesso e histórico de solicitações, em claro/escuro e celular.
+- Limites aplicados no servidor com bloqueio por empresa, inclusive convites, reativações, importação de exemplos e uploads simultâneos em lançamentos diferentes. Revogar convite libera sua vaga.
+- Vencimento preserva consultas, exportações, comprovantes, segurança e solicitações de plano. Remoção de anexos continua disponível para liberar espaço. Pagamentos Asaas e confirmação de cobranças existentes continuam sendo processados.
+
+### Operação comercial
+
+- A contratação e os períodos pagos são manuais nesta etapa. Preços, termos, cobrança automática da assinatura, nota fiscal, recuperação de inadimplência e homologação da conta recebedora do próprio Fintry continuam pendentes. Nenhum plano foi vendido nem pagamento real efetuado nesta entrega.
+
 ## [0.15.0] - 2026-10-21
 
 ### Funcionalidades

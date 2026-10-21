@@ -11,6 +11,7 @@ import tempfile
 import time
 
 import ops
+import subscription_ops
 
 
 def command(args, **kwargs):
@@ -290,8 +291,34 @@ def main():
                     break
                 time.sleep(0.2)
             assert messages["total"] == 2
+            # SaaS activation exercises the real PostgreSQL operator transaction, without payment calls.
+            subscription = request("GET", "/api/v1/subscription")
+            assert subscription["status"] == "TRIAL"
+            request("POST", "/api/v1/subscription/requests", {"plan": "PRO", "revision": subscription["revision"]})
+            pending = request("GET", "/api/v1/subscription")["requests"][0]
+            statement = subscription_ops.activation_sql(pending["id"], 30, "fixture-ci-authorized")
+            subscription_ops.sql(compose, statement)
+            activated = request("GET", "/api/v1/subscription")
+            assert activated["status"] == "ACTIVE" and activated["plan"] == "PRO"
+            subscription_ops.sql(compose, statement)
+            assert request("GET", "/api/v1/subscription")["paidUntil"] == activated["paidUntil"]
+
             # Add demo business data, including PDFs in bytea, before the backup round-trip.
             request("POST", "/api/v1/finance/sample", {}, 201)
+            # Usage may increase after requesting a downgrade; activation must recheck it under lock.
+            current = request("GET", "/api/v1/subscription")
+            requested = request("POST", "/api/v1/subscription/requests", {"plan": "ESSENTIAL", "revision": current["revision"]})
+            request("POST", "/api/v1/finance/accounts", {"name": "Conta para validar capacidade", "initialBalance": 0}, 201)
+            pending = requested["requests"][0]
+            try:
+                subscription_ops.sql(compose, subscription_ops.activation_sql(pending["id"], 30, "fixture-capacity-check"))
+                raise AssertionError("Ativação acima do limite foi aceita")
+            except ops.OpsError:
+                pass
+            current = request("GET", "/api/v1/subscription")
+            assert current["plan"] == "PRO" and current["paidUntil"] == activated["paidUntil"]
+            assert current["requests"][0]["status"] == "PENDING"
+            request("POST", "/api/v1/subscription/requests/" + pending["id"] + "/cancel", {"revision": current["revision"]})
             query = "SELECT json_build_object('companies',(SELECT count(*) FROM companies),'entries',(SELECT count(*) FROM financial_entries),'attachments',(SELECT count(*) FROM entry_attachments),'attachmentsHash',(SELECT md5(coalesce(string_agg(md5(encode(content,'hex')),',' ORDER BY id),'')) FROM entry_attachments),'entriesHash',(SELECT md5(coalesce(string_agg(id::text||amount::text||status,',' ORDER BY id),'')) FROM financial_entries),'schema',(SELECT count(*) FROM flyway_schema_history WHERE success))"
 
             def snapshot(database):
@@ -363,7 +390,7 @@ def main():
             }
             command(base + ["start", "db"], timeout=60)
             print(
-                "PASS produção: HTTPS/certificado interno validado, headers, cookies Secure, SMTP STARTTLS autenticado e recuperação no capturador, PostgreSQL, backup/restauração com comprovantes íntegros, corrupção recusada, origem preservada e prontidão/liveness separados."
+                "PASS produção: HTTPS/certificado interno validado, headers, cookies Secure, SMTP STARTTLS autenticado e recuperação no capturador, PostgreSQL, ativação manual SaaS idempotente, backup/restauração com comprovantes íntegros, corrupção recusada, origem preservada e prontidão/liveness separados."
             )
         except Exception:
             # Only disposable CI fixtures exist in this generated project; redact even their passwords.

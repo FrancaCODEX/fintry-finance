@@ -24,6 +24,8 @@ public class AttachmentService {
   private final com.fintry.audit.AuditService audit;
   private final EntryRepository entries;
   private final AttachmentRepository attachments;
+  private final com.fintry.subscription.SubscriptionService subscriptions;
+  private final com.fintry.company.repository.CompanyRepository companies;
 
   public record View(
       UUID id,
@@ -128,6 +130,10 @@ public class AttachmentService {
   @Transactional
   public View upload(UUID entryId, MultipartFile file) {
     var user = current.get();
+    subscriptions.check(
+        user.getCompanyId(),
+        com.fintry.subscription.SubscriptionService.Resource.STORAGE,
+        file.getSize());
     entries.lock(entryId, user.getCompanyId()).orElseThrow(this::missing);
     if (file.isEmpty()) throw invalid("O arquivo está vazio.");
     if (file.getSize() > MAX_BYTES)
@@ -174,6 +180,7 @@ public class AttachmentService {
 
   @Transactional
   public void delete(UUID entryId, UUID id) {
+    companies.lock(current.companyId()).orElseThrow(this::missing);
     entries.lock(entryId, current.companyId()).orElseThrow(this::missing);
     var a =
         attachments

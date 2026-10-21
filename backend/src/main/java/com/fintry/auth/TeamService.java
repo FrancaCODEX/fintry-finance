@@ -25,6 +25,7 @@ public class TeamService {
   private final PasswordEncoder encoder;
   private final AuditService audit;
   private final EntityManager em;
+  private final com.fintry.subscription.SubscriptionService subscriptions;
 
   public record InviteInput(
       @NotBlank @Size(max = 120) String name,
@@ -145,12 +146,17 @@ public class TeamService {
     if (users.existsByEmail(email))
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "Este e-mail não está disponível. Confira os usuários da equipe.");
+    subscriptions.check(
+        actor.getCompanyId(), com.fintry.subscription.SubscriptionService.Resource.MEMBERS, 1);
     var u = new AppUser();
     u.setCompanyId(actor.getCompanyId());
     u.setName(input.name().strip());
     u.setEmail(email);
     u.setRole(input.role());
     u.setActive(false);
+    if (!u.isInvited())
+      subscriptions.check(
+          actor.getCompanyId(), com.fintry.subscription.SubscriptionService.Resource.MEMBERS, 1);
     u.setInvited(true);
     u.setPasswordHash(encoder.encode(UUID.randomUUID().toString()));
     users.saveAndFlush(u);
@@ -172,6 +178,9 @@ public class TeamService {
         && (!input.active() || input.role() != AppUser.Role.ADMIN)
         && users.countByCompanyIdAndRoleAndActive(u.getCompanyId(), AppUser.Role.ADMIN, true) <= 1)
       throw invalid("Mantenha pelo menos um Administrador ativo.");
+    if (input.active() && !u.isActive() && !u.isInvited())
+      subscriptions.check(
+          actor.getCompanyId(), com.fintry.subscription.SubscriptionService.Resource.MEMBERS, 1);
     var before = snapshot(u);
     u.setName(input.name().strip());
     u.setRole(input.role());
@@ -189,6 +198,9 @@ public class TeamService {
     var u = member(id, actor.getCompanyId());
     if (u.isActive())
       throw invalid("O usuário já está ativo. Para trocar a senha, use a recuperação de acesso.");
+    if (!u.isInvited())
+      subscriptions.check(
+          actor.getCompanyId(), com.fintry.subscription.SubscriptionService.Resource.MEMBERS, 1);
     u.setInvited(true);
     u.setAuthVersion(u.getAuthVersion() + 1);
     tokens.revoke(u.getId(), Instant.now());
@@ -204,6 +216,7 @@ public class TeamService {
     if (!u.isInvited()) throw invalid("Este usuário não tem convite pendente.");
     tokens.revoke(u.getId(), Instant.now());
     u.setAuthVersion(u.getAuthVersion() + 1);
+    u.setInvited(false);
     audit.eventAs(actor, "INVITE_REVOKE", "USER", u.getId(), u.getName());
   }
 }

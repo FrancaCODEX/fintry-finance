@@ -42,6 +42,7 @@ class ProductionGuardTests {
     var values =
         new String[][] {
           {"fintry.base-url", "http://localhost:8080"},
+          {"fintry.saas.mode", "EVALUATION"},
           {"fintry.base-url", "https://user:secret@host.invalid"},
           {"fintry.base-url", "https://host.invalid/path"},
           {"spring.datasource.url", "jdbc:h2:mem:test"},

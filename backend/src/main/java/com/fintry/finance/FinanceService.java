@@ -25,6 +25,7 @@ public class FinanceService {
   private final com.fintry.audit.AuditService audit;
   private final com.fintry.directory.DirectoryService directory;
   private final AccountRepository accounts;
+  private final com.fintry.subscription.SubscriptionService subscriptions;
   private final EntryRepository entries;
   private final StatementLineRepository statementLines;
   private final com.fintry.billing.BillingChargeRepository billingCharges;
@@ -203,6 +204,8 @@ public class FinanceService {
 
   @Transactional
   public AccountView createAccount(AccountInput input) {
+    subscriptions.check(
+        current.companyId(), com.fintry.subscription.SubscriptionService.Resource.ACCOUNTS, 1);
     FinancialAccount a = new FinancialAccount();
     a.setCompanyId(current.companyId());
     a.setName(input.name().strip());

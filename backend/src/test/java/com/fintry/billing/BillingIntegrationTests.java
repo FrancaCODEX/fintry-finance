@@ -20,6 +20,7 @@ import tools.jackson.databind.json.JsonMapper;
     properties = {
       "spring.profiles.default=test",
       "fintry.mail.enabled=false",
+      "fintry.saas.mode=COMMERCIAL",
       "fintry.billing.master-key=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
     })
 class BillingIntegrationTests {
@@ -30,6 +31,7 @@ class BillingIntegrationTests {
   final String today = LocalDate.now(ZoneId.of("America/Sao_Paulo")).toString();
   @Autowired MockAsaas provider;
   @Autowired BillingConnectionRepository connections;
+  @Autowired com.fintry.subscription.SubscriptionRepository subscriptions;
   @Autowired com.fintry.auth.UserRepository users;
 
   @TestConfiguration
@@ -572,6 +574,37 @@ class BillingIntegrationTests {
         "REVIEW",
         b.request("GET", "/billing", null, 200).path("content").get(0).path("status").asText());
     assertEquals(1, b.request("GET", "/finance/entries", null, 200).path("totalElements").asInt());
+  }
+
+  @Test
+  void realProviderReceiptStillSettlesWhenSaasTrialHasExpired() throws Exception {
+    var b = new Browser().signup();
+    var config = configure(b, "PRODUCTION");
+    String account = b.account("Saldo Asaas após teste");
+    String entry = entry(b, account);
+    var c = issue(b, entry, "PIX");
+    var p = payment(c);
+    var user = users.findByEmail(b.email).orElseThrow();
+    var sub = subscriptions.findById(user.getCompanyId()).orElseThrow();
+    sub.setTrialEndsAt(Instant.now().minusSeconds(1));
+    subscriptions.saveAndFlush(sub);
+    b.request(
+        "POST",
+        "/finance/accounts",
+        Map.of("name", "Operação bloqueada", "initialBalance", 0),
+        402);
+    p.put("status", "RECEIVED");
+    event(b, config, p.get("id").toString(), token(b), 204);
+    assertEquals("PAID", detail(b, entry).path("status").asText());
+    b.request("POST", "/billing/" + c.path("id").asText() + "/refresh", Map.of(), 200);
+    assertEquals(
+        0,
+        new java.math.BigDecimal("97.50")
+            .compareTo(
+                b.request("GET", "/finance/accounts", null, 200)
+                    .get(0)
+                    .path("balance")
+                    .decimalValue()));
   }
 
   @Test
