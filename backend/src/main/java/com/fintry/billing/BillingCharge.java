@@ -75,6 +75,9 @@ public class BillingCharge extends BaseEntity {
   private LocalDate settledDate;
   private UUID feeEntryId;
 
+  @Column(nullable = false)
+  private boolean released;
+
   @Column(length = 255)
   private String message;
 }

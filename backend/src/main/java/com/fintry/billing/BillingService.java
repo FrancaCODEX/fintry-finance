@@ -485,7 +485,12 @@ public class BillingService {
       b.setInvoiceUrl(url(p, "invoiceUrl"));
       b.setBankSlipUrl(url(p, "bankSlipUrl"));
       if (p.path("deleted").asBoolean(false)) status = "DELETED";
-      if (b.getSettledDate() != null && !status.equals("RECEIVED")) {
+      if (b.isReleased() && !status.equals("DELETED")) {
+        review(
+            b,
+            "Cobrança cancelada foi reativada no Asaas. Revise o lançamento; nenhuma baixa"
+                + " automática será realizada.");
+      } else if (b.getSettledDate() != null && !status.equals("RECEIVED")) {
         review(
             b,
             "O recebimento mudou no Asaas. Confira estorno ou contestação; o financeiro foi"
@@ -505,6 +510,7 @@ public class BillingService {
             b.setMessage("Pagamento confirmado, aguardando disponibilização no Asaas.");
           }
           case "DELETED" -> {
+            b.setReleased(true);
             b.setStatus(CANCELLED);
             b.setMessage(
                 "Cobrança cancelada no Asaas. O lançamento permanece disponível no financeiro.");

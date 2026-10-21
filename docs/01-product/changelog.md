@@ -14,7 +14,7 @@ As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem vers
 ### Visual, melhorias e correções
 
 - Página Cobranças com destaque do ambiente, cartões de recebimento, estados, detalhes e ações em claro/escuro e celular.
-- Proteção contra alterações manuais conflitantes no lançamento, venda, série e tarifa; cancelamento externo preserva o lançamento e o estoque.
+- Proteção contra alterações manuais conflitantes no lançamento, venda, série e tarifa; cancelamento externo preserva o lançamento e o estoque. Cobranças reativadas no Asaas após cancelamento exigem revisão e não dão baixa em lançamentos que já puderam ser corrigidos.
 - Auditoria sem segredos, limites de payload de webhook, URLs do provedor verificadas e documentação de homologação, operação e recuperação da chave de proteção.
 
 ### Limitações de ativação

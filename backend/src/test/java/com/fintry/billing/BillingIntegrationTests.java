@@ -532,6 +532,49 @@ class BillingIntegrationTests {
   }
 
   @Test
+  void restoredCancelledChargeCannotPayAnAlteredEntry() throws Exception {
+    var b = new Browser().signup();
+    var config = configure(b, "PRODUCTION");
+    String account = b.account("Asaas cancelamento");
+    String entry = entry(b, account);
+    var c = issue(b, entry, "BOLETO");
+    var p = payment(c);
+    b.request("POST", "/billing/" + c.path("id").asText() + "/cancel", Map.of(), 200);
+    String another = b.account("Banco após cancelamento");
+    b.request(
+        "PUT",
+        "/finance/entries/" + entry,
+        Map.of(
+            "accountId",
+            another,
+            "description",
+            "Receita corrigida",
+            "category",
+            "Serviços",
+            "type",
+            "INCOME",
+            "amount",
+            "100.00",
+            "dueDate",
+            today,
+            "paid",
+            false,
+            "contactId",
+            b.contactId),
+        200);
+    p.put("deleted", false);
+    p.put("status", "RECEIVED");
+    event(b, config, p.get("id").toString(), token(b), 204);
+    event(b, config, p.get("id").toString(), token(b), 204);
+    b.request("POST", "/billing/" + c.path("id").asText() + "/refresh", Map.of(), 200);
+    assertEquals("PENDING", detail(b, entry).path("status").asText());
+    assertEquals(
+        "REVIEW",
+        b.request("GET", "/billing", null, 200).path("content").get(0).path("status").asText());
+    assertEquals(1, b.request("GET", "/finance/entries", null, 200).path("totalElements").asInt());
+  }
+
+  @Test
   void encryptedSecretsAreBoundToTenantAndPurpose() {
     var s = new BillingSecrets("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=");
     var company = UUID.randomUUID();
