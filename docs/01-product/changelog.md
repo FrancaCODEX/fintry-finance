@@ -12,7 +12,7 @@ As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem vers
 - Rascunho editável, negociação, recusa e cancelamento; retorno de negociação para rascunho permite revisar validade e condições. Revisão impede sobrescrever alterações mais recentes.
 - Aprovação interna gera uma venda confirmada e a receita em uma transação. Estoque/cadastros e validade são conferidos novamente, mantendo nomes/preços acordados. Repetir aprovação devolve a venda existente.
 - Proposta aprovada permanece como histórico após cancelar a venda; não gera uma segunda venda. Correções financeiras e devoluções de estoque seguem pelo fluxo de cancelamento da venda.
-- PDF comercial com dados da empresa, cliente, validade, situação, itens, total, observações e paginação. Download autenticado por empresa; sem envio automático de e-mail ou assinatura digital.
+- PDF comercial com fonte incorporada, dados da empresa, cliente, validade, situação, itens, total, observações e paginação. Download autenticado por empresa; sem envio automático de e-mail ou assinatura digital.
 
 ### Visual e uso
 

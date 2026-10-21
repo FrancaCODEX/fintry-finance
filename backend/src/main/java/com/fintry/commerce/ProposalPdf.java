@@ -48,8 +48,16 @@ public class ProposalPdf {
     for (int cp : value.codePoints().toArray()) {
       String ch = new String(Character.toChars(cp));
       if (font.getStringWidth(line + ch) / 1000 * size > width && line.length() > 0) {
-        result.add(line.toString());
-        line.setLength(0);
+        int space = line.lastIndexOf(" ");
+        if (space > 0) {
+          result.add(line.substring(0, space));
+          var rest = line.substring(space + 1);
+          line.setLength(0);
+          line.append(rest);
+        } else {
+          result.add(line.toString());
+          line.setLength(0);
+        }
       }
       line.append(ch);
     }
@@ -63,62 +71,73 @@ public class ProposalPdf {
 
   public byte[] export(ProposalService.View p) throws IOException {
     var company = companies.findById(current.companyId()).orElseThrow();
-    var regular = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
-    var bold = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
-    var blocks = new ArrayList<List<String>>();
-    String status =
-        switch (p.status()) {
-          case DRAFT -> "Rascunho";
-          case OPEN -> "Em negociação";
-          case APPROVED -> "Aprovada";
-          case REJECTED -> "Recusada";
-          case CANCELLED -> "Cancelada";
-        };
-    blocks.add(wrap(p.title(), bold, 14, 500));
-    blocks.add(
-        wrap(
-            "Cliente: " + Objects.toString(p.contactName(), "Consumidor final"), regular, 10, 500));
-    blocks.add(
-        List.of(
-            "Validade: "
-                + p.validUntil().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                + " | "
-                + status
-                + (p.expired() ? " | Validade expirada" : "")));
-    for (var i : p.items()) {
-      var row = new ArrayList<String>();
-      row.addAll(wrap(i.sku() + " · " + i.productName(), bold, 10, 500));
-      row.addAll(
+    try (var doc = new PDDocument();
+        var bytes = new ByteArrayOutputStream();
+        var fontFile =
+            PDDocument.class.getResourceAsStream(
+                "/org/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf")) {
+      if (fontFile == null) throw new IOException("Fonte da proposta indisponível.");
+      var regular = PDType0Font.load(doc, fontFile);
+      var bold = regular;
+      var blocks = new ArrayList<List<String>>();
+      String status =
+          switch (p.status()) {
+            case DRAFT -> "Rascunho";
+            case OPEN -> "Em negociação";
+            case APPROVED -> "Aprovada";
+            case REJECTED -> "Recusada";
+            case CANCELLED -> "Cancelada";
+          };
+      blocks.add(wrap(p.title(), bold, 14, 500));
+      blocks.add(
           wrap(
-              (i.kind() == Product.Kind.SERVICE ? "Serviço" : "Produto")
-                  + " | "
-                  + i.quantity().stripTrailingZeros().toPlainString()
-                  + " "
-                  + i.unit()
-                  + " x "
-                  + money(i.unitPrice())
-                  + " = "
-                  + money(i.total()),
+              "Cliente: " + Objects.toString(p.contactName(), "Consumidor final"),
               regular,
               10,
               500));
-      blocks.add(row);
-    }
-    blocks.add(List.of("TOTAL: " + money(p.total())));
-    if (p.notes() != null && !p.notes().isBlank())
-      blocks.add(wrap("Observações: " + p.notes(), regular, 10, 500));
-    blocks.add(
-        List.of(
-            "A aprovação é registrada pela equipe no Fintry.",
-            "Proposta comercial. Não é nota fiscal nem comprovante de pagamento."));
-    try (var doc = new PDDocument();
-        var bytes = new ByteArrayOutputStream()) {
+      blocks.add(
+          List.of(
+              "Validade: "
+                  + p.validUntil().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                  + " | "
+                  + status
+                  + (p.expired() ? " | Validade expirada" : "")));
+      for (var i : p.items()) {
+        var row = new ArrayList<String>();
+        row.addAll(wrap(i.sku() + " · " + i.productName(), bold, 10, 500));
+        row.addAll(
+            wrap(
+                (i.kind() == Product.Kind.SERVICE ? "Serviço" : "Produto")
+                    + " | "
+                    + i.quantity().stripTrailingZeros().toPlainString()
+                    + " "
+                    + i.unit()
+                    + " x "
+                    + money(i.unitPrice())
+                    + " = "
+                    + money(i.total()),
+                regular,
+                10,
+                500));
+        blocks.add(row);
+      }
+      blocks.add(List.of("TOTAL: " + money(p.total())));
+      if (p.notes() != null && !p.notes().isBlank())
+        blocks.add(wrap("Observações: " + p.notes(), regular, 10, 500));
+      blocks.add(
+          List.of(
+              "A aprovação é registrada pela equipe no Fintry.",
+              "Proposta comercial. Não é nota fiscal nem comprovante de pagamento."));
       PDPageContentStream content = null;
       float y = 0;
       int page = 0;
       try {
+        int blockIndex = 0;
         for (var block : blocks) {
-          if (content == null || y - block.size() * 16 - 12 < 65) {
+          boolean total = block.size() == 1 && block.get(0).startsWith("TOTAL:");
+          int size = blockIndex == 0 || total ? 14 : 10;
+          int leading = size + 6;
+          if (content == null || y - block.size() * leading - 16 < 65) {
             if (content != null) content.close();
             var sheet = new PDPage(PDRectangle.A4);
             doc.addPage(sheet);
@@ -141,11 +160,26 @@ public class ProposalPdf {
             text(content, regular, 8, 40, 35, "Proposta #" + p.number() + " | Página " + page);
             y = 725;
           }
-          for (var line : block) {
-            text(content, regular, 10, 40, y, line);
-            y -= 16;
+          if (total) {
+            content.setNonStrokingColor(0.93f, 0.97f, 0.94f);
+            content.addRect(32, y - 9, 531, 32);
+            content.fill();
+            content.setNonStrokingColor(0.06f, 0.25f, 0.18f);
           }
-          y -= 12;
+          for (var line : block) {
+            text(content, regular, size, 40, y, line);
+            y -= leading;
+          }
+          content.setNonStrokingColor(0f, 0f, 0f);
+          if (blockIndex >= 3 && blockIndex < 3 + p.items().size()) {
+            content.setStrokingColor(0.85f, 0.90f, 0.87f);
+            content.setLineWidth(0.5f);
+            content.moveTo(40, y + 4);
+            content.lineTo(555, y + 4);
+            content.stroke();
+          }
+          y -= 16;
+          blockIndex++;
         }
       } finally {
         if (content != null) content.close();

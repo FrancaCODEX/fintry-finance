@@ -182,6 +182,84 @@ class ProposalIntegrationTests {
   }
 
   @Test
+  void upgradesExistingProductsAndSaleItemsWithoutChangingStockOrAgreedValues() throws Exception {
+    try (var pool = new com.zaxxer.hikari.HikariDataSource()) {
+      pool.setJdbcUrl(
+          "jdbc:h2:mem:commercial-upgrade-"
+              + UUID.randomUUID()
+              + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1");
+      pool.setUsername("sa");
+      pool.setPassword("");
+      pool.setMaximumPoolSize(2);
+      org.flywaydb.core.Flyway.configure()
+          .dataSource(pool)
+          .locations("classpath:db/demo")
+          .target("8")
+          .load()
+          .migrate();
+      var company = UUID.randomUUID();
+      var product = UUID.randomUUID();
+      var sale = UUID.randomUUID();
+      try (var c = pool.getConnection();
+          var st = c.createStatement()) {
+        st.executeUpdate(
+            "insert into companies(id,legal_name,document,created_at,updated_at) values('"
+                + company
+                + "','Legado','98765432000100',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)");
+        st.executeUpdate(
+            "insert into"
+                + " products(id,company_id,sku,name,unit,price,cost,quantity,minimum,active,created_at,updated_at)"
+                + " values('"
+                + product
+                + "','"
+                + company
+                + "','ANTIGO','Produto"
+                + " anterior','UN',10,2,7,1,true,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)");
+        st.executeUpdate(
+            "insert into"
+                + " sales(id,company_id,number,request_id,fingerprint,status,total,created_at,updated_at)"
+                + " values('"
+                + sale
+                + "','"
+                + company
+                + "',1,'"
+                + UUID.randomUUID()
+                + "','legado','DRAFT',20,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)");
+        st.executeUpdate(
+            "insert into"
+                + " sale_items(id,sale_id,product_id,sku,product_name,unit,quantity,unit_price,total,created_at,updated_at)"
+                + " values('"
+                + UUID.randomUUID()
+                + "','"
+                + sale
+                + "','"
+                + product
+                + "','ANTIGO','Nome acordado','UN',2,10,20,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)");
+      }
+      org.flywaydb.core.Flyway.configure()
+          .dataSource(pool)
+          .locations("classpath:db/demo")
+          .load()
+          .migrate();
+      try (var c = pool.getConnection();
+          var st = c.createStatement();
+          var r = st.executeQuery("select kind,quantity from products")) {
+        assertTrue(r.next());
+        assertEquals("PRODUCT", r.getString(1));
+        assertEquals(7, r.getBigDecimal(2).intValueExact());
+      }
+      try (var c = pool.getConnection();
+          var st = c.createStatement();
+          var r = st.executeQuery("select kind,product_name,total from sale_items")) {
+        assertTrue(r.next());
+        assertEquals("PRODUCT", r.getString(1));
+        assertEquals("Nome acordado", r.getString(2));
+        assertEquals(20, r.getBigDecimal(3).intValueExact());
+      }
+    }
+  }
+
+  @Test
   void servicesHaveNoStockAndTypeAndUnitAreImmutable() throws Exception {
     var b = new Browser().signup();
     var service = product(b, "SRV", "SERVICE", "0");
@@ -543,6 +621,8 @@ class ProposalIntegrationTests {
         response.headers().firstValue("content-disposition").orElse("").contains("attachment"));
     try (var doc = Loader.loadPDF(response.body())) {
       assertTrue(doc.getNumberOfPages() > 1);
+      for (var name : doc.getPage(0).getResources().getFontNames())
+        assertTrue(doc.getPage(0).getResources().getFont(name).isEmbedded());
       var text = new PDFTextStripper().getText(doc);
       assertTrue(text.contains("PDF-29"));
       assertTrue(text.contains("Escopo combinado"));
