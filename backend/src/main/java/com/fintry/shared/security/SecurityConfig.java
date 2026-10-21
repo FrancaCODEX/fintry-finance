@@ -17,7 +17,10 @@ public class SecurityConfig {
   }
 
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http, com.fintry.auth.UserRepository users)
+  SecurityFilterChain securityFilterChain(
+      HttpSecurity http,
+      com.fintry.auth.UserRepository users,
+      com.fintry.subscription.SubscriptionService subscriptions)
       throws Exception {
     http.securityContext(
             c -> c.securityContextRepository(new HttpSessionSecurityContextRepository()))
@@ -43,6 +46,7 @@ public class SecurityConfig {
                         "/imports.js",
                         "/operations.js",
                         "/billing.js",
+                        "/subscription.js",
                         "/reconciliation.js",
                         "/theme.js",
                         "/style.css",
@@ -70,6 +74,9 @@ public class SecurityConfig {
                         "/api/v1/operations/**")
                     .hasRole("ADMIN")
                     .requestMatchers(
+                        org.springframework.http.HttpMethod.POST, "/api/v1/subscription/**")
+                    .hasRole("ADMIN")
+                    .requestMatchers(
                         org.springframework.http.HttpMethod.PUT, "/api/v1/billing/connection")
                     .hasRole("ADMIN")
                     .requestMatchers(
@@ -88,6 +95,9 @@ public class SecurityConfig {
                     .authenticated())
         .addFilterBefore(
             new com.fintry.auth.SessionAccessFilter(users),
+            org.springframework.security.web.access.intercept.AuthorizationFilter.class)
+        .addFilterAfter(
+            new com.fintry.subscription.SubscriptionAccessFilter(subscriptions),
             org.springframework.security.web.access.intercept.AuthorizationFilter.class)
         .exceptionHandling(
             e ->

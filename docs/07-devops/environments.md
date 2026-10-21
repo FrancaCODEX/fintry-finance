@@ -14,3 +14,7 @@ A composição de produção usa projeto/volumes próprios e não reutiliza o ba
 ## Cobranças integradas
 
 `BILLING_MASTER_KEY` habilita a configuração Asaas; deve conter 32 bytes em Base64 e ser preservada fora do banco, em cofre do operador. Compose local e de produção repassam a variável. Não há chave padrão de desenvolvimento. Sem ela, o financeiro continua disponível e Cobranças explica a configuração pendente. Consulte [homologação e operação](../05-api/billing.md).
+
+## Planos SaaS
+
+O Compose local usa `SAAS_MODE=EVALUATION`; o de produção fixa `COMMERCIAL`. O perfil prod recusa simulação. A migração preserva o acesso legado das empresas existentes; simulações não são períodos pagos. Preços e ativação são administrados pelo operador, conforme [operação comercial](../05-api/subscriptions.md).

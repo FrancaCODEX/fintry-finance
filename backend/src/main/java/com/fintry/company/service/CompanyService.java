@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CompanyService {
 
   private final CompanyRepository repository;
+  private final com.fintry.subscription.SubscriptionService subscriptions;
   private final com.fintry.audit.AuditService audit;
 
   private java.util.Map<String, String> snapshot(Company c) {
@@ -45,7 +46,8 @@ public class CompanyService {
 
     Company company = CompanyMapper.toEntity(request);
 
-    Company savedCompany = repository.save(company);
+    Company savedCompany = repository.saveAndFlush(company);
+    subscriptions.initialize(savedCompany.getId());
 
     return CompanyMapper.toResponse(savedCompany);
   }

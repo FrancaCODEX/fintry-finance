@@ -23,5 +23,8 @@ public interface UserRepository
 
   Optional<AppUser> findByEmail(String email);
 
+  @org.springframework.data.jpa.repository.Query("select count(u) from AppUser u where u.companyId=:company and (u.active=true or u.invited=true)")
+  long subscriptionSeats(@org.springframework.data.repository.query.Param("company") UUID company);
+
   boolean existsByEmail(String email);
 }

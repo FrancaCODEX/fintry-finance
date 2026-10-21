@@ -179,6 +179,7 @@ const uxPageNames = {
   operations: "Ambiente",
   reconciliation: "Conciliação bancária",
   billing: "Cobranças",
+  subscription: "Plano e assinatura",
   examples: "Dados de exemplo",
   accounts: "Contas",
   contacts: "Clientes e fornecedores",

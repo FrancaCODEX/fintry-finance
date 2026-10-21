@@ -18,6 +18,7 @@ public class AuthService {
   private final UserRepository users;
   private final CompanyRepository companies;
   private final PasswordEncoder encoder;
+  private final com.fintry.subscription.SubscriptionService subscriptions;
   private final com.fintry.audit.AuditService audit;
   private String dummyHash;
 
@@ -63,6 +64,7 @@ public class AuthService {
             .email(email)
             .build();
     companies.saveAndFlush(company);
+    subscriptions.initialize(company.getId());
     AppUser user = new AppUser();
     user.setCompanyId(company.getId());
     user.setName(input.name().strip());

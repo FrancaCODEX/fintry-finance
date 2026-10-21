@@ -26,6 +26,8 @@ public class ProductionGuard implements ApplicationRunner {
     if (Arrays.stream(env.getActiveProfiles())
         .anyMatch(Set.of("demo", "dev", "test", "postgres-test")::contains))
       errors.add("use somente o perfil prod para publicação");
+    if (!env.getProperty("fintry.saas.mode", "COMMERCIAL").equals("COMMERCIAL"))
+      errors.add("SAAS_MODE deve ser COMMERCIAL em produção; simulação é exclusiva de avaliação");
     String url = env.getProperty("fintry.base-url", "");
     try {
       var uri = URI.create(url);

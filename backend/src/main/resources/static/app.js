@@ -197,7 +197,9 @@ const roles = {
   FINANCE: "Financeiro",
   VIEWER: "Somente leitura",
 };
-const canWrite = () => state.user?.permissions?.includes("WRITE_FINANCE");
+const canWrite = () =>
+  state.user?.permissions?.includes("WRITE_FINANCE") &&
+  state.subscriptionAccess?.writable !== false;
 const isAdmin = () => state.user?.permissions?.includes("MANAGE_USERS");
 const timestamp = (value) =>
   value
@@ -236,6 +238,7 @@ function renderAuth(mode = "login", notice = "") {
     resetEntryImport();
     resetReconciliation();
     resetBilling();
+    resetSubscription();
     resetNavigation();
     state.dashboardPending = null;
   }
@@ -363,7 +366,14 @@ function applyPermissions(scope = document) {
     "attachment-confirm",
   ];
   scope.querySelectorAll("[data-action]").forEach((el) => {
-    if (mutations.includes(el.dataset.action)) el.remove();
+    if (
+      mutations.includes(el.dataset.action) &&
+      !(
+        state.user?.permissions?.includes("WRITE_FINANCE") &&
+        ["attachment-remove", "attachment-confirm"].includes(el.dataset.action)
+      )
+    )
+      el.remove();
   });
   scope.querySelector("#attachment-form")?.remove();
   scope
@@ -371,7 +381,9 @@ function applyPermissions(scope = document) {
     .forEach(
       (el) =>
         (el.innerHTML =
-          '<span class="muted">Um membro do Financeiro ou Administrador pode adicionar registros.</span>'),
+          state.subscriptionAccess?.writable === false
+            ? '<span class="muted">Consulte Plano e assinatura para voltar a adicionar registros.</span>'
+            : '<span class="muted">Um membro do Financeiro ou Administrador pode adicionar registros.</span>'),
     );
 }
 function pager(prefix, result, page) {
@@ -425,6 +437,13 @@ const auditActions = {
   SALE_CREATE: "Criou venda",
   SALE_CONFIRM: "Confirmou venda",
   SALE_CANCEL: "Cancelou venda",
+  SUBSCRIPTION: "Plano e assinatura",
+  SUBSCRIPTION_SIMULATE: "Experimentou plano",
+  SUBSCRIPTION_REQUEST: "Solicitou plano",
+  SUBSCRIPTION_REQUEST_CANCEL: "Cancelou solicitação de plano",
+  SUBSCRIPTION_ACTIVATE: "Ativou assinatura",
+  SUBSCRIPTION_CANCEL: "Programou encerramento",
+  SUBSCRIPTION_KEEP: "Manteve assinatura",
   BILLING_CONNECT: "Configurou conexão de cobrança",
   BILLING_ISSUE: "Emitiu cobrança",
   BILLING_STATUS: "Atualizou cobrança",
@@ -454,6 +473,7 @@ const resources = {
   RECONCILIATION: "Conciliação bancária",
   OPERATIONS: "Ambiente",
   BILLING: "Cobranças",
+  SUBSCRIPTION: "Plano e assinatura",
   STOCK: "Estoque",
   SALE: "Vendas",
   BUDGET: "Orçamentos",
@@ -463,6 +483,13 @@ function auditValue(v) {
   return (
     roles[v] ||
     {
+      ESSENTIAL: "Essencial",
+      PRO: "Profissional",
+      BUSINESS: "Gestão",
+      TRIAL: "Período de teste",
+      LEGACY: "Acesso preservado",
+      SIMULATED: "Simulação",
+      ACTIVE: "Ativa",
       PAID: "Realizado",
       PENDING: "Pendente",
       LINKED: "Conciliado",
@@ -661,7 +688,13 @@ async function accessAction(btn) {
 function shell() {
   const u = state.user,
     current = root.querySelector(".shell");
-  const key = JSON.stringify([u.id, u.role, u.name, u.companyName]);
+  const key = JSON.stringify([
+    u.id,
+    u.role,
+    u.name,
+    u.companyName,
+    state.subscriptionAccess?.writable,
+  ]);
   if (current?.dataset.session === key) {
     syncNavigation();
     return;
@@ -1006,9 +1039,13 @@ async function load() {
   }
 }
 async function loadData(id) {
+  const access = await api("/subscription/access");
+  if (id !== requestId || !state.user) return;
+  state.subscriptionAccess = access;
   if (!root.querySelector(".shell")) shell();
   if (["services", "proposals"].includes(state.page)) return loadCommercial(id);
   if (state.page === "imports") return loadImports(id);
+  if (state.page === "subscription") return loadSubscription(id);
   if (state.page === "billing") return loadBilling(id);
   if (state.page === "operations") return loadOperations(id);
   if (state.page === "reconciliation") return loadReconciliation(id);
@@ -1735,6 +1772,7 @@ async function act(btn) {
   if (navigationAction(btn)) return;
   if (action === "theme") return window.fintryTheme.toggle();
   if (await importAction(btn)) return;
+  if (await subscriptionAction(btn)) return;
   if (await billingAction(btn)) return;
   if (await operationsAction(btn)) return;
   if (await reconciliationAction(btn)) return;

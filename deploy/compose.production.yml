@@ -31,6 +31,7 @@ services:
       DB_USER: fintry
       DB_PASSWORD: ${DB_PASSWORD:?Configure DB_PASSWORD}
       APP_BASE_URL: https://${FINTRY_DOMAIN:?Configure FINTRY_DOMAIN}
+      SAAS_MODE: COMMERCIAL
       BILLING_MASTER_KEY: ${BILLING_MASTER_KEY:-}
       MAIL_ENABLED: "true"
       MAIL_FROM: ${MAIL_FROM:?Configure MAIL_FROM}

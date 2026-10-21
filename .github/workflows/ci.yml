@@ -24,9 +24,10 @@ jobs:
         if: github.event_name == 'pull_request'
         run: python3 scripts/check_release.py --base "${{ github.event.pull_request.base.sha }}"
       - name: Host operation failure paths
-        run: python3 -m unittest discover -s scripts -p test_ops.py -v
+        run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
       - name: JavaScript syntax
         run: |
+          node --check backend/src/main/resources/static/subscription.js
           node --check backend/src/main/resources/static/billing.js
           node --check backend/src/main/resources/static/operations.js
           node --check backend/src/main/resources/static/ux.js

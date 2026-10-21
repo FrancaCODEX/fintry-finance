@@ -66,3 +66,6 @@ fintry:
 
   billing:
     master-key: ${BILLING_MASTER_KEY:}
+
+  saas:
+    mode: ${SAAS_MODE:EVALUATION}

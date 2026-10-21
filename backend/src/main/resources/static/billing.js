@@ -5,6 +5,7 @@ function resetBilling() {
   billing.data = null;
   billing.config = null;
 }
+const canCollect = () => state.user?.permissions?.includes("WRITE_FINANCE");
 const billingLabels = {
   ISSUING: "Emitindo",
   PENDING: "Aguardando pagamento",
@@ -109,22 +110,22 @@ async function billingActionInternal(button) {
     showDialog(
       "Detalhes da cobrança",
       `${c.method === "PIX" ? "Pix" : "Boleto"} · ${billingLabels[c.status]}`,
-      `<div class="billing-detail-amount">${money(c.amount)}<small>${e(c.description)}</small></div><dl class="billing-facts"><div><dt>Vencimento</dt><dd>${dateLabel(c.dueDate)}</dd></div><div><dt>Ambiente</dt><dd>${c.environment === "SANDBOX" ? "Testes" : "Produção"}</dd></div><div><dt>Crédito</dt><dd>${c.settledDate ? dateLabel(c.settledDate) : "Aguardando"}</dd></div><div><dt>Valor líquido</dt><dd>${c.netAmount != null ? money(c.netAmount) : "Aguardando"}</dd></div></dl>${c.message ? `<p class="notice">${e(c.message)}</p>` : ""}<div class="billing-detail-actions">${c.invoiceUrl ? `<a class="btn secondary" href="${e(c.invoiceUrl)}" target="_blank" rel="noopener noreferrer">Abrir fatura ↗</a>` : ""}${c.bankSlipUrl ? `<a class="btn secondary" href="${e(c.bankSlipUrl)}" target="_blank" rel="noopener noreferrer">Abrir boleto ↗</a>` : ""}<button type="button" class="btn text" data-action="billing-entry" data-id="${c.entryId}">Ver lançamento</button>${canWrite() && c.method === "PIX" && ["PENDING", "OVERDUE"].includes(c.status) ? `<button type="button" class="btn secondary" data-action="billing-pix" data-id="${c.id}">Pix copia e cola</button>` : ""}${canWrite() && ["PENDING", "OVERDUE"].includes(c.status) ? `<button type="button" class="btn text danger" data-action="billing-cancel" data-id="${c.id}">Cancelar cobrança</button>` : ""}</div>`,
+      `<div class="billing-detail-amount">${money(c.amount)}<small>${e(c.description)}</small></div><dl class="billing-facts"><div><dt>Vencimento</dt><dd>${dateLabel(c.dueDate)}</dd></div><div><dt>Ambiente</dt><dd>${c.environment === "SANDBOX" ? "Testes" : "Produção"}</dd></div><div><dt>Crédito</dt><dd>${c.settledDate ? dateLabel(c.settledDate) : "Aguardando"}</dd></div><div><dt>Valor líquido</dt><dd>${c.netAmount != null ? money(c.netAmount) : "Aguardando"}</dd></div></dl>${c.message ? `<p class="notice">${e(c.message)}</p>` : ""}<div class="billing-detail-actions">${c.invoiceUrl ? `<a class="btn secondary" href="${e(c.invoiceUrl)}" target="_blank" rel="noopener noreferrer">Abrir fatura ↗</a>` : ""}${c.bankSlipUrl ? `<a class="btn secondary" href="${e(c.bankSlipUrl)}" target="_blank" rel="noopener noreferrer">Abrir boleto ↗</a>` : ""}<button type="button" class="btn text" data-action="billing-entry" data-id="${c.entryId}">Ver lançamento</button>${canCollect() && c.method === "PIX" && ["PENDING", "OVERDUE"].includes(c.status) ? `<button type="button" class="btn secondary" data-action="billing-pix" data-id="${c.id}">Pix copia e cola</button>` : ""}${canCollect() && ["PENDING", "OVERDUE"].includes(c.status) ? `<button type="button" class="btn text danger" data-action="billing-cancel" data-id="${c.id}">Cancelar cobrança</button>` : ""}</div>`,
       async () => {
         sameSession();
-        if (canWrite()) {
+        if (canCollect()) {
           await send(`/billing/${c.id}/refresh`);
           toast("Consulta concluída.");
         }
       },
-      canWrite() ? "Consultar Asaas" : "Concluir",
+      canCollect() ? "Consultar Asaas" : "Concluir",
     );
   }
   if (action === "billing-entry") {
     modal.close();
     await openDetails(button.dataset.id);
   }
-  if (action === "billing-cancel" && canWrite()) {
+  if (action === "billing-cancel" && canCollect()) {
     modal.close();
     showDialog(
       "Cancelar cobrança?",
@@ -142,7 +143,7 @@ async function billingActionInternal(button) {
       "Cancelar no Asaas",
     );
   }
-  if (action === "billing-pix" && canWrite()) {
+  if (action === "billing-pix" && canCollect()) {
     const result = await send(`/billing/${button.dataset.id}/pix`);
     sameSession();
     modal.close();
