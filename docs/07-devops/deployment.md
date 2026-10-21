@@ -1,4 +1,4 @@
-# Publicação do Fintry — 0.14.0
+# Publicação do Fintry — 0.15.0
 
 A entrega prepara uma instalação em servidor Linux com Docker Compose, PostgreSQL 17 e Caddy. O repositório não contém servidor, domínio, conta SMTP ou cópia externa contratados. A primeira publicação pública depende desses dados; não é feita ao integrar um PR.
 
@@ -25,7 +25,7 @@ Use o valor gerado como DB_PASSWORD e preencha o arquivo com domínio, contato A
 | MAIL_FROM | Remetente autorizado pelo provedor SMTP |
 | SMTP_HOST/PORT/USERNAME/PASSWORD | Dados do provedor de envio |
 | SMTP_STARTTLS/SMTP_SSL | 587: true/false; 465: false/true |
-| FINTRY_IMAGE | Tag da versão, inicialmente fintry:0.14.0 |
+| FINTRY_IMAGE | Tag da versão, inicialmente fintry:0.15.0 |
 
 Configure SPF/DKIM/DMARC conforme seu provedor. O Fintry exige SMTP autenticado, STARTTLS obrigatório ou TLS implícito e verificação do certificado; não é preciso desativar a validação TLS para usar certificados públicos válidos.
 
@@ -62,3 +62,5 @@ Voltar a imagem não desfaz migrações. Só use uma imagem anterior se ela for 
 Esta é uma base de implantação em uma única máquina. Alta disponibilidade, várias réplicas/sessões compartilhadas, recuperação ponto a ponto (WAL/PITR), infraestrutura como código por provedor e alertas externos integrados ficam para evolução. Certificados públicos, credenciais SMTP, hospedagem e armazenamento externo precisam ser configurados no ambiente real.
 
 Referências: [Caddy/HTTPS](https://caddyserver.com/docs/automatic-https), [proxy e cabeçalhos](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy), [Docker Compose](https://docs.docker.com/compose/).
+
+Para ativar cobranças, configure também `BILLING_MASTER_KEY` e siga a [homologação Asaas](../05-api/billing.md). A publicação da aplicação e a homologação financeira são verificações operacionais separadas.

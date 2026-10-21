@@ -91,6 +91,19 @@ public class AuditService {
     save(company, null, "Recuperação de acesso", action, "ACCESS", userId, label, List.of());
   }
 
+  @Transactional
+  public void billingSystem(UUID company, UUID id, String label, String before, String after) {
+    save(
+        company,
+        null,
+        "Integração Asaas",
+        "BILLING_STATUS",
+        "BILLING",
+        id,
+        label,
+        List.of(new Change("Situação", before, after)));
+  }
+
   private void save(
       UUID company,
       UUID actor,

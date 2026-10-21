@@ -10,3 +10,7 @@
 O perfil prod exige PostgreSQL, Flyway, Hibernate validate, senha do banco com pelo menos 20 caracteres, URL HTTPS, cookies Secure e SMTP habilitado com autenticação/certificado válido. Não combine prod com demo/dev/test/postgres-test. A senha e valores das configurações não aparecem nas mensagens de validação próprias do guard.
 
 A composição de produção usa projeto/volumes próprios e não reutiliza o banco local automaticamente. O arquivo deploy/production.env fica fora do Git e da imagem Docker. O build usa Java 21; o override Java 17 serve apenas à avaliação local quando necessário.
+
+## Cobranças integradas
+
+`BILLING_MASTER_KEY` habilita a configuração Asaas; deve conter 32 bytes em Base64 e ser preservada fora do banco, em cofre do operador. Compose local e de produção repassam a variável. Não há chave padrão de desenvolvimento. Sem ela, o financeiro continua disponível e Cobranças explica a configuração pendente. Consulte [homologação e operação](../05-api/billing.md).
