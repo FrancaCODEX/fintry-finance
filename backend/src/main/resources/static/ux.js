@@ -187,6 +187,8 @@ const uxPageNames = {
   audit: "Histórico",
   security: "Minha segurança",
   products: "Produtos",
+  services: "Serviços",
+  proposals: "Propostas",
   stock: "Estoque",
   sales: "Vendas",
 };

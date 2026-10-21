@@ -25,6 +25,8 @@ function navigationGroups() {
       "Comercial",
       [
         ["products", "Produtos", "box"],
+        ["services", "Serviços", "sparkles"],
+        ["proposals", "Propostas", "entries"],
         ["stock", "Estoque", "stock"],
         ["sales", "Vendas", "cart"],
       ],

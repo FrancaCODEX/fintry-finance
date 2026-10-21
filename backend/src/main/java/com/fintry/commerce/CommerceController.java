@@ -16,10 +16,11 @@ public class CommerceController {
   public CommerceService.ProductPage products(
       @RequestParam(required = false) String search,
       @RequestParam(required = false) Boolean active,
+      @RequestParam(required = false) Product.Kind kind,
       @RequestParam(defaultValue = "false") boolean low,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
-    return service.products(search, active, low, page, size);
+    return service.products(search, active, low, page, size, kind);
   }
 
   @PostMapping("/products")

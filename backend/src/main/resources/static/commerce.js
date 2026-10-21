@@ -52,6 +52,7 @@ async function loadCommerce(id) {
         "/products?" +
           queryParams({
             ...commerce.productFilters,
+            kind: "PRODUCT",
             page: commerce.productsPage,
           }),
       )
@@ -131,7 +132,7 @@ function renderSales() {
             "Nova venda</button>"
         : "",
     ) +
-    `<section class="sale-workflow" aria-label="Etapas da venda"><div><span>1</span><strong>Prepare</strong><p>Escolha cliente, produtos e preços.</p></div><div><span>2</span><strong>Confirme</strong><p>Baixa no estoque e receita vinculada.</p></div><div><span>3</span><strong>Acompanhe</strong><p>Receba pelo lançamento financeiro.</p></div></section><section class="card"><form id="sale-filter" class="commerce-filters">${field("Buscar venda", "search", "search", 'maxlength="120" placeholder="Cliente ou observação"', commerce.saleFilters.search || "")}<label class="field">Situação<select name="status"><option value="">Todas as vendas</option>${Object.entries(
+    `<section class="sale-workflow" aria-label="Etapas da venda"><div><span>1</span><strong>Prepare</strong><p>Escolha cliente, itens e preços.</p></div><div><span>2</span><strong>Confirme</strong><p>Baixa no estoque e receita vinculada.</p></div><div><span>3</span><strong>Acompanhe</strong><p>Receba pelo lançamento financeiro.</p></div></section><section class="card"><form id="sale-filter" class="commerce-filters">${field("Buscar venda", "search", "search", 'maxlength="120" placeholder="Cliente ou observação"', commerce.saleFilters.search || "")}<label class="field">Situação<select name="status"><option value="">Todas as vendas</option>${Object.entries(
       saleStates,
     )
       .map(
@@ -161,10 +162,10 @@ function productDialog(p = null) {
     },
   );
 }
-function productPicker(selected = null) {
-  return `${field("Buscar produto no catálogo", "productSearch", "search", 'maxlength="120" placeholder="Nome ou SKU" autocomplete="off"')}<label class="field">Produto<select name="productId" required><option value="">Carregando produtos…</option>${selected ? `<option value="${selected.id}" selected>${e(selected.sku)} · ${e(selected.name)}</option>` : ""}</select><small class="picker-help" role="status">Busque para encontrar outros produtos. Até 20 resultados por busca.</small></label>`;
+function productPicker(selected = null, mixed = false) {
+  return `${field(mixed ? "Buscar produto ou serviço" : "Buscar produto no catálogo", "productSearch", "search", 'maxlength="120" placeholder="Nome ou SKU" autocomplete="off"')}<label class="field">${mixed ? "Item do catálogo" : "Produto"}<select name="productId" required><option value="">Carregando catálogo…</option>${selected ? `<option value="${selected.id}" selected>${e(selected.sku)} · ${e(selected.name)}</option>` : ""}</select><small class="picker-help" role="status">Busque pelo nome ou código. Até 20 resultados por busca.</small></label>`;
 }
-function bindProductPicker(form, selected = null) {
+function bindProductPicker(form, selected = null, kind = null) {
   let rows = selected ? [selected] : [],
     seq = 0;
   const select = form.elements.productId;
@@ -174,6 +175,7 @@ function bindProductPicker(form, selected = null) {
       "/products?" +
         queryParams({
           active: "true",
+          kind,
           size: 20,
           search: form.elements.productSearch.value,
         }),
@@ -188,7 +190,7 @@ function bindProductPicker(form, selected = null) {
       rows
         .map(
           (p) =>
-            `<option value="${p.id}">${e(p.sku)} · ${e(p.name)} (${quantityLabel(p.quantity)} ${e(p.unit)})</option>`,
+            `<option value="${p.id}">${e(p.sku)} · ${e(p.name)} (${p.kind === "SERVICE" ? "Serviço · sem estoque" : quantityLabel(p.quantity) + " " + e(p.unit)})</option>`,
         )
         .join("");
     if (rows.some((p) => p.id === old)) select.value = old;
@@ -224,7 +226,7 @@ function stockDialog(p = null) {
     },
     "Registrar movimento",
   );
-  bindProductPicker(modal.querySelector("form"), p);
+  bindProductPicker(modal.querySelector("form"), p, "PRODUCT");
 }
 function scaledInteger(value, digits) {
   value = String(value).replace(/^\./, "0.");
@@ -238,15 +240,31 @@ function lineCents(quantity, price) {
     p = scaledInteger(price, 2);
   return q === null || p === null ? null : (q * p + 500n) / 1000n;
 }
-function saleDialog() {
-  const requestId = crypto.randomUUID(),
-    lines = [];
+function saleDialog(options = {}) {
+  const proposal = options.mode === "proposal",
+    existing = options.existing;
+  const requestId = existing?.requestId || crypto.randomUUID(),
+    lines = existing
+      ? existing.items.map((i) => ({
+          productId: i.productId,
+          name: i.productName,
+          sku: i.sku,
+          unit: i.unit,
+          kind: i.kind,
+          available: 0,
+          quantity: String(i.quantity),
+          unitPrice: String(i.unitPrice),
+        }))
+      : [];
   showDialog(
-    "Nova venda",
-    "Prepare os itens. O estoque só muda depois de confirmar a venda.",
-    `${field("Buscar cliente (opcional)", "customerSearch", "search", 'maxlength="120" placeholder="Nome ou documento" autocomplete="off"')}<label class="field">Cliente<select name="contactId"><option value="">Consumidor final</option></select></label><section class="sale-builder"><h3>Adicionar produto</h3>${productPicker()}<button type="button" class="btn secondary" id="add-sale-item">Adicionar aos itens</button></section><div id="sale-lines" class="sale-lines"></div><div id="sale-preview" class="sale-preview" aria-live="polite"></div>${field("Observações (opcional)", "notes", "text", 'maxlength="500"')}<p class="notice">Rascunhos não reservam estoque nem geram receita. Preços e nomes dos itens ficam registrados nesta venda.</p>`,
+    proposal ? (existing ? "Editar proposta" : "Nova proposta") : "Nova venda",
+    proposal
+      ? "Defina escopo, validade e preços. Nada será movimentado antes da aprovação."
+      : "Prepare os itens. O estoque só muda depois de confirmar a venda.",
+    `${proposal ? field("Título da proposta", "title", "text", 'required maxlength="120" placeholder="Ex.: Implantação e suporte mensal"', existing?.title || "") + field("Válida até", "validUntil", "date", `required min="${localDate()}" max="2100-12-31"`, existing?.validUntil || localDate()) : ""}${field("Buscar cliente (opcional)", "customerSearch", "search", 'maxlength="120" placeholder="Nome ou documento" autocomplete="off"')}<label class="field">Cliente<select name="contactId"><option value="">Consumidor final</option>${existing?.contactId ? `<option value="${existing.contactId}" selected>${e(existing.contactName)}</option>` : ""}</select></label><section class="sale-builder"><h3>Adicionar produto ou serviço</h3>${productPicker(null, true)}<button type="button" class="btn secondary" id="add-sale-item">Adicionar aos itens</button></section><div id="sale-lines" class="sale-lines"></div><div id="sale-preview" class="sale-preview" aria-live="polite"></div>${field("Observações (opcional)", "notes", "text", 'maxlength="500"', existing?.notes || "")}<p class="notice">Rascunhos não reservam estoque nem geram receita. Serviços não movimentam estoque. Preços e nomes ficam registrados ${proposal ? "na proposta" : "na venda"}.</p>`,
     async (data) => {
-      if (!lines.length) throw new Error("Adicione pelo menos um produto.");
+      if (!lines.length)
+        throw new Error("Adicione pelo menos um produto ou serviço.");
       if (
         lines.some((l) => !l.quantity || (!l.unitPrice && l.unitPrice !== "0"))
       )
@@ -255,6 +273,34 @@ function saleDialog() {
         throw new Error(
           "Use até três casas na quantidade e duas no preço, sem notação científica.",
         );
+      const content = {
+        requestId,
+        title: data.title,
+        validUntil: data.validUntil,
+        contactId: data.contactId || null,
+        notes: data.notes,
+        items: lines.map((l) => ({
+          productId: l.productId,
+          quantity: l.quantity,
+          unitPrice: l.unitPrice,
+        })),
+      };
+      if (proposal) {
+        const saved = existing
+          ? await api("/proposals/" + existing.id, {
+              method: "PUT",
+              body: JSON.stringify({ version: existing.version, content }),
+            })
+          : await send("/proposals", content);
+        commercial.pendingProposal = saved.id;
+        state.page = "proposals";
+        commercial.proposalFilters = {};
+        commercial.proposalPage = 0;
+        toast(
+          existing ? "Proposta atualizada." : "Proposta criada como rascunho.",
+        );
+        return;
+      }
       const created = await send("/sales", {
         requestId,
         contactId: data.contactId || null,
@@ -271,7 +317,11 @@ function saleDialog() {
       commerce.salesPage = 0;
       toast("Rascunho criado. Confira os dados e confirme a venda.");
     },
-    "Salvar rascunho",
+    proposal
+      ? existing
+        ? "Salvar alterações"
+        : "Criar proposta"
+      : "Salvar rascunho",
   );
   const form = modal.querySelector("form"),
     selected = bindProductPicker(form);
@@ -282,13 +332,13 @@ function saleDialog() {
       ? null
       : cents.reduce((a, b) => a + b, 0n);
     form.querySelector("#sale-preview").innerHTML =
-      `<span>${lines.length} produto(s)</span><strong>Total ${total === null ? "—" : money(Number(total) / 100)}</strong>`;
+      `<span>${lines.length} item(ns)</span><strong>Total ${total === null ? "—" : money(Number(total) / 100)}</strong>`;
   }
   function renderLines() {
     form.querySelector("#sale-lines").innerHTML = lines
       .map(
         (l, i) =>
-          `<article class="sale-line"><div class="sale-line-heading"><div><strong>${e(l.name)}</strong><small>${e(l.sku)} · Saldo atual: ${quantityLabel(l.available)} ${e(l.unit)}</small></div><button class="btn text small" type="button" data-remove-line="${i}" aria-label="Remover ${e(l.name)}">Remover</button></div><div class="form-row">${field("Quantidade (" + e(l.unit) + ")", "qty-" + i, "number", `required min="0.001" max="999999999.999" step="0.001" data-line="${i}" data-prop="quantity"`, l.quantity)}${field("Preço unitário (R$)", "price-" + i, "number", `required min="0" max="999999999999.99" step="0.01" data-line="${i}" data-prop="unitPrice"`, l.unitPrice)}</div></article>`,
+          `<article class="sale-line"><div class="sale-line-heading"><div><strong>${e(l.name)}</strong><small>${e(l.sku)} · ${l.kind === "SERVICE" ? "Serviço · sem estoque" : existing ? "Produto · estoque conferido na aprovação" : "Saldo atual: " + quantityLabel(l.available) + " " + e(l.unit)}</small></div><button class="btn text small" type="button" data-remove-line="${i}" aria-label="Remover ${e(l.name)}">Remover</button></div><div class="form-row">${field("Quantidade (" + e(l.unit) + ")", "qty-" + i, "number", `required min="0.001" max="999999999.999" step="0.001" data-line="${i}" data-prop="quantity"`, l.quantity)}${field("Preço unitário (R$)", "price-" + i, "number", `required min="0" max="999999999999.99" step="0.01" data-line="${i}" data-prop="unitPrice"`, l.unitPrice)}</div></article>`,
       )
       .join("");
     preview();
@@ -296,15 +346,15 @@ function saleDialog() {
   form.querySelector("#add-sale-item").onclick = () => {
     const p = selected();
     if (!p) {
-      formError(form, "Escolha um produto para adicionar.");
+      formError(form, "Escolha um produto ou serviço para adicionar.");
       return;
     }
     if (lines.some((l) => l.productId === p.id)) {
-      toast("Este produto já está nos itens. Ajuste a quantidade.");
+      toast("Este item já está na lista. Ajuste a quantidade.");
       return;
     }
     if (lines.length >= 100) {
-      toast("Cada venda aceita até 100 produtos.");
+      toast("Cada formulário aceita até 100 itens.");
       return;
     }
     lines.push({
@@ -312,6 +362,7 @@ function saleDialog() {
       name: p.name,
       sku: p.sku,
       unit: p.unit,
+      kind: p.kind,
       available: p.quantity,
       quantity: "1",
       unitPrice: String(p.price),
@@ -359,7 +410,7 @@ function saleDialog() {
       }
     }, 250);
   };
-  preview();
+  renderLines();
 }
 async function saleDetails(id) {
   closeDetails();

@@ -45,7 +45,20 @@ public class CommerceService {
       @NotNull @DecimalMin("0") @Digits(integer = 12, fraction = 2) BigDecimal cost,
       @NotNull @DecimalMin("0") @Digits(integer = 9, fraction = 3) BigDecimal minimum,
       boolean active,
-      @DecimalMin("0") @Digits(integer = 9, fraction = 3) BigDecimal initialQuantity) {}
+      @DecimalMin("0") @Digits(integer = 9, fraction = 3) BigDecimal initialQuantity,
+      Product.Kind kind) {
+    public ProductInput(
+        String sku,
+        String name,
+        String unit,
+        BigDecimal price,
+        BigDecimal cost,
+        BigDecimal minimum,
+        boolean active,
+        BigDecimal initialQuantity) {
+      this(sku, name, unit, price, cost, minimum, active, initialQuantity, null);
+    }
+  }
 
   public record MovementInput(
       @NotNull UUID requestId,
@@ -78,7 +91,8 @@ public class CommerceService {
       BigDecimal quantity,
       BigDecimal minimum,
       boolean active,
-      boolean lowStock) {}
+      boolean lowStock,
+      Product.Kind kind) {}
 
   public record ProductPage(
       List<ProductView> content,
@@ -113,7 +127,8 @@ public class CommerceService {
       String unit,
       BigDecimal quantity,
       BigDecimal unitPrice,
-      BigDecimal total) {}
+      BigDecimal total,
+      Product.Kind kind) {}
 
   public record SaleView(
       UUID id,
@@ -196,11 +211,14 @@ public class CommerceService {
         p.getQuantity(),
         p.getMinimum(),
         p.isActive(),
-        p.getQuantity().compareTo(p.getMinimum()) <= 0);
+        p.getKind() == Product.Kind.PRODUCT && p.getQuantity().compareTo(p.getMinimum()) <= 0,
+        p.getKind());
   }
 
   private Map<String, String> snapshot(Product p) {
     return fields(
+        "Tipo",
+        p.getKind(),
         "SKU",
         p.getSku(),
         "Nome",
@@ -218,6 +236,11 @@ public class CommerceService {
   }
 
   public ProductPage products(String search, Boolean active, boolean low, int page, int size) {
+    return products(search, active, low, page, size, null);
+  }
+
+  public ProductPage products(
+      String search, Boolean active, boolean low, int page, int size, Product.Kind kind) {
     page(page, size);
     UUID company = current.companyId();
     String term = search == null ? null : escaped(search);
@@ -226,7 +249,11 @@ public class CommerceService {
           var p = new ArrayList<jakarta.persistence.criteria.Predicate>();
           p.add(cb.equal(root.get("companyId"), company));
           if (active != null) p.add(cb.equal(root.get("active"), active));
-          if (low) p.add(cb.lessThanOrEqualTo(root.get("quantity"), root.get("minimum")));
+          if (kind != null) p.add(cb.equal(root.get("kind"), kind));
+          if (low) {
+            p.add(cb.equal(root.get("kind"), Product.Kind.PRODUCT));
+            p.add(cb.lessThanOrEqualTo(root.get("quantity"), root.get("minimum")));
+          }
           if (term != null)
             p.add(
                 cb.or(
@@ -235,7 +262,7 @@ public class CommerceService {
           return cb.and(p.toArray(jakarta.persistence.criteria.Predicate[]::new));
         };
     var result = products.findAll(filter, PageRequest.of(page, size, Sort.by("name", "id")));
-    var totals = products.summary(company).get(0);
+    var totals = products.summary(company, kind).get(0);
     return new ProductPage(
         result.stream().map(this::view).toList(),
         result.getTotalElements(),
@@ -251,6 +278,15 @@ public class CommerceService {
     lockCompany();
     var p = id == null ? new Product() : product(id);
     var before = id == null ? Map.<String, String>of() : snapshot(p);
+    var kind = input.kind() == null ? p.getKind() : input.kind();
+    if (id != null && kind != p.getKind())
+      throw invalid("O tipo é fixo para preservar o histórico. Cadastre outro item.");
+    if (kind == Product.Kind.SERVICE
+        && (!input.unit().equals("UN")
+            || input.minimum().signum() != 0
+            || (input.initialQuantity() != null && input.initialQuantity().signum() != 0)))
+      throw invalid("Serviços usam UN e não possuem estoque inicial ou mínimo.");
+    p.setKind(kind);
     if (id != null && !p.getUnit().equals(input.unit()))
       throw invalid("A unidade é fixa para preservar o histórico. Cadastre outro produto.");
     if (id != null && input.initialQuantity() != null)
@@ -369,6 +405,8 @@ public class CommerceService {
       return view(old.get());
     }
     var p = product(input.productId());
+    if (p.getKind() == Product.Kind.SERVICE)
+      throw invalid("Serviços não possuem movimentações de estoque.");
     if (!p.isActive()) throw invalid("Reative o produto para movimentar seu estoque.");
     return view(
         move(
@@ -385,7 +423,8 @@ public class CommerceService {
     page(page, size);
     UUID company = current.companyId();
     if (productId != null)
-      products.findByIdAndCompanyId(productId, company).orElseThrow(this::missing);
+      if (products.findByIdAndCompanyId(productId, company).orElseThrow(this::missing).getKind()
+          == Product.Kind.SERVICE) throw invalid("Serviços não possuem histórico de estoque.");
     Specification<StockMovement> spec =
         (root, q, cb) ->
             productId == null
@@ -425,7 +464,8 @@ public class CommerceService {
                             i.getUnit(),
                             i.getQuantity(),
                             i.getUnitPrice(),
-                            i.getTotal()))
+                            i.getTotal(),
+                            i.getKind()))
                 .toList()
             : List.<ItemView>of();
     return new SaleView(
@@ -475,6 +515,17 @@ public class CommerceService {
 
   @Transactional
   public Created draft(DraftInput input) {
+    return createDraft(input, Map.of());
+  }
+
+  @Transactional
+  public Created draftFromProposal(DraftInput input, List<ItemView> snapshot) {
+    var snapshots = new HashMap<UUID, ItemView>();
+    snapshot.forEach(i -> snapshots.put(i.productId(), i));
+    return createDraft(input, snapshots);
+  }
+
+  private Created createDraft(DraftInput input, Map<UUID, ItemView> snapshot) {
     UUID company = lockCompany();
     String fingerprint = hash(input);
     var prior = sales.findByCompanyIdAndRequestId(company, input.requestId());
@@ -504,10 +555,12 @@ public class CommerceService {
       var p = products.findByIdAndCompanyId(line.productId(), company).orElseThrow(this::missing);
       if (!p.isActive()) throw invalid("Escolha apenas produtos ativos.");
       var i = new SaleItem();
+      var agreed = snapshot.get(p.getId());
       i.setProductId(p.getId());
-      i.setSku(p.getSku());
-      i.setProductName(p.getName());
-      i.setUnit(p.getUnit());
+      i.setKind(p.getKind());
+      i.setSku(agreed == null ? p.getSku() : agreed.sku());
+      i.setProductName(agreed == null ? p.getName() : agreed.productName());
+      i.setUnit(agreed == null ? p.getUnit() : agreed.unit());
       i.setQuantity(line.quantity());
       i.setUnitPrice(line.unitPrice());
       i.setTotal(line.quantity().multiply(line.unitPrice()).setScale(2, RoundingMode.HALF_UP));
@@ -553,6 +606,7 @@ public class CommerceService {
       var p = product(i.getProductId());
       if (!p.isActive())
         throw invalid("O produto " + p.getName() + " foi inativado. Reative-o ou refaça a venda.");
+      if (i.getKind() == Product.Kind.SERVICE) continue;
       move(
           p,
           StockMovement.Kind.SALE,
@@ -570,7 +624,11 @@ public class CommerceService {
                     + s.getNumber()
                     + " · "
                     + (s.getContactName() == null ? "Consumidor final" : s.getContactName()),
-                "Vendas de produtos",
+                lines.stream().allMatch(i -> i.getKind() == Product.Kind.SERVICE)
+                    ? "Vendas de serviços"
+                    : lines.stream().allMatch(i -> i.getKind() == Product.Kind.PRODUCT)
+                        ? "Vendas de produtos"
+                        : "Vendas de produtos e serviços",
                 FinancialEntry.Type.INCOME,
                 s.getTotal(),
                 input.dueDate(),
@@ -603,7 +661,8 @@ public class CommerceService {
       for (var i :
           items.findBySaleIdOrderBySkuAsc(s.getId()).stream()
               .sorted(Comparator.comparing(SaleItem::getProductId))
-              .toList())
+              .toList()) {
+        if (i.getKind() == Product.Kind.SERVICE) continue;
         move(
             product(i.getProductId()),
             StockMovement.Kind.RETURN,
@@ -612,6 +671,7 @@ public class CommerceService {
             s.getId(),
             null,
             null);
+      }
       var old = finance.snapshot(entry);
       entry.setStatus(FinancialEntry.Status.CANCELLED);
       finance.recordChange("CANCEL", entry, old);

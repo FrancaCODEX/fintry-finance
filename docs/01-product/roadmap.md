@@ -15,12 +15,13 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.9.0 | Orçamento por categoria e dados de exemplo completos | Incorporada à main |
 | 0.10.0 | Prioridade visual: navegação, rolagem e refinamento do front-end | Incorporada à main |
 | 0.10.1 | Correção da barra de rolagem do menu e da página | Incorporada à main |
-| 0.11.0 | Importação CSV com prévia, seleção e identificação de possíveis duplicidades | Entrega atual |
+| 0.11.0 | Importação CSV com prévia, seleção e identificação de possíveis duplicidades | Incorporada à main |
+| 0.12.0 | Serviços, propostas comerciais, PDF e aprovação integrada à venda/receita | Entrega atual |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
 Depois da base: importações/conciliação, integrações bancárias, cobrança, planos/assinaturas e recorrência sem prazo final. A identidade visual mantém verde escuro, verde claro e fundo suave; a evolução deve priorizar hierarquia, estados de carregamento, feedback de ações, detalhes acessíveis e uso no celular.
 
-Próximas prioridades propostas: catálogo de serviços e propostas comerciais; evolução posterior da importação para OFX/conciliação. As entregas seguintes continuam incluindo melhorias de uso e visual.
+Próximas prioridades propostas: importação OFX e conciliação com revisão de correspondências; evolução dos dados de exemplo para os novos módulos; personalização da empresa e melhorias contínuas de uso. As entregas seguintes continuam incluindo melhorias de uso e visual.
 
 Em 20/10/2026, o foco da 0.10.0 passou para front-end/CSS e navegação por solicitação do usuário. A importação CSV continua como próxima funcionalidade, seguida de serviços/propostas.

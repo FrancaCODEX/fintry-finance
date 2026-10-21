@@ -13,6 +13,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Product extends BaseEntity {
+  public enum Kind {
+    PRODUCT,
+    SERVICE
+  }
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 8)
+  private Kind kind = Kind.PRODUCT;
+
   @Column(nullable = false)
   private UUID companyId;
 
