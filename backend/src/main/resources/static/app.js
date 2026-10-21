@@ -235,6 +235,7 @@ function renderAuth(mode = "login", notice = "") {
     resetPlanning();
     resetEntryImport();
     resetReconciliation();
+    resetBilling();
     resetNavigation();
     state.dashboardPending = null;
   }
@@ -424,6 +425,9 @@ const auditActions = {
   SALE_CREATE: "Criou venda",
   SALE_CONFIRM: "Confirmou venda",
   SALE_CANCEL: "Cancelou venda",
+  BILLING_CONNECT: "Configurou conexão de cobrança",
+  BILLING_ISSUE: "Emitiu cobrança",
+  BILLING_STATUS: "Atualizou cobrança",
   OPERATIONS_MAIL_TEST: "Testou envio de e-mail",
   STATEMENT_IMPORT: "Importou movimento bancário",
   RECONCILE_LINK: "Conciliou lançamento",
@@ -449,6 +453,7 @@ const resources = {
   PROPOSAL: "Propostas comerciais",
   RECONCILIATION: "Conciliação bancária",
   OPERATIONS: "Ambiente",
+  BILLING: "Cobranças",
   STOCK: "Estoque",
   SALE: "Vendas",
   BUDGET: "Orçamentos",
@@ -1004,6 +1009,7 @@ async function loadData(id) {
   if (!root.querySelector(".shell")) shell();
   if (["services", "proposals"].includes(state.page)) return loadCommercial(id);
   if (state.page === "imports") return loadImports(id);
+  if (state.page === "billing") return loadBilling(id);
   if (state.page === "operations") return loadOperations(id);
   if (state.page === "reconciliation") return loadReconciliation(id);
   if (["budgets", "examples"].includes(state.page)) return loadPlanning(id);
@@ -1729,6 +1735,7 @@ async function act(btn) {
   if (navigationAction(btn)) return;
   if (action === "theme") return window.fintryTheme.toggle();
   if (await importAction(btn)) return;
+  if (await billingAction(btn)) return;
   if (await operationsAction(btn)) return;
   if (await reconciliationAction(btn)) return;
   if (await planningAction(btn)) return;

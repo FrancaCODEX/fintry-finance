@@ -27,6 +27,7 @@ public class FinanceService {
   private final AccountRepository accounts;
   private final EntryRepository entries;
   private final StatementLineRepository statementLines;
+  private final com.fintry.billing.BillingChargeRepository billingCharges;
 
   public record AccountInput(
       @NotBlank @Size(max = 100) String name,
@@ -256,6 +257,7 @@ public class FinanceService {
   @Transactional
   public EntryView updateEntry(UUID id, EntryInput input) {
     var e = entries.lock(id, current.companyId()).orElseThrow(this::missing);
+    requireBillingEditable(id);
     if (e.getSaleId() != null)
       throw invalid(
           "O lançamento pertence a uma venda. Cancele a venda para corrigir os itens e o estoque.");
@@ -336,6 +338,7 @@ public class FinanceService {
   public EntryView pay(UUID id, PaymentInput input) {
     validPaymentDate(input.paymentDate());
     var e = entries.lock(id, current.companyId()).orElseThrow(this::missing);
+    requireBillingEditable(id);
     if (e.getStatus() == CANCELLED) throw invalid("Lançamento cancelado não pode ser pago.");
     if (e.getStatus() == PAID) return view(e); // retry does not create a second movement
     var before = snapshot(e);
@@ -345,7 +348,19 @@ public class FinanceService {
     return view(e);
   }
 
+  public void requireBillingEditable(UUID id) {
+    if (billingCharges.existsByFeeEntryId(id)
+        || billingCharges
+            .findByEntryId(id)
+            .filter(c -> c.getStatus() != com.fintry.billing.BillingCharge.Status.CANCELLED)
+            .isPresent())
+      throw invalid(
+          "Este lançamento é gerenciado por Cobranças. Consulte ou cancele a cobrança no Asaas"
+              + " antes de alterar o financeiro.");
+  }
+
   public void requireUnreconciled(UUID id) {
+    requireBillingEditable(id);
     if (statementLines.existsByEntryId(id))
       throw invalid(
           "Reabra o movimento na Conciliação antes de cancelar o lançamento ou a venda. A"
@@ -355,6 +370,7 @@ public class FinanceService {
   @Transactional
   public EntryView cancel(UUID id) {
     var e = entries.lock(id, current.companyId()).orElseThrow(this::missing);
+    requireBillingEditable(id);
     requireUnreconciled(id);
     if (e.getSaleId() != null)
       throw invalid(

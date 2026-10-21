@@ -2,7 +2,9 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.14.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.15.0**
+
+Cobranças integradas Asaas com Pix/boleto, Sandbox, consulta e webhook. Veja [configuração e limites de cobrança](docs/05-api/billing.md). · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 

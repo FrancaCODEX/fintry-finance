@@ -21,9 +21,17 @@ public class SecurityConfig {
       throws Exception {
     http.securityContext(
             c -> c.securityContextRepository(new HttpSessionSecurityContextRepository()))
+        .csrf(
+            c ->
+                c.ignoringRequestMatchers(
+                    org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
+                        .withDefaults()
+                        .matcher(org.springframework.http.HttpMethod.POST, "/webhooks/asaas/{id}")))
         .authorizeHttpRequests(
             a ->
-                a.requestMatchers(
+                a.requestMatchers(org.springframework.http.HttpMethod.POST, "/webhooks/asaas/{id}")
+                    .permitAll()
+                    .requestMatchers(
                         "/",
                         "/index.html",
                         "/app.js",
@@ -34,6 +42,7 @@ public class SecurityConfig {
                         "/budgets.js",
                         "/imports.js",
                         "/operations.js",
+                        "/billing.js",
                         "/reconciliation.js",
                         "/theme.js",
                         "/style.css",
@@ -59,6 +68,9 @@ public class SecurityConfig {
                         "/api/v1/audit",
                         "/api/v1/operations",
                         "/api/v1/operations/**")
+                    .hasRole("ADMIN")
+                    .requestMatchers(
+                        org.springframework.http.HttpMethod.PUT, "/api/v1/billing/connection")
                     .hasRole("ADMIN")
                     .requestMatchers(
                         org.springframework.http.HttpMethod.POST, "/api/v1/auth/change-password")

@@ -20,6 +20,11 @@ public class GlobalExceptionHandler {
             "status", ex.getStatusCode().value(), "message", ex.getReason() == null ? "Operação inválida." : ex.getReason()));
     }
 
+    @ExceptionHandler(com.fintry.billing.AsaasClient.ProviderFailure.class)
+    public ResponseEntity<Map<String,Object>> handleProvider(com.fintry.billing.AsaasClient.ProviderFailure ex) {
+        return ResponseEntity.status(502).body(Map.of("message", ex.getMessage()));
+    }
+
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleConflict(Exception ex) {
         return ResponseEntity.status(409).body(Map.of("message", "Já existe um cadastro com esses dados. Confira o documento, e-mail ou nome informado."));

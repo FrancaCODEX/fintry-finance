@@ -2,6 +2,25 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.15.0] - 2026-10-21
+
+### Funcionalidades
+
+- Integração Asaas v3 para emissão de Pix e boleto vinculados a receitas pendentes com cliente e CPF/CNPJ; fatura, boleto e Pix copia e cola acessíveis no painel.
+- Conexão por empresa com credenciais cifradas, configuração exclusiva do Administrador e promoção de Sandbox para Produção preservando cobranças e webhooks antigos.
+- Consulta manual, recuperação de emissão inconclusiva e webhook autenticado que confirma a situação pela API do provedor. Reserva persistente e vínculo único impedem reemissão em tentativas repetidas ou simultâneas.
+- Em Produção, RECEIVED compatível registra baixa e tarifa separada na data de crédito. Sandbox não altera receitas, tarifas ou saldos. Divergências, estornos e contestações ficam em revisão.
+
+### Visual, melhorias e correções
+
+- Página Cobranças com destaque do ambiente, cartões de recebimento, estados, detalhes e ações em claro/escuro e celular.
+- Proteção contra alterações manuais conflitantes no lançamento, venda, série e tarifa; cancelamento externo preserva o lançamento e o estoque. Cobranças reativadas no Asaas após cancelamento exigem revisão e não dão baixa em lançamentos que já puderam ser corrigidos.
+- Auditoria sem segredos, limites de payload de webhook, URLs do provedor verificadas e documentação de homologação, operação e recuperação da chave de proteção.
+
+### Limitações de ativação
+
+- Integração validada com servidor HTTP simulado; Sandbox real e produção dependem das credenciais e da homologação da empresa. Publicação real não foi executada. Uma emissão por lançamento; sem reemissão, rotação de conta/chaves após emissão, reembolso, envio de avisos, cartões ou conciliação agrupada do líquido. Planos do próprio SaaS continuam no backlog.
+
 ## [0.14.0] - 2026-10-21
 
 ### Funcionalidades

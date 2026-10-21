@@ -63,3 +63,6 @@ fintry:
     enabled: ${MAIL_ENABLED:false}
     from: ${MAIL_FROM:noreply@fintry.local}
   version: "@project.version@"
+
+  billing:
+    master-key: ${BILLING_MASTER_KEY:}

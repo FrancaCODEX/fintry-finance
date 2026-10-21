@@ -252,6 +252,7 @@ public class SeriesService {
     var before = com.fintry.audit.AuditService.fields("Encerrada", s.isStopped());
     for (var e : items)
       if (e.getStatus() == FinancialEntry.Status.PENDING) {
+        finance.requireUnreconciled(e.getId());
         var old = finance.snapshot(e);
         e.setStatus(FinancialEntry.Status.CANCELLED);
         finance.recordChange("CANCEL", e, old);
