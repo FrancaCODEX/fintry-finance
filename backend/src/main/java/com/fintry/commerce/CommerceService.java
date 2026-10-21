@@ -658,6 +658,7 @@ public class CommerceService {
     var before = s.getStatus();
     if (before == Sale.Status.CONFIRMED) {
       var entry = entries.lock(s.getEntryId(), company).orElseThrow(this::missing);
+      finance.requireUnreconciled(entry.getId());
       for (var i :
           items.findBySaleIdOrderBySkuAsc(s.getId()).stream()
               .sorted(Comparator.comparing(SaleItem::getProductId))

@@ -2,6 +2,25 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.13.0] - 2026-10-21
+
+### Funcionalidades
+
+- Importação OFX bancária 1.x/2.x em BRL, com prévia, seleção, confirmação da conta de destino e revisão persistente. Até 1 MB e 500 movimentos; importar não altera o financeiro.
+- Identificação de movimentos repetidos por origem bancária e FITID, inclusive entre arquivos sobrepostos. Identificadores com dados divergentes são sinalizados; a origem não pode ser importada em outra conta da mesma empresa.
+- Conciliação individual com lançamentos da mesma conta, tipo e valor: vincular realizado da mesma data preserva o saldo; vincular pendente registra baixa na data do extrato.
+- Sugestões por valor/tipo e proximidade de datas, busca manual e decisão explícita. Um lançamento não pode ser vinculado a dois movimentos.
+- Criação de lançamento realizado a partir do extrato, com categoria cadastrada ou avulsa. Possíveis correspondências exigem justificativa antes de criar outro lançamento de mesmo valor/tipo.
+- Ignorar com motivo e reabrir revisão sem estornar pagamentos. Cancelamentos de lançamentos/vendas conciliados exigem reabrir o vínculo primeiro.
+- Auditoria de importação e decisões, revisão contra alterações concorrentes e novas migrações PostgreSQL V12/H2 V10 preservando os dados anteriores.
+
+### Visual e uso
+
+- Página Conciliação com indicadores por situação, cartões de entrada/saída, filtros por conta/situação, paginação e detalhes das correspondências.
+- Prévia em tabela no desktop e cartões no celular, formulários de confirmação e apresentação nos temas claro/escuro.
+- Leitura UTF-8/Windows-1252 e arquivo OFX fictício para avaliação. Consulta acompanha movimentos; importação e decisões ficam com Administrador/Financeiro.
+- Cartões, investimentos, correções bancárias, importação automática por API e conciliação parcial/agrupada ficam fora desta entrega. O arquivo original e a conta bancária completa não são armazenados; o saldo informado pelo banco não substitui o saldo do Fintry.
+
 ## [0.12.0] - 2026-10-21
 
 ### Funcionalidades
