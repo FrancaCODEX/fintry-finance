@@ -28,6 +28,7 @@ jobs:
           node --check backend/src/main/resources/static/ux.js
           node --check backend/src/main/resources/static/pending.js
           node --check backend/src/main/resources/static/imports.js
+          node --check backend/src/main/resources/static/reconciliation.js
           node --check backend/src/main/resources/static/budgets.js
           node --check backend/src/main/resources/static/commerce.js
           node --check backend/src/main/resources/static/proposals.js

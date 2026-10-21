@@ -2,11 +2,22 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.12.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.13.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
 ![Dashboard do Fintry com dados fictícios](docs/screenshots/dashboard.webp)
+
+## OFX e conciliação bancária
+
+Em **Conciliação**, escolha uma conta, importe um extrato OFX e confira banco, final da conta e movimentos na prévia. Adicionar à revisão não cria lançamentos nem altera o saldo. Depois, decida por movimento:
+
+- **Buscar correspondência:** vincule a um realizado com a mesma data sem alterar o saldo, ou a um pendente para registrar a baixa na data do banco. Valor, tipo e conta devem coincidir.
+- **Criar lançamento:** confira as correspondências, escolha uma categoria e confirme a criação como realizado. Havendo outro lançamento de mesmo valor/tipo, é preciso justificar que se trata de um movimento distinto.
+- **Ignorar:** registre um motivo; o movimento continua consultável.
+- **Reabrir revisão:** remove a decisão/vínculo, preservando o pagamento. Correções financeiras são feitas pelas ações existentes depois da reabertura.
+
+Administradores e Financeiro podem importar e decidir; Consulta pode acompanhar as revisões. A tela oferece um OFX fictício para contas de avaliação. Use até 1 MB/500 movimentos por arquivo, de uma conta bancária em BRL, em UTF-8 ou Windows-1252. Cartões, investimentos, correções OFX e conciliação de valores parciais/agrupados ficam fora desta versão. A integração é por arquivo; não há conexão automática com bancos. [Detalhes e API](docs/05-api/bank-reconciliation.md).
 
 ## Rodar com Docker (recomendado)
 

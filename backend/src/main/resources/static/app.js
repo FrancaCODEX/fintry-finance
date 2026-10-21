@@ -234,6 +234,7 @@ function renderAuth(mode = "login", notice = "") {
     resetPending();
     resetPlanning();
     resetEntryImport();
+    resetReconciliation();
     resetNavigation();
     state.dashboardPending = null;
   }
@@ -423,6 +424,11 @@ const auditActions = {
   SALE_CREATE: "Criou venda",
   SALE_CONFIRM: "Confirmou venda",
   SALE_CANCEL: "Cancelou venda",
+  STATEMENT_IMPORT: "Importou movimento bancário",
+  RECONCILE_LINK: "Conciliou lançamento",
+  RECONCILE_CREATE: "Criou lançamento do extrato",
+  RECONCILE_IGNORE: "Ignorou movimento bancário",
+  RECONCILE_REOPEN: "Reabriu conciliação",
   PROPOSAL_CREATE: "Criou proposta",
   PROPOSAL_UPDATE: "Editou proposta",
   PROPOSAL_STATUS: "Atualizou negociação",
@@ -440,6 +446,7 @@ const resources = {
   ACCESS: "Segurança do acesso",
   PRODUCT: "Produtos e serviços",
   PROPOSAL: "Propostas comerciais",
+  RECONCILIATION: "Conciliação bancária",
   STOCK: "Estoque",
   SALE: "Vendas",
   BUDGET: "Orçamentos",
@@ -451,6 +458,8 @@ function auditValue(v) {
     {
       PAID: "Realizado",
       PENDING: "Pendente",
+      LINKED: "Conciliado",
+      IGNORED: "Ignorado",
       CANCELLED: "Cancelado",
       INCOME: "Receita",
       EXPENSE: "Despesa",
@@ -993,6 +1002,7 @@ async function loadData(id) {
   if (!root.querySelector(".shell")) shell();
   if (["services", "proposals"].includes(state.page)) return loadCommercial(id);
   if (state.page === "imports") return loadImports(id);
+  if (state.page === "reconciliation") return loadReconciliation(id);
   if (["budgets", "examples"].includes(state.page)) return loadPlanning(id);
   if (state.page === "pending") return loadPending(id);
   if (["products", "stock", "sales"].includes(state.page))
@@ -1716,6 +1726,7 @@ async function act(btn) {
   if (navigationAction(btn)) return;
   if (action === "theme") return window.fintryTheme.toggle();
   if (await importAction(btn)) return;
+  if (await reconciliationAction(btn)) return;
   if (await planningAction(btn)) return;
   if (await pendingAction(btn)) return;
   if (await commercialAction(btn)) return;

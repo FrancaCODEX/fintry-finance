@@ -33,6 +33,7 @@ public class SecurityConfig {
                         "/pending.js",
                         "/budgets.js",
                         "/imports.js",
+                        "/reconciliation.js",
                         "/theme.js",
                         "/style.css",
                         "/design.css",

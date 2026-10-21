@@ -26,6 +26,7 @@ public class FinanceService {
   private final com.fintry.directory.DirectoryService directory;
   private final AccountRepository accounts;
   private final EntryRepository entries;
+  private final StatementLineRepository statementLines;
 
   public record AccountInput(
       @NotBlank @Size(max = 100) String name,
@@ -344,9 +345,17 @@ public class FinanceService {
     return view(e);
   }
 
+  public void requireUnreconciled(UUID id) {
+    if (statementLines.existsByEntryId(id))
+      throw invalid(
+          "Reabra o movimento na Conciliação antes de cancelar o lançamento ou a venda. A"
+              + " reabertura não estorna o pagamento.");
+  }
+
   @Transactional
   public EntryView cancel(UUID id) {
     var e = entries.lock(id, current.companyId()).orElseThrow(this::missing);
+    requireUnreconciled(id);
     if (e.getSaleId() != null)
       throw invalid(
           "Cancele pela página Vendas para devolver o estoque e estornar o financeiro juntos.");
@@ -446,5 +455,4 @@ public class FinanceService {
         previous.income().subtract(previous.expense()),
         categories);
   }
-
 }

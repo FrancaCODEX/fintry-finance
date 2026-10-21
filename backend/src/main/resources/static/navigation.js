@@ -14,6 +14,7 @@ function navigationGroups() {
         ["entries", "Lançamentos", "entries"],
         ["pending", "Pendências", "calendar"],
         ["accounts", "Contas", "wallet"],
+        ["reconciliation", "Conciliação", "wallet"],
         ["budgets", "Orçamentos", "budget"],
         ["reports", "Relatórios", "chart"],
         ["forecast", "Fluxo projetado", "trend"],
