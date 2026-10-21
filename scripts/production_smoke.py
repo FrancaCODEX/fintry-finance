@@ -9,6 +9,7 @@ import secrets
 import subprocess
 import tempfile
 import time
+import uuid
 
 import ops
 import subscription_ops
@@ -297,6 +298,18 @@ def main():
             request("POST", "/api/v1/subscription/requests", {"plan": "PRO", "revision": subscription["revision"]})
             pending = request("GET", "/api/v1/subscription")["requests"][0]
             statement = subscription_ops.activation_sql(pending["id"], 30, "fixture-ci-authorized")
+            # A reserved integrated invoice must block the manual grant under the same company lock.
+            fixture_invoice = str(uuid.uuid4())
+            subscription_ops.sql(compose, f"""INSERT INTO saas_invoices(id,company_id,request_id,plan,environment,merchant,amount,due_date,method,status,created_at,updated_at)
+SELECT '{fixture_invoice}',company_id,id,plan,'SANDBOX','fixture-ci',100,CURRENT_DATE,'PIX','ISSUING',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP
+FROM saas_plan_requests WHERE id='{pending["id"]}';""")
+            try:
+                subscription_ops.sql(compose, statement)
+                raise AssertionError("Ativação manual aceitou solicitação com mensalidade integrada")
+            except ops.OpsError:
+                pass
+            assert request("GET", "/api/v1/subscription")["status"] == "TRIAL"
+            subscription_ops.sql(compose, f"UPDATE saas_invoices SET status='CANCELLED',released=TRUE WHERE id='{fixture_invoice}';")
             subscription_ops.sql(compose, statement)
             activated = request("GET", "/api/v1/subscription")
             assert activated["status"] == "ACTIVE" and activated["plan"] == "PRO"

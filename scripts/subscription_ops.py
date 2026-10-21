@@ -34,6 +34,7 @@ BEGIN
  SELECT * INTO r FROM saas_plan_requests WHERE id='{identifier}';
  IF NOT FOUND THEN RAISE EXCEPTION 'Unknown request'; END IF;
  IF r.status='APPROVED' AND r.reference='{reference}' AND r.granted_days={days} THEN RETURN; END IF;
+ IF EXISTS(SELECT 1 FROM saas_invoices WHERE request_id=r.id AND status<>'CANCELLED') THEN RAISE EXCEPTION 'Request has an integrated invoice; use payment reconciliation'; END IF;
  IF r.status<>'PENDING' THEN RAISE EXCEPTION 'Request already resolved'; END IF;
  SELECT * INTO s FROM saas_subscriptions WHERE company_id=r.company_id;
  IF s.pending_request_id IS DISTINCT FROM r.id THEN RAISE EXCEPTION 'Stale request'; END IF;

@@ -74,3 +74,7 @@ Limites são conferidos sob bloqueio da empresa antes de criar contas, reservar 
 ## Próxima evolução comercial
 
 Definir preços e termos, homologar a conta recebedora do próprio Fintry e implementar checkout/renovação/cobrança recorrente autenticada, sincronização de eventos, recuperação de inadimplência, comunicação autorizada e emissão fiscal. Essa integração deverá permanecer separada das cobranças emitidas pelas empresas aos seus clientes. Nenhuma venda ou transação real foi executada nesta entrega.
+
+## Evolução na 0.17.0
+
+A emissão integrada de mensalidades, preços configuráveis e ativação por recebimento confirmado estão documentados em [mensalidades do Fintry](subscription-payments.md). A ativação manual continua disponível para solicitações sem fatura integrada ou com fatura cancelada. A geração recorrente e o débito automático continuam pendentes. As regras acima descrevem a base entregue na 0.16.0.

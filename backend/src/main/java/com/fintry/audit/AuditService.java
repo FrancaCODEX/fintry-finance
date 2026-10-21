@@ -104,6 +104,19 @@ public class AuditService {
         List.of(new Change("Situação", before, after)));
   }
 
+  @Transactional
+  public void subscriptionPayment(UUID company, UUID id, String before, String after) {
+    save(
+        company,
+        null,
+        "Cobrança do Fintry",
+        "SUBSCRIPTION_PAYMENT",
+        "SUBSCRIPTION",
+        id,
+        "Mensalidade do Fintry",
+        List.of(new Change("Situação", before, after)));
+  }
+
   private void save(
       UUID company,
       UUID actor,

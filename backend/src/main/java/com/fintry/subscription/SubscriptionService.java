@@ -39,6 +39,8 @@ public class SubscriptionService {
   private final PlanRepository plans;
   private final PlanRequestRepository requests;
   private final AuditService audit;
+  private final SaasPaymentsConfig paymentConfig;
+  private final SaasInvoiceRepository invoices;
 
   @Value("${fintry.saas.mode:EVALUATION}")
   private Mode mode;
@@ -165,7 +167,9 @@ public class SubscriptionService {
                         p.getMemberLimit(),
                         p.getAccountLimit(),
                         p.getStorageBytes(),
-                        p.getMonthlyPrice()))
+                        paymentConfig.price(p.getCode()) != null
+                            ? paymentConfig.price(p.getCode())
+                            : p.getMonthlyPrice()))
             .toList();
     return new View(
         company,
@@ -243,7 +247,8 @@ public class SubscriptionService {
     return s;
   }
 
-  private void fits(UUID company, SaasPlan.Code code) {
+  @Transactional(noRollbackFor = ResponseStatusException.class)
+  public void fits(UUID company, SaasPlan.Code code) {
     var u = usage(company);
     var p = plan(code);
     if (u.members() > p.getMemberLimit()
@@ -330,6 +335,14 @@ public class SubscriptionService {
                         HttpStatus.NOT_FOUND, "Solicitação não encontrada."));
     if (r.getStatus() != PlanRequest.Status.PENDING || !id.equals(s.getPendingRequestId()))
       throw invalid("Esta solicitação não está pendente.");
+    var invoice = invoices.findByRequestId(r.getId());
+    if (invoice.isPresent()) {
+      var i = invoice.get();
+      if (i.getStatus() != SaasInvoice.Status.CANCELLED
+          && i.getStatus() != SaasInvoice.Status.TEST_PAID)
+        throw invalid("Cancele e confirme a mensalidade antes de cancelar a solicitação.");
+      i.setReleased(true);
+    }
     r.setStatus(PlanRequest.Status.CANCELLED);
     s.setPendingRequestId(null);
     audit.eventAs(

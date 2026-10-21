@@ -441,6 +441,8 @@ const auditActions = {
   SUBSCRIPTION_SIMULATE: "Experimentou plano",
   SUBSCRIPTION_REQUEST: "Solicitou plano",
   SUBSCRIPTION_REQUEST_CANCEL: "Cancelou solicitação de plano",
+  SUBSCRIPTION_INVOICE: "Solicitou mensalidade",
+  SUBSCRIPTION_PAYMENT: "Atualizou pagamento do Fintry",
   SUBSCRIPTION_ACTIVATE: "Ativou assinatura",
   SUBSCRIPTION_CANCEL: "Programou encerramento",
   SUBSCRIPTION_KEEP: "Manteve assinatura",

@@ -2,6 +2,26 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.17.0] - 2026-10-21
+
+### Funcionalidades
+
+- Mensalidades do próprio Fintry por Pix/boleto, com conta recebedora do operador separada das cobranças dos clientes e preços configuráveis no servidor, sem valores predefinidos.
+- Emissão confirmada pelo Administrador com preço registrado, consentimento, vencimento em três dias e fatura hospedada no Asaas. Recebimento em produção libera 30 dias de acesso ou estende o período pago do mesmo plano.
+- Webhook autenticado e consulta manual conferem o estado pela API. Cada fatura concede um único período; Sandbox e confirmação sem recebimento não ativam acesso comercial.
+- Reserva persistente, recuperação de emissão incerta, isolamento por empresa e cancelamento confirmado pelo provedor. Pagamento com divergência ou excesso de capacidade fica em conferência.
+
+### Visual, melhorias e correções
+
+- Histórico de mensalidades com valor, plano, vencimento, ambiente, situação e acesso concedido, com ações de consulta, fatura e cancelamento; apresentação adaptada ao celular e aos temas claro/escuro.
+- Resumo do pedido antes da emissão, com valor e condições explícitas. Encerramento do acesso e cancelamento da fatura têm ações distintas.
+- Ativação manual protegida contra conflito com faturas integradas. Exclusão/restauração após cancelamento não concede acesso; estornos após ativação exigem resolução assistida, sem repetir períodos.
+
+### Operação comercial
+
+- Renovação por nova solicitação confirmada pelo administrador; geração recorrente, débito automático, nota fiscal e recuperação automática de inadimplência continuam pendentes.
+- Preços/condições e conta recebedora precisam ser definidos e homologados pelo operador. Integração validada com servidor HTTP simulado; nenhum pagamento real, credencial comercial ou publicação foi efetuado nesta entrega.
+
 ## [0.16.0] - 2026-10-21
 
 ### Funcionalidades

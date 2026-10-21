@@ -2,9 +2,11 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.16.0**
+**Versão atual: 0.17.0**
 
-Planos Essencial, Profissional e Gestão com capacidade por empresa, teste de 14 dias, solicitações e ativação manual. Consulte [planos e operação comercial](docs/05-api/subscriptions.md).
+Mensalidades do próprio Fintry por Pix/boleto, preços configuráveis, fatura hospedada e ativação/renovação por recebimento confirmado. Cada emissão concede 30 dias; renovação com confirmação do administrador, sem débito automático. Consulte [configuração das mensalidades](docs/05-api/subscription-payments.md).
+
+Planos Essencial, Profissional e Gestão com capacidade por empresa, teste de 14 dias, solicitações e atendimento comercial. Consulte [planos e operação comercial](docs/05-api/subscriptions.md).
 
 Cobranças integradas Asaas com Pix/boleto, Sandbox, consulta e webhook. Veja [configuração e limites de cobrança](docs/05-api/billing.md). · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
