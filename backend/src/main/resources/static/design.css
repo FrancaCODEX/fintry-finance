@@ -2007,3 +2007,16 @@ body.navigation-open {
     grid-column: 2;
   }
 }
+.rec-upload .card-head {
+  align-items: flex-start;
+  gap: 14px;
+}
+.rec-upload .card-head > div {
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .rec-upload .card-head {
+    flex-direction: column;
+  }
+}
