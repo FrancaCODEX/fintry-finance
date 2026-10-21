@@ -1,0 +1,24 @@
+server:
+  forward-headers-strategy: framework
+  shutdown: graceful
+  servlet:
+    session:
+      cookie:
+        secure: true
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  datasource:
+    hikari:
+      connection-timeout: 5000
+      maximum-pool-size: 10
+  mail:
+    properties:
+      mail.smtp.starttls.required: ${SMTP_STARTTLS:true}
+      mail.smtp.ssl.checkserveridentity: true
+      mail.smtp.ssl.enable: ${SMTP_SSL:false}
+management:
+  endpoint:
+    health:
+      show-details: never
+      show-components: never

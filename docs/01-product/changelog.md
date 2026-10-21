@@ -2,6 +2,28 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.14.0] - 2026-10-21
+
+### Funcionalidades
+
+- Composição de produção separada com Caddy/HTTPS, volumes e redes próprios, banco/aplicação sem portas públicas, logs rotacionados e aplicação sem privilégios com sistema de arquivos somente leitura.
+- Perfil prod com cookies Secure, cabeçalhos do proxy, encerramento gracioso e validação de PostgreSQL, URL HTTPS, senha do banco, Flyway/Hibernate e SMTP autenticado com TLS/certificado.
+- Rotinas administrativas para backup PostgreSQL customizado, manifesto SHA-256, verificação e restauração em nova base. O teste de restauração remove somente sua própria base isolada após sucesso; backups anteriores e banco em uso são preservados.
+- Suporte às rotinas também no PostgreSQL do Docker local. Exemplos systemd de backup diário e verificação HTTPS, com falhas registradas no journal.
+- Diagnóstico Ambiente exclusivo de Administrador, com disponibilidade, banco, versão, início do processo, cookies e modo de e-mail, sem expor credenciais ou acesso ao backup de todas as empresas.
+- Teste de e-mail enviado somente ao próprio Administrador, com CSRF, limite por pessoa e auditoria. Aceite SMTP é distinguido da confirmação de entrega.
+
+### Visual e correções
+
+- Painel Ambiente com indicadores, cartões e ações de diagnóstico em claro/escuro, adaptado ao celular.
+- Probes de liveness e readiness separados; prontidão inclui banco, enquanto SMTP não bloqueia consultas financeiras. Probes não dependem da validação de usuário mesmo com cookie antigo durante uma queda do banco.
+- Healthcheck da imagem Docker e monitor HTTPS sem redirecionamentos, com certificado validado. A configuração local, os dados e as migrações publicadas são preservados.
+- CI ampliado com falhas de backup, guard de produção e instalação Docker isolada para TLS, SMTP e restauração com comprovantes.
+
+### Operação
+
+- Guias de publicação, atualização, recuperação, ambientes, monitoramento e backups. Nenhum servidor, domínio, serviço SMTP ou armazenamento externo foi configurado automaticamente; a publicação real depende desses dados.
+
 ## [0.13.0] - 2026-10-21
 
 ### Funcionalidades

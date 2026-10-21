@@ -1,0 +1,12 @@
+[Unit]
+Description=Verificação de prontidão HTTPS do Fintry
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=fintry
+SupplementaryGroups=docker
+WorkingDirectory=/opt/fintry
+ExecStart=/usr/bin/python3 /opt/fintry/scripts/ops.py --env-file /etc/fintry/production.env health
+TimeoutStartSec=30

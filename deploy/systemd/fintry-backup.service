@@ -1,0 +1,13 @@
+[Unit]
+Description=Backup PostgreSQL do Fintry
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+User=fintry
+SupplementaryGroups=docker
+WorkingDirectory=/opt/fintry
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/fintry/scripts/ops.py --env-file /etc/fintry/production.env backup --output /var/backups/fintry
+TimeoutStartSec=4300

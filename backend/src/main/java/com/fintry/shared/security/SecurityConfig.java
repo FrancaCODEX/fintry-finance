@@ -33,6 +33,7 @@ public class SecurityConfig {
                         "/pending.js",
                         "/budgets.js",
                         "/imports.js",
+                        "/operations.js",
                         "/reconciliation.js",
                         "/theme.js",
                         "/style.css",
@@ -48,9 +49,16 @@ public class SecurityConfig {
                         "/api/v1/auth/invitation",
                         "/api/v1/auth/accept-invite",
                         "/actuator/health",
+                        "/actuator/health/liveness",
+                        "/actuator/health/readiness",
                         "/error")
                     .permitAll()
-                    .requestMatchers("/api/v1/users", "/api/v1/users/**", "/api/v1/audit")
+                    .requestMatchers(
+                        "/api/v1/users",
+                        "/api/v1/users/**",
+                        "/api/v1/audit",
+                        "/api/v1/operations",
+                        "/api/v1/operations/**")
                     .hasRole("ADMIN")
                     .requestMatchers(
                         org.springframework.http.HttpMethod.POST, "/api/v1/auth/change-password")

@@ -46,6 +46,7 @@ function navigationGroups() {
           ? [
               ["team", "Equipe", "users"],
               ["audit", "Histórico", "history"],
+              ["operations", "Ambiente", "shield"],
             ]
           : []),
         ["security", "Minha segurança", "shield"],

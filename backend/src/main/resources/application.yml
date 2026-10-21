@@ -38,6 +38,17 @@ server:
   error:
     include-message: never
 management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      cache:
+        time-to-live: 5s
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,db
   health:
     mail:
       enabled: ${fintry.mail.enabled:false}

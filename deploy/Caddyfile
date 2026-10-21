@@ -1,0 +1,28 @@
+{
+	email {$ACME_EMAIL}
+}
+
+{$FINTRY_DOMAIN} {
+	encode zstd gzip
+	header -Server
+	@readiness path /healthz
+	handle @readiness {
+		rewrite * /actuator/health/readiness
+		reverse_proxy app:8080 {
+			header_up -Forwarded
+			header_up -X-Forwarded-Prefix
+			header_up -X-Forwarded-Port
+		}
+	}
+	@internal path /actuator /actuator/*
+	handle @internal {
+		respond 404
+	}
+	handle {
+		reverse_proxy app:8080 {
+			header_up -Forwarded
+			header_up -X-Forwarded-Prefix
+			header_up -X-Forwarded-Port
+		}
+	}
+}
