@@ -230,6 +230,7 @@ window.addEventListener("hashchange", readAccessLink);
 function renderAuth(mode = "login", notice = "") {
   if (!state.user) {
     resetCommerce();
+    resetCommercial();
     resetPending();
     resetPlanning();
     resetEntryImport();
@@ -422,6 +423,10 @@ const auditActions = {
   SALE_CREATE: "Criou venda",
   SALE_CONFIRM: "Confirmou venda",
   SALE_CANCEL: "Cancelou venda",
+  PROPOSAL_CREATE: "Criou proposta",
+  PROPOSAL_UPDATE: "Editou proposta",
+  PROPOSAL_STATUS: "Atualizou negociação",
+  PROPOSAL_APPROVE: "Aprovou proposta",
 };
 const resources = {
   ENTRY: "Lançamentos e comprovantes",
@@ -433,7 +438,8 @@ const resources = {
   COMPANY: "Empresa",
   USER: "Equipe",
   ACCESS: "Segurança do acesso",
-  PRODUCT: "Produtos",
+  PRODUCT: "Produtos e serviços",
+  PROPOSAL: "Propostas comerciais",
   STOCK: "Estoque",
   SALE: "Vendas",
   BUDGET: "Orçamentos",
@@ -985,6 +991,7 @@ async function load() {
 }
 async function loadData(id) {
   if (!root.querySelector(".shell")) shell();
+  if (["services", "proposals"].includes(state.page)) return loadCommercial(id);
   if (state.page === "imports") return loadImports(id);
   if (["budgets", "examples"].includes(state.page)) return loadPlanning(id);
   if (state.page === "pending") return loadPending(id);
@@ -1180,6 +1187,11 @@ function showDialog(title, subtitle, fields, action, submit = "Salvar") {
       modal.close();
       await safeLoad();
       if (state.invitationToShow) showInviteLink();
+      if (commercial.pendingProposal) {
+        const id = commercial.pendingProposal;
+        commercial.pendingProposal = null;
+        await proposalDetails(id);
+      }
       if (commerce.pendingSale) {
         const id = commerce.pendingSale;
         commerce.pendingSale = null;
@@ -1706,6 +1718,7 @@ async function act(btn) {
   if (await importAction(btn)) return;
   if (await planningAction(btn)) return;
   if (await pendingAction(btn)) return;
+  if (await commercialAction(btn)) return;
   if (await commerceAction(btn)) return;
   if (await accessAction(btn)) return;
   if (

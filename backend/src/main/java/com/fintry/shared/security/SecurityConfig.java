@@ -28,6 +28,7 @@ public class SecurityConfig {
                         "/index.html",
                         "/app.js",
                         "/commerce.js",
+                        "/proposals.js",
                         "/ux.js",
                         "/pending.js",
                         "/budgets.js",

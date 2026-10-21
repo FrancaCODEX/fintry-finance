@@ -2,6 +2,25 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.12.0] - 2026-10-21
+
+### Funcionalidades
+
+- Catálogo de serviços por unidade de execução (UN), com código único entre produtos/serviços, preço, custo de referência e situação. Serviços não têm estoque nem alertas de reposição.
+- Vendas com produtos e serviços; confirmação/cancelamento movimentam apenas itens físicos e mantêm a receita vinculada ao financeiro.
+- Propostas com título, cliente opcional, observações, validade, quantidades/preços e itens registrados como estavam na elaboração.
+- Rascunho editável, negociação, recusa e cancelamento; retorno de negociação para rascunho permite revisar validade e condições. Revisão impede sobrescrever alterações mais recentes.
+- Aprovação interna gera uma venda confirmada e a receita em uma transação. Estoque/cadastros e validade são conferidos novamente, mantendo nomes/preços acordados. Repetir aprovação devolve a venda existente.
+- Proposta aprovada permanece como histórico após cancelar a venda; não gera uma segunda venda. Correções financeiras e devoluções de estoque seguem pelo fluxo de cancelamento da venda.
+- PDF comercial com dados da empresa, cliente, validade, situação, itens, total, observações e paginação. Download autenticado por empresa; sem envio automático de e-mail ou assinatura digital.
+
+### Visual e uso
+
+- Novas páginas Serviços e Propostas, cartões de catálogo, indicadores de negociação, busca/filtros e detalhes com ações contextuais em claro/escuro.
+- Formulário de itens compartilhado entre vendas/propostas, identificando serviços sem estoque; layouts adaptados ao celular e feedback durante operações.
+- Histórico com identificação de propostas, mudanças de itens e aprovação, além dos eventos da venda e do financeiro.
+- Novas migrações preservam produtos/vendas existentes como itens físicos. Sem remoção de dados ou alteração de migrações publicadas.
+
 ## [0.11.0] - 2026-10-20
 
 ### Funcionalidades

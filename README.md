@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.11.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
+**Versão atual: 0.12.0** · [Changelog](docs/01-product/changelog.md) · [Roadmap](docs/01-product/roadmap.md)
 
 Gestão financeira para pequenas empresas, desenvolvida por **Vinicius Azeredo França**. O Fintry organiza contas, receitas, despesas e o fluxo de caixa em uma interface em português.
 
@@ -37,6 +37,10 @@ docker compose down
 ```
 
 Os dados do PostgreSQL ficam no volume `fintry-data`. Não use `docker compose down -v` se quiser preservá-los. Para mudar a porta, copie `.env.example` para `.env` e ajuste `APP_PORT` (por exemplo, `8081`). Se já houver um banco criado por uma versão anterior do projeto, este Compose usa seu próprio volume; os dados anteriores não são importados automaticamente.
+
+## Serviços e propostas
+
+Cadastre **Serviços** com código, preço e custo de referência; eles não possuem estoque. Em **Propostas**, escolha produtos/serviços, cliente, validade e preços, salve o rascunho e baixe o PDF. Coloque a proposta **em negociação** e use **Aprovar e gerar venda** para escolher conta, vencimento e recebimento. A aprovação cria a venda confirmada e a receita na mesma transação; somente produtos baixam estoque. A equipe registra a negociação no Fintry; nenhum e-mail é enviado automaticamente. Veja as [regras comerciais](docs/05-api/proposals-and-services.md).
 
 ## Importar lançamentos CSV
 
