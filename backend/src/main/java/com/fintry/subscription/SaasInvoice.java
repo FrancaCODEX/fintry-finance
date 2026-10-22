@@ -79,6 +79,8 @@ public class SaasInvoice extends BaseEntity {
 
   private Instant activeUntil;
 
+  private Instant renewalPeriodEnd;
+
   // A cancelled or cancelling invoice can never activate access, even after provider restoration.
   @Column(nullable = false)
   private boolean released;

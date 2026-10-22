@@ -2,6 +2,27 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.18.0] - 2026-10-22
+
+### Funcionalidades
+
+- Autorização explícita para geração recorrente de mensalidades Pix/boleto do próprio Fintry, com valor, plano, pagador e forma de pagamento vinculados a uma mensalidade de produção já recebida.
+- Rotina no servidor reserva uma fatura por ciclo a partir de três dias antes do fim do acesso pago. Recebimento confirmado continua concedendo um único período de 30 dias; não há débito automático.
+- Interrupção das próximas emissões, verificação manual da autorização e integração com o encerramento do período. Faturas já iniciadas têm cancelamento separado.
+
+### Visual, melhorias e correções
+
+- Painel de renovação com valor autorizado, fim do acesso e previsão de emissão; estados de pausa, confirmação de consentimento e ações em claro/escuro e celular.
+- Preços do catálogo identificados como períodos de 30 dias, alinhados à duração efetiva do acesso.
+- Alterações de preço exigem novo consentimento; solicitações pendentes, capacidade excedida, alterações de conta/plano e pagamentos em conferência pausam novas emissões.
+- Bloqueio por empresa e vínculo único por ciclo impedem duplicidades entre instâncias. Respostas incertas preservam a reserva para consulta, sem repetir POST automaticamente nem recriar faturas canceladas.
+- Novas faturas solicitam juros e multa zero e não solicitam envio postal. Interromper a recorrência preserva acesso pago e não estorna pagamentos.
+
+### Operação comercial
+
+- Rotina opcional, habilitada no Compose de produção e desabilitada na execução local por padrão; pagamentos continuam desabilitados até configuração e homologação. Não são criadas autorizações para empresas existentes.
+- Integração validada com provedor HTTP simulado. Preços, conta recebedora, condições e homologação real continuam pendentes. Pix Automático, cartão, assinatura nativa Asaas, nota fiscal e avisos automáticos não fazem parte desta entrega.
+
 ## [0.17.0] - 2026-10-21
 
 ### Funcionalidades

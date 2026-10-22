@@ -117,6 +117,19 @@ public class AuditService {
         List.of(new Change("Situação", before, after)));
   }
 
+  @Transactional
+  public void subscriptionRenewal(UUID company, UUID id, String label) {
+    save(
+        company,
+        null,
+        "Renovação do Fintry",
+        "SUBSCRIPTION_RENEWAL",
+        "SUBSCRIPTION",
+        id,
+        label,
+        List.of());
+  }
+
   private void save(
       UUID company,
       UUID actor,

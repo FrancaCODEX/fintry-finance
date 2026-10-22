@@ -1,8 +1,9 @@
 "use strict";
-const subscription = { data: null, payments: null };
+const subscription = { data: null, payments: null, renewal: null };
 function resetSubscription() {
   subscription.data = null;
   subscription.payments = null;
+  subscription.renewal = null;
   state.subscriptionAccess = null;
 }
 const subscriptionStatus = {
@@ -32,13 +33,15 @@ function subscriptionSize(value) {
   );
 }
 async function loadSubscription(id) {
-  const [data, payments] = await Promise.all([
+  const [data, payments, renewal] = await Promise.all([
     api("/subscription"),
     api("/subscription/payments"),
+    api("/subscription/renewal"),
   ]);
   if (id !== requestId || !state.user || state.page !== "subscription") return;
   subscription.data = data;
   subscription.payments = payments;
+  subscription.renewal = renewal;
   shell();
   const selected = data.plans.find((p) => p.code === data.plan),
     evaluation = data.mode === "EVALUATION",
@@ -53,8 +56,9 @@ async function loadSubscription(id) {
     ) +
     `<section class="card plan-hero"><div><span class="eyebrow">PLANO E ASSINATURA · FINTRY</span><h2>${data.status === "LEGACY" ? "Seu acesso continua preservado" : selected.name}</h2><p>${evaluation ? "Ambiente de avaliação: experimente limites e recursos sem cobrança ou contratação real." : data.status === "LEGACY" ? "Esta empresa já utilizava o Fintry. A atualização mantém o acesso anterior, sem impor limites retroativos." : data.status === "TRIAL" ? "Seu teste de 14 dias inclui a capacidade do plano Profissional. Nenhuma cobrança é criada ao iniciar o teste." : !data.writable ? "Continue consultando e exportando seus dados. Solicite um plano para voltar a registrar novas operações." : "Seu período de acesso está confirmado. A renovação é feita por uma nova mensalidade ou pelo atendimento comercial."}</p><span class="badge ${data.writable ? "paid" : "cancelled"}">${e(subscriptionStatus[data.status])}</span>${!evaluation && !["LEGACY", "INACTIVE"].includes(data.status) ? `<p class="plan-validity">${data.status === "TRIAL" ? "Teste até" : "Acesso até"} <strong>${subscriptionDate(data.status === "TRIAL" ? data.trialEndsAt : data.paidUntil)}</strong>${data.cancelAtPeriodEnd ? " · Encerramento programado ao final do período." : ""}</p>` : ""}</div>${isAdmin() && !evaluation && data.status === "ACTIVE" ? `<button class="btn secondary" data-action="subscription-${data.cancelAtPeriodEnd ? "keep" : "cancel"}">${data.cancelAtPeriodEnd ? "Manter assinatura" : "Programar encerramento"}</button>` : ""}</section>` +
     `<section class="plan-usage-grid" aria-label="Uso do seu plano">${meter("Pessoas", data.usage.members, selected.members)}${meter("Contas", data.usage.accounts, selected.accounts)}${meter("Comprovantes", data.usage.storageBytes, selected.storageBytes, true)}</section>` +
+    subscriptionRenewal(renewal, data) +
     `${pending ? `<section class="card plan-request"><div><span class="eyebrow">SOLICITAÇÃO EM ANDAMENTO</span><h2>${e(data.plans.find((p) => p.code === pending.plan).name)}</h2><p>Confira o preço e a forma de pagamento antes de gerar a mensalidade. Seu plano atual continua valendo até a confirmação.</p><label class="field">Referência da solicitação<input readonly value="${pending.id}"></label></div>${isAdmin() ? `${payments.enabled && !payments.invoices.some((i) => i.requestId === pending.id) && data.plans.find((p) => p.code === pending.plan).monthlyPrice != null && !["LEGACY", "INACTIVE"].includes(data.status) ? `<button class="btn" data-action="subscription-checkout" data-id="${pending.id}">Gerar mensalidade</button>` : ""}<button class="btn secondary" data-action="subscription-request-cancel" data-id="${pending.id}">Cancelar solicitação</button>` : ""}</section>` : ""}` +
-    `<div class="plan-section-heading"><h2>Escolha a capacidade ideal</h2><p>Todos os planos incluem controle financeiro, relatórios, produtos, vendas e conciliação. As tarifas do provedor de pagamentos são separadas.</p></div><section class="plan-catalog" aria-label="Comparação de planos">${data.plans.map((p) => `<article class="card plan-option ${p.code === data.plan ? "is-current" : ""}"><span class="eyebrow">${p.code === data.plan ? "SEU PLANO ATUAL" : "FINTRY"}</span><h3>${e(p.name)}</h3><p class="plan-description">${e(p.description)}</p><div class="plan-price">${p.monthlyPrice == null ? "Condições a definir" : money(p.monthlyPrice) + "<small> / mês</small>"}</div><ul><li><strong>${p.members}</strong> pessoas, incluindo convites</li><li><strong>${p.accounts}</strong> contas financeiras</li><li><strong>${subscriptionSize(p.storageBytes)}</strong> para comprovantes</li><li>Lançamentos sem limite de quantidade</li><li>Todos os módulos financeiros e comerciais</li></ul>${isAdmin() ? `<button class="btn ${p.code === data.plan ? "secondary" : ""}" data-action="subscription-${evaluation ? "simulate" : "request"}" data-plan="${p.code}" ${pending ? "disabled" : ""}>${evaluation ? "Experimentar plano" : p.code === data.plan && data.status === "ACTIVE" ? "Solicitar renovação" : "Solicitar plano"}</button>` : '<p class="notice">Peça ao administrador para gerenciar o plano.</p>'}</article>`).join("")}</section><p class="notice">${evaluation ? "As mudanças feitas aqui são simulações. Elas não se tornam uma assinatura comercial quando o ambiente é publicado." : "Escolher um plano registra uma solicitação. Quando o pagamento integrado estiver disponível, você pode gerar uma mensalidade para 30 dias de acesso. Só o recebimento confirmado libera o período. Não há débito automático nem geração recorrente; cada renovação exige sua confirmação. O atendimento comercial continua disponível."} Uma mudança para menor capacidade exige que o uso atual caiba no plano. Seus dados não são apagados ao vencer ou encerrar o acesso.</p>` +
+    `<div class="plan-section-heading"><h2>Escolha a capacidade ideal</h2><p>Todos os planos incluem controle financeiro, relatórios, produtos, vendas e conciliação. As tarifas do provedor de pagamentos são separadas.</p></div><section class="plan-catalog" aria-label="Comparação de planos">${data.plans.map((p) => `<article class="card plan-option ${p.code === data.plan ? "is-current" : ""}"><span class="eyebrow">${p.code === data.plan ? "SEU PLANO ATUAL" : "FINTRY"}</span><h3>${e(p.name)}</h3><p class="plan-description">${e(p.description)}</p><div class="plan-price">${p.monthlyPrice == null ? "Condições a definir" : money(p.monthlyPrice) + "<small> / 30 dias</small>"}</div><ul><li><strong>${p.members}</strong> pessoas, incluindo convites</li><li><strong>${p.accounts}</strong> contas financeiras</li><li><strong>${subscriptionSize(p.storageBytes)}</strong> para comprovantes</li><li>Lançamentos sem limite de quantidade</li><li>Todos os módulos financeiros e comerciais</li></ul>${isAdmin() ? `<button class="btn ${p.code === data.plan ? "secondary" : ""}" data-action="subscription-${evaluation ? "simulate" : "request"}" data-plan="${p.code}" ${pending ? "disabled" : ""}>${evaluation ? "Experimentar plano" : p.code === data.plan && data.status === "ACTIVE" ? "Solicitar renovação" : "Solicitar plano"}</button>` : '<p class="notice">Peça ao administrador para gerenciar o plano.</p>'}</article>`).join("")}</section><p class="notice">${evaluation ? "As mudanças feitas aqui são simulações. Elas não se tornam uma assinatura comercial quando o ambiente é publicado." : "Escolher um plano registra uma solicitação. Quando o pagamento integrado estiver disponível, você pode gerar uma mensalidade para 30 dias de acesso. Só o recebimento confirmado libera o período. A geração recorrente pode ser autorizada após uma mensalidade paga. O Pix/boleto continua exigindo seu pagamento, sem débito automático. O atendimento comercial continua disponível."} Uma mudança para menor capacidade exige que o uso atual caiba no plano. Seus dados não são apagados ao vencer ou encerrar o acesso.</p>` +
     subscriptionPayments(payments, data) +
     `<section class="card plan-history"><h2>Últimas solicitações</h2>${data.requests.length ? data.requests.map((r) => `<article><div><strong>${e(data.plans.find((p) => p.code === r.plan).name)}</strong><small>${subscriptionDate(r.createdAt)}${r.activeUntil ? " · Acesso até " + subscriptionDate(r.activeUntil) : ""}</small></div><span class="badge ${r.status === "APPROVED" ? "paid" : r.status === "PENDING" ? "pending" : "cancelled"}">${{ PENDING: "Aguardando ativação", APPROVED: "Ativada", CANCELLED: "Cancelada" }[r.status]}</span></article>`).join("") : '<p class="muted">Nenhuma solicitação registrada. As simulações ficam no histórico de alterações.</p>'}</section>`;
 }
@@ -73,6 +77,53 @@ async function subscriptionAction(button) {
     if (state.user?.id !== userId || !isAdmin())
       throw new Error("Sua sessão mudou. Atualize a página.");
   };
+  if (action === "subscription-renewal-enable") {
+    const renewal = subscription.renewal;
+    const plan = data.plans.find((p) => p.code === data.plan);
+    showDialog(
+      "Autorizar geração recorrente",
+      plan.name + " · pagamento por Pix ou boleto",
+      `<div class="subscription-order"><span>Valor por período de 30 dias</span><strong>${money(renewal.offeredPrice)}</strong><small>Sem débito automático</small></div><p>O Fintry poderá gerar uma fatura a partir de três dias antes de terminar seu acesso pago, usando o mesmo pagador e a forma de pagamento da mensalidade já recebida. Cada pagamento confirmado libera um período de 30 dias. Nenhum período é liberado só pela emissão.</p><p class="notice">Uma cobrança pendente ou um preço diferente do autorizado pausa novas emissões. Você pode interromper a autorização a qualquer momento. As faturas já reservadas ou emitidas precisam ser conferidas e canceladas separadamente.</p><label class="check"><input name="accepted" type="checkbox" required> Autorizo a emissão recorrente de ${money(renewal.offeredPrice)} por período de 30 dias, até eu interromper esta autorização.</label>`,
+      async (form) => {
+        check();
+        await send("/subscription/renewal/enable", {
+          sourceInvoiceId: renewal.sourceInvoiceId,
+          price: renewal.offeredPrice,
+          revision: renewal.revision,
+          accepted: form.accepted === "on",
+        });
+        toast("Geração recorrente autorizada.");
+      },
+      "Autorizar recorrência",
+    );
+  }
+  if (action === "subscription-renewal-disable") {
+    const renewal = subscription.renewal;
+    showDialog(
+      "Interromper próximas emissões?",
+      "Seu acesso já pago será preservado.",
+      "<p>O Fintry deixará de reservar novas mensalidades recorrentes. Uma emissão já iniciada pode ser concluída: consulte o histórico e cancele essa fatura separadamente se desejar. Esta ação não realiza estorno.</p>",
+      async () => {
+        check();
+        await send("/subscription/renewal/disable", {
+          revision: renewal.revision,
+        });
+        toast("Próximas emissões interrompidas.");
+      },
+      "Interromper emissões",
+    );
+  }
+  if (action === "subscription-renewal-check") {
+    check();
+    button.disabled = true;
+    try {
+      await send("/subscription/renewal/check", {});
+      await safeLoad();
+      toast("Renovação verificada. Confira as mensalidades.");
+    } finally {
+      button.disabled = false;
+    }
+  }
   if (action === "subscription-simulate" || action === "subscription-request") {
     const plan = data.plans.find((p) => p.code === button.dataset.plan),
       simulate = action.endsWith("simulate");
@@ -166,7 +217,7 @@ async function subscriptionAction(button) {
     showDialog(
       cancel ? "Programar encerramento?" : "Manter assinatura?",
       `Seu período atual vai até ${subscriptionDate(data.paidUntil)}.`,
-      `<p>${cancel ? "O acesso de escrita continuará até essa data. Depois, consultas, exportações e segurança da conta permanecerão disponíveis. Seus dados serão preservados." : "A preferência de encerramento será removida. A renovação continua dependendo da contratação e ativação de um novo período; esta ação não cria cobrança."}</p>`,
+      `<p>${cancel ? "O acesso de escrita continuará até essa data. Depois, consultas, exportações e segurança da conta permanecerão disponíveis. Seus dados serão preservados. A autorização de emissões recorrentes também será interrompida; faturas já emitidas precisam ser canceladas separadamente." : "A preferência de encerramento será removida. A geração recorrente continuará desativada até uma nova autorização em Renovação de mensalidades."}</p>`,
       async () => {
         check();
         await send("/subscription/" + (cancel ? "cancel" : "keep"), {
@@ -193,4 +244,35 @@ function subscriptionPayments(payments, data) {
     REVIEW: "Conferência necessária",
   };
   return `<section class="card subscription-invoices"><div class="plan-section-heading"><div><span class="eyebrow">COBRANÇA DO SEU FINTRY</span><h2>Mensalidades e pagamentos</h2></div><span class="badge ${payments.enabled ? "pending" : "cancelled"}">${payments.enabled ? (payments.environment === "PRODUCTION" ? "Produção" : "Sandbox · testes") : "Atendimento comercial"}</span></div><p class="muted">${payments.enabled ? "A fatura abre no ambiente do Asaas. A confirmação do recebimento atualiza seu acesso; você também pode consultar por aqui." : "A emissão integrada depende da configuração da conta recebedora pelo operador. As solicitações de plano continuam disponíveis."}</p>${payments.invoices.length ? `<div class="subscription-invoice-list">${payments.invoices.map((i) => `<article class="subscription-invoice"><div><strong>${money(i.amount)}</strong><span>${e(data.plans.find((p) => p.code === i.plan).name)} · ${i.method === "PIX" ? "Pix" : "Boleto"} · ${i.environment === "SANDBOX" ? "Teste" : "Produção"}</span><small>Vencimento: ${e(i.dueDate.split("-").reverse().join("/"))}${i.activeUntil ? " · Acesso até " + subscriptionDate(i.activeUntil) : ""}</small><span class="badge ${i.status === "PAID" ? "paid" : ["REVIEW", "CANCELLED"].includes(i.status) ? "cancelled" : "pending"}">${e(labels[i.status])}</span>${i.message ? `<p class="notice">${e(i.message)}</p>` : ""}</div><div class="subscription-invoice-actions">${i.invoiceUrl && ["PENDING", "OVERDUE", "CONFIRMED"].includes(i.status) ? `<a class="btn" href="${e(i.invoiceUrl)}" target="_blank" rel="noopener noreferrer">Abrir fatura ↗</a>` : ""}${isAdmin() && payments.enabled ? `<button class="btn secondary" data-action="subscription-payment-refresh" data-id="${i.id}">Consultar</button>${["PENDING", "OVERDUE", "CANCELLING"].includes(i.status) ? `<button class="btn secondary" data-action="subscription-payment-cancel" data-id="${i.id}">Cancelar mensalidade</button>` : ""}` : ""}</div></article>`).join("")}</div>` : '<div class="subscription-empty"><strong>Seu histórico de pagamentos começa aqui</strong><p>Solicite um plano e, quando disponível, gere a mensalidade na solicitação. Nenhuma cobrança é criada sem sua confirmação.</p></div>'}</section>`;
+}
+
+function subscriptionRenewal(r, data) {
+  if (data.mode === "EVALUATION") return "";
+  const labels = {
+    DISABLED: "Emissão manual",
+    AUTHORIZED: "Recorrência autorizada",
+    PRICE_CHANGED: "Novo preço exige autorização",
+    CONFIGURATION: "Configuração em conferência",
+    PLAN_CHANGED: "Plano em conferência",
+    REVIEW: "Pagamento em conferência",
+    PENDING: "Aguardando resolução da solicitação",
+    CYCLE_CLOSED: "Emissão deste ciclo encerrada",
+    CAPACITY: "Capacidade em conferência",
+  };
+  const description = r.enabled
+    ? {
+        AUTHORIZED:
+          "Uma fatura será gerada perto do fim do período. Pague pelo Pix/boleto para renovar seu acesso.",
+        PRICE_CHANGED:
+          "O preço atual difere do autorizado. Nenhuma nova emissão será feita até você conferir e autorizar o valor.",
+        PENDING:
+          "Existe uma solicitação ou mensalidade em andamento. Resolva-a antes de uma nova emissão.",
+        CYCLE_CLOSED:
+          "Já houve uma emissão neste ciclo. Ela não será recriada automaticamente, mesmo após cancelamento. Renove manualmente ou procure atendimento.",
+        CAPACITY:
+          "O uso atual ultrapassa o plano. Ajuste a capacidade antes da próxima mensalidade.",
+      }[r.status] ||
+      "As novas emissões estão pausadas. Confira o plano, a configuração ou o pagamento com o atendimento."
+    : "Você escolhe quando gerar cada mensalidade. Após um pagamento confirmado, pode autorizar a geração recorrente das próximas faturas.";
+  return `<section class="card subscription-renewal" aria-label="Renovação de mensalidades"><div class="renewal-heading"><div><span class="eyebrow">CONTINUIDADE DO SEU FINTRY</span><h2>Renovação de mensalidades</h2></div><span class="badge ${r.status === "AUTHORIZED" ? "paid" : "pending"}">${e(labels[r.status])}</span></div><p class="muted">${e(description)}</p>${r.enabled ? `<dl class="renewal-timeline"><div><dt>Valor autorizado</dt><dd>${money(r.amount)} <small>/ 30 dias</small></dd></div><div><dt>Fim do acesso pago</dt><dd>${subscriptionDate(r.nextDueAt)}</dd></div><div><dt>Emissão a partir de</dt><dd>${subscriptionDate(r.generationAt)}</dd></div></dl>${!r.schedulerEnabled ? '<p class="notice">A rotina automática está desabilitada no servidor. Peça a ativação ao operador ou use Verificar renovação para conferir e gerar uma fatura elegível.</p>' : ""}` : ""}<div class="renewal-actions">${isAdmin() ? `${r.canEnable && (!r.enabled || r.status === "PRICE_CHANGED" || r.status === "PLAN_CHANGED") ? '<button class="btn" data-action="subscription-renewal-enable">Autorizar recorrência</button>' : ""}${r.enabled ? '<button class="btn secondary" data-action="subscription-renewal-check">Verificar renovação</button><button class="btn secondary" data-action="subscription-renewal-disable">Interromper emissões</button>' : ""}` : "<small>Somente o administrador pode alterar a autorização.</small>"}</div><p class="renewal-footnote">Geração de faturas com pagamento por Pix/boleto. Sem débito automático. Cancelar a autorização não cancela faturas já iniciadas.</p></section>`;
 }

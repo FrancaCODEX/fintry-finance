@@ -1,4 +1,4 @@
-# Publicação do Fintry — 0.17.0
+# Publicação do Fintry — 0.18.0
 
 A entrega prepara uma instalação em servidor Linux com Docker Compose, PostgreSQL 17 e Caddy. O repositório não contém servidor, domínio, conta SMTP ou cópia externa contratados. A primeira publicação pública depende desses dados; não é feita ao integrar um PR.
 
@@ -25,7 +25,7 @@ Use o valor gerado como DB_PASSWORD e preencha o arquivo com domínio, contato A
 | MAIL_FROM | Remetente autorizado pelo provedor SMTP |
 | SMTP_HOST/PORT/USERNAME/PASSWORD | Dados do provedor de envio |
 | SMTP_STARTTLS/SMTP_SSL | 587: true/false; 465: false/true |
-| FINTRY_IMAGE | Tag da versão, inicialmente fintry:0.17.0 |
+| FINTRY_IMAGE | Tag da versão, inicialmente fintry:0.18.0 |
 
 Configure SPF/DKIM/DMARC conforme seu provedor. O Fintry exige SMTP autenticado, STARTTLS obrigatório ou TLS implícito e verificação do certificado; não é preciso desativar a validação TLS para usar certificados públicos válidos.
 
@@ -68,3 +68,5 @@ Para ativar cobranças, configure também `BILLING_MASTER_KEY` e siga a [homolog
 O modo comercial é obrigatório em produção. Novos cadastros recebem teste de 14 dias; empresas anteriores à 0.16.0 mantêm acesso legado. [Ativação e limites de planos](../05-api/subscriptions.md).
 
 A 0.17.0 acrescenta a configuração opcional da conta recebedora e dos preços do próprio Fintry. Consulte [mensalidades integradas](../05-api/subscription-payments.md); mantenha a emissão desabilitada até homologar a conta e as condições comerciais.
+
+A geração recorrente da 0.18.0 usa `SAAS_RENEWALS_SCHEDULER_ENABLED=true` no Compose de produção. Exige pagamentos comerciais configurados e autorização explícita por empresa. Confira [operação e recuperação da recorrência](../05-api/subscription-renewals.md) antes de habilitar os pagamentos.

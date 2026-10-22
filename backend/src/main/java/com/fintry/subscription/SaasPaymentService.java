@@ -32,6 +32,7 @@ public class SaasPaymentService {
   private final SubscriptionService access;
   private final PlanRequestRepository requests;
   private final SaasInvoiceRepository invoices;
+  private final SaasRenewalRepository renewals;
   private final SaasPaymentsConfig config;
   private final AsaasClient asaas;
   private final AuditService audit;
@@ -221,6 +222,24 @@ public class SaasPaymentService {
             locked.setCustomerId(customerId);
             return null;
           });
+      i.setCustomerId(customerId);
+      return issueReserved(i);
+    } catch (AsaasClient.ProviderFailure ex) {
+      return tx(
+          () -> {
+            var locked = lock(i.getId(), company);
+            if (locked.getActiveUntil() == null && locked.getStatus() != CANCELLED)
+              review(locked, "Resposta não confirmada. Use Consultar; não gere outra cobrança.");
+            return view(locked);
+          });
+    }
+  }
+
+  // Only the transaction that created a durable reservation may call this POST.
+  InvoiceView issueReserved(SaasInvoice i) {
+    merchant(i);
+    UUID company = i.getCompanyId();
+    try {
       var payment =
           asaas.request(
               i.getEnvironment(),
@@ -229,7 +248,7 @@ public class SaasPaymentService {
               "/payments",
               Map.of(
                   "customer",
-                  customerId,
+                  i.getCustomerId(),
                   "billingType",
                   i.getMethod().name(),
                   "value",
@@ -239,7 +258,13 @@ public class SaasPaymentService {
                   "description",
                   "Fintry · " + i.getPlan() + " · acesso por 30 dias, sem débito automático",
                   "externalReference",
-                  reference(i)));
+                  reference(i),
+                  "interest",
+                  Map.of("value", 0),
+                  "fine",
+                  Map.of("value", 0),
+                  "postalService",
+                  false));
       String id = payment.path("id").asText("");
       if (!id.matches("pay_[A-Za-z0-9_-]{1,90}")) throw new AsaasClient.ProviderFailure();
       // Creation responses never grant access. Read the authoritative payment first.
@@ -486,7 +511,9 @@ public class SaasPaymentService {
       s.setState(SaasSubscription.State.ACTIVE);
       s.setPlan(i.getPlan());
       s.setPaidUntil(end);
-      s.setCancelAtPeriodEnd(false);
+      s.setCancelAtPeriodEnd(
+          i.getRenewalPeriodEnd() != null
+              && renewals.findById(i.getCompanyId()).map(rn -> !rn.isEnabled()).orElse(true));
       s.setPendingRequestId(null);
       r.setStatus(PlanRequest.Status.APPROVED);
       r.setReference("asaas:" + id);

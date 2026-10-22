@@ -10,7 +10,7 @@ A conta recebedora é a do operador do Fintry. Ela é configurada no servidor, s
 4. O webhook autenticado consulta a cobrança pela API. Somente `RECEIVED` em produção, com dados compatíveis, ativa o plano. `CONFIRMED` aguarda recebimento; Sandbox nunca libera acesso comercial.
 5. O período é de **30 dias corridos**, contado da confirmação pelo Fintry ou do fim do período pago vigente, o que ocorrer depois. O teste gratuito não é somado. Cada fatura concede um único período, inclusive após entregas repetidas ou fora de ordem.
 
-A renovação exige nova solicitação e confirmação de emissão pelo administrador. **Não há débito automático, assinatura recorrente no Asaas, geração agendada de mensalidades, cartão, nota fiscal ou aviso automático de inadimplência nesta versão.** O cancelamento do período na página não cancela uma fatura já emitida: ela tem uma ação própria de cancelamento.
+Na 0.17.0, a renovação exige nova solicitação e confirmação de emissão pelo administrador. A [0.18.0 acrescenta geração recorrente autorizada](subscription-renewals.md). **Não há débito automático, assinatura nativa no Asaas, cartão, nota fiscal ou aviso automático de inadimplência.** O cancelamento do período na página não cancela uma fatura já emitida: ela tem uma ação própria de cancelamento.
 
 Acesso legado ou simulado exige atendimento comercial antes da migração. Mudanças de plano durante período pago também exigem atendimento; a renovação integrada pode estender o plano atual. Preços são apresentados antes da emissão, sem rateio ou desconto implícito. Preço alterado exige atualizar a página; faturas existentes mantêm o valor registrado.
 

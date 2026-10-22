@@ -2613,3 +2613,73 @@ body.navigation-open {
     flex: 1 1 100%;
   }
 }
+
+/* Autorização e próximos marcos da renovação. */
+.subscription-renewal {
+  padding: 24px;
+  margin: 24px 0;
+  background: linear-gradient(120deg, var(--paper), var(--soft));
+}
+.renewal-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.renewal-heading h2 {
+  margin: 6px 0;
+}
+.subscription-renewal > p {
+  line-height: 1.7;
+}
+.renewal-timeline {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+.renewal-timeline > div {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--paper);
+  min-width: 0;
+}
+.renewal-timeline dt {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.renewal-timeline dd {
+  margin: 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.renewal-timeline dd small {
+  font-weight: 400;
+  color: var(--muted);
+}
+.renewal-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.renewal-footnote {
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-bottom: 0;
+}
+@media (max-width: 640px) {
+  .subscription-renewal {
+    padding: 16px;
+  }
+  .renewal-timeline {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .renewal-actions .btn {
+    width: 100%;
+  }
+}

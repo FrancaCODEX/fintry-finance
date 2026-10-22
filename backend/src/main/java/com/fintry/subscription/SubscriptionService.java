@@ -41,6 +41,7 @@ public class SubscriptionService {
   private final AuditService audit;
   private final SaasPaymentsConfig paymentConfig;
   private final SaasInvoiceRepository invoices;
+  private final SaasRenewalRepository renewals;
 
   @Value("${fintry.saas.mode:EVALUATION}")
   private Mode mode;
@@ -362,6 +363,7 @@ public class SubscriptionService {
       throw invalid("Não há um período de assinatura ativo para esta ação.");
     var before = AuditService.fields("Encerramento programado", s.isCancelAtPeriodEnd());
     s.setCancelAtPeriodEnd(cancel);
+    if (cancel) renewals.findById(s.getCompanyId()).ifPresent(r -> r.setEnabled(false));
     record(cancel ? "SUBSCRIPTION_CANCEL" : "SUBSCRIPTION_KEEP", s, before);
     subscriptions.flush();
     return view(s.getCompanyId());
