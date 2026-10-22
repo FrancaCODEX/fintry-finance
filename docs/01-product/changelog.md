@@ -2,6 +2,20 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.19.0] - 2026-10-22
+
+### Funcionalidades e experiência
+
+- Após criar a conta e entrar automaticamente, o usuário conhece os planos disponíveis antes de acessar o financeiro.
+- Primeiro acesso apresenta o plano inicial Profissional e o teste de 14 dias no modo comercial, com a data de término obtida do servidor. Continuar com o teste não exige contratação ou pagamento.
+- Ações para comparar planos ou entrar no financeiro, com apresentação adaptada ao celular e aos temas claro/escuro. O ambiente de avaliação tem texto próprio e não simula uma assinatura comercial ativa.
+
+### Melhorias e operação
+
+- Cadastro informa que a criação da conta não gera cobrança. Contratação e autorização de recorrência continuam exigindo confirmação separada.
+- Login normal continua abrindo o dashboard. Sair da apresentação não altera plano, prazo, solicitações ou pagamentos.
+- Documentação de primeiro acesso e abertura/configuração da conta Asaas do operador, versão e imagem de produção atualizadas.
+
 ## [0.18.0] - 2026-10-22
 
 ### Funcionalidades

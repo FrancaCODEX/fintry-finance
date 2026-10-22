@@ -1,9 +1,15 @@
 "use strict";
-const subscription = { data: null, payments: null, renewal: null };
+const subscription = {
+  data: null,
+  payments: null,
+  renewal: null,
+  welcome: false,
+};
 function resetSubscription() {
   subscription.data = null;
   subscription.payments = null;
   subscription.renewal = null;
+  subscription.welcome = false;
   state.subscriptionAccess = null;
 }
 const subscriptionStatus = {
@@ -48,17 +54,24 @@ async function loadSubscription(id) {
     pending = data.requests.find((r) => r.status === "PENDING");
   const meter = (name, value, limit, bytes = false) =>
     `<article class="card plan-usage"><span>${name}</span><strong>${bytes ? subscriptionSize(value) : value}<small> / ${data.limited ? (bytes ? subscriptionSize(limit) : limit) : "sem limite aplicado"}</small></strong><progress value="${data.limited ? Math.min(value, limit) : 0}" max="${limit}" aria-label="Uso de ${name}"></progress><p>${data.limited && value >= limit ? "Limite atingido. Confira as opções de plano." : name === "Pessoas" ? "Pessoas ativas e convites pendentes ocupam vagas." : name === "Comprovantes" ? "Remover anexos libera espaço; os lançamentos ficam preservados." : "Contas financeiras cadastradas na empresa."}</p></article>`;
+  const catalog = subscriptionCatalog(data, pending, evaluation);
   document.querySelector("#page-content").innerHTML =
     head(
-      "Um plano para o seu momento.",
-      "Acompanhe seu uso e escolha a capacidade que combina com a sua empresa.",
+      subscription.welcome
+        ? "Conheça os planos do Fintry."
+        : "Um plano para o seu momento.",
+      subscription.welcome
+        ? "Sua conta está pronta. Compare as opções ou comece a organizar seu financeiro."
+        : "Acompanhe seu uso e escolha a capacidade que combina com a sua empresa.",
       '<button class="btn secondary" data-action="subscription-refresh">Atualizar uso</button>',
     ) +
+    subscriptionWelcome(data, selected) +
+    (subscription.welcome ? catalog : "") +
     `<section class="card plan-hero"><div><span class="eyebrow">PLANO E ASSINATURA · FINTRY</span><h2>${data.status === "LEGACY" ? "Seu acesso continua preservado" : selected.name}</h2><p>${evaluation ? "Ambiente de avaliação: experimente limites e recursos sem cobrança ou contratação real." : data.status === "LEGACY" ? "Esta empresa já utilizava o Fintry. A atualização mantém o acesso anterior, sem impor limites retroativos." : data.status === "TRIAL" ? "Seu teste de 14 dias inclui a capacidade do plano Profissional. Nenhuma cobrança é criada ao iniciar o teste." : !data.writable ? "Continue consultando e exportando seus dados. Solicite um plano para voltar a registrar novas operações." : "Seu período de acesso está confirmado. A renovação é feita por uma nova mensalidade ou pelo atendimento comercial."}</p><span class="badge ${data.writable ? "paid" : "cancelled"}">${e(subscriptionStatus[data.status])}</span>${!evaluation && !["LEGACY", "INACTIVE"].includes(data.status) ? `<p class="plan-validity">${data.status === "TRIAL" ? "Teste até" : "Acesso até"} <strong>${subscriptionDate(data.status === "TRIAL" ? data.trialEndsAt : data.paidUntil)}</strong>${data.cancelAtPeriodEnd ? " · Encerramento programado ao final do período." : ""}</p>` : ""}</div>${isAdmin() && !evaluation && data.status === "ACTIVE" ? `<button class="btn secondary" data-action="subscription-${data.cancelAtPeriodEnd ? "keep" : "cancel"}">${data.cancelAtPeriodEnd ? "Manter assinatura" : "Programar encerramento"}</button>` : ""}</section>` +
     `<section class="plan-usage-grid" aria-label="Uso do seu plano">${meter("Pessoas", data.usage.members, selected.members)}${meter("Contas", data.usage.accounts, selected.accounts)}${meter("Comprovantes", data.usage.storageBytes, selected.storageBytes, true)}</section>` +
     subscriptionRenewal(renewal, data) +
     `${pending ? `<section class="card plan-request"><div><span class="eyebrow">SOLICITAÇÃO EM ANDAMENTO</span><h2>${e(data.plans.find((p) => p.code === pending.plan).name)}</h2><p>Confira o preço e a forma de pagamento antes de gerar a mensalidade. Seu plano atual continua valendo até a confirmação.</p><label class="field">Referência da solicitação<input readonly value="${pending.id}"></label></div>${isAdmin() ? `${payments.enabled && !payments.invoices.some((i) => i.requestId === pending.id) && data.plans.find((p) => p.code === pending.plan).monthlyPrice != null && !["LEGACY", "INACTIVE"].includes(data.status) ? `<button class="btn" data-action="subscription-checkout" data-id="${pending.id}">Gerar mensalidade</button>` : ""}<button class="btn secondary" data-action="subscription-request-cancel" data-id="${pending.id}">Cancelar solicitação</button>` : ""}</section>` : ""}` +
-    `<div class="plan-section-heading"><h2>Escolha a capacidade ideal</h2><p>Todos os planos incluem controle financeiro, relatórios, produtos, vendas e conciliação. As tarifas do provedor de pagamentos são separadas.</p></div><section class="plan-catalog" aria-label="Comparação de planos">${data.plans.map((p) => `<article class="card plan-option ${p.code === data.plan ? "is-current" : ""}"><span class="eyebrow">${p.code === data.plan ? "SEU PLANO ATUAL" : "FINTRY"}</span><h3>${e(p.name)}</h3><p class="plan-description">${e(p.description)}</p><div class="plan-price">${p.monthlyPrice == null ? "Condições a definir" : money(p.monthlyPrice) + "<small> / 30 dias</small>"}</div><ul><li><strong>${p.members}</strong> pessoas, incluindo convites</li><li><strong>${p.accounts}</strong> contas financeiras</li><li><strong>${subscriptionSize(p.storageBytes)}</strong> para comprovantes</li><li>Lançamentos sem limite de quantidade</li><li>Todos os módulos financeiros e comerciais</li></ul>${isAdmin() ? `<button class="btn ${p.code === data.plan ? "secondary" : ""}" data-action="subscription-${evaluation ? "simulate" : "request"}" data-plan="${p.code}" ${pending ? "disabled" : ""}>${evaluation ? "Experimentar plano" : p.code === data.plan && data.status === "ACTIVE" ? "Solicitar renovação" : "Solicitar plano"}</button>` : '<p class="notice">Peça ao administrador para gerenciar o plano.</p>'}</article>`).join("")}</section><p class="notice">${evaluation ? "As mudanças feitas aqui são simulações. Elas não se tornam uma assinatura comercial quando o ambiente é publicado." : "Escolher um plano registra uma solicitação. Quando o pagamento integrado estiver disponível, você pode gerar uma mensalidade para 30 dias de acesso. Só o recebimento confirmado libera o período. A geração recorrente pode ser autorizada após uma mensalidade paga. O Pix/boleto continua exigindo seu pagamento, sem débito automático. O atendimento comercial continua disponível."} Uma mudança para menor capacidade exige que o uso atual caiba no plano. Seus dados não são apagados ao vencer ou encerrar o acesso.</p>` +
+    (subscription.welcome ? "" : catalog) +
     subscriptionPayments(payments, data) +
     `<section class="card plan-history"><h2>Últimas solicitações</h2>${data.requests.length ? data.requests.map((r) => `<article><div><strong>${e(data.plans.find((p) => p.code === r.plan).name)}</strong><small>${subscriptionDate(r.createdAt)}${r.activeUntil ? " · Acesso até " + subscriptionDate(r.activeUntil) : ""}</small></div><span class="badge ${r.status === "APPROVED" ? "paid" : r.status === "PENDING" ? "pending" : "cancelled"}">${{ PENDING: "Aguardando ativação", APPROVED: "Ativada", CANCELLED: "Cancelada" }[r.status]}</span></article>`).join("") : '<p class="muted">Nenhuma solicitação registrada. As simulações ficam no histórico de alterações.</p>'}</section>`;
 }
@@ -67,6 +80,22 @@ async function subscriptionAction(button) {
   if (!action?.startsWith("subscription-")) return false;
   if (action === "subscription-refresh") {
     await safeLoad();
+    return true;
+  }
+  if (action === "subscription-start") {
+    subscription.welcome = false;
+    state.page = "dashboard";
+    window.scrollTo({ top: 0, behavior: "instant" });
+    await safeLoad();
+    return true;
+  }
+  if (action === "subscription-compare") {
+    document.querySelector(".plan-catalog")?.scrollIntoView({
+      block: "start",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+    });
     return true;
   }
   if (!isAdmin()) return true;
@@ -275,4 +304,15 @@ function subscriptionRenewal(r, data) {
       "As novas emissões estão pausadas. Confira o plano, a configuração ou o pagamento com o atendimento."
     : "Você escolhe quando gerar cada mensalidade. Após um pagamento confirmado, pode autorizar a geração recorrente das próximas faturas.";
   return `<section class="card subscription-renewal" aria-label="Renovação de mensalidades"><div class="renewal-heading"><div><span class="eyebrow">CONTINUIDADE DO SEU FINTRY</span><h2>Renovação de mensalidades</h2></div><span class="badge ${r.status === "AUTHORIZED" ? "paid" : "pending"}">${e(labels[r.status])}</span></div><p class="muted">${e(description)}</p>${r.enabled ? `<dl class="renewal-timeline"><div><dt>Valor autorizado</dt><dd>${money(r.amount)} <small>/ 30 dias</small></dd></div><div><dt>Fim do acesso pago</dt><dd>${subscriptionDate(r.nextDueAt)}</dd></div><div><dt>Emissão a partir de</dt><dd>${subscriptionDate(r.generationAt)}</dd></div></dl>${!r.schedulerEnabled ? '<p class="notice">A rotina automática está desabilitada no servidor. Peça a ativação ao operador ou use Verificar renovação para conferir e gerar uma fatura elegível.</p>' : ""}` : ""}<div class="renewal-actions">${isAdmin() ? `${r.canEnable && (!r.enabled || r.status === "PRICE_CHANGED" || r.status === "PLAN_CHANGED") ? '<button class="btn" data-action="subscription-renewal-enable">Autorizar recorrência</button>' : ""}${r.enabled ? '<button class="btn secondary" data-action="subscription-renewal-check">Verificar renovação</button><button class="btn secondary" data-action="subscription-renewal-disable">Interromper emissões</button>' : ""}` : "<small>Somente o administrador pode alterar a autorização.</small>"}</div><p class="renewal-footnote">Geração de faturas com pagamento por Pix/boleto. Sem débito automático. Cancelar a autorização não cancela faturas já iniciadas.</p></section>`;
+}
+
+function subscriptionWelcome(data, plan) {
+  if (!subscription.welcome) return "";
+  const evaluation = data.mode === "EVALUATION";
+  const trial = data.status === "TRIAL";
+  return `<section class="card plan-welcome" aria-label="Primeiro acesso"><div><div class="welcome-steps" aria-label="Etapas do primeiro acesso"><span>✓ Conta criada</span><span>2 · Conheça os planos</span></div><h2>Sua conta está pronta.</h2><p>${trial ? `Você já começou com o <strong>${e(plan.name)}</strong> em teste gratuito por 14 dias, até <strong>${subscriptionDate(data.trialEndsAt)}</strong>.` : evaluation ? `O plano inicial é o <strong>${e(plan.name)}</strong>. Neste ambiente de avaliação, você pode conhecer e simular os planos sem contratação real.` : `Seu plano inicial é o <strong>${e(plan.name)}</strong>. Confira abaixo a situação e as opções de capacidade.`}</p><p class="muted">${trial ? "Nenhum pagamento é necessário para começar. Escolher um plano agora é opcional e não ativa cobrança ou renovação automaticamente." : "Criar a conta e visualizar os planos não gera cobrança. Qualquer contratação exige uma confirmação separada."}</p><div class="welcome-actions"><button class="btn" data-action="subscription-start">${trial ? "Continuar com o teste" : "Entrar no financeiro"}</button><button class="btn secondary" data-action="subscription-compare">Comparar planos</button></div></div><aside class="welcome-plan-summary"><span class="eyebrow">SEU PLANO INICIAL</span><strong>${e(plan.name)}</strong><span class="badge paid">${trial ? "Teste gratuito de 14 dias" : evaluation ? "Ambiente de avaliação" : e(subscriptionStatus[data.status])}</span><p>${trial ? "O prazo já começou com a criação da conta. Depois do teste, você poderá escolher a contratação para continuar registrando operações." : "Conheça as opções e comece pelo financeiro. Você pode voltar a esta página pelo menu Plano e assinatura."}</p></aside></section>`;
+}
+
+function subscriptionCatalog(data, pending, evaluation) {
+  return `<div class="plan-section-heading"><h2>Escolha a capacidade ideal</h2><p>Todos os planos incluem controle financeiro, relatórios, produtos, vendas e conciliação. As tarifas do provedor de pagamentos são separadas.</p></div><section class="plan-catalog" aria-label="Comparação de planos">${data.plans.map((p) => `<article class="card plan-option ${p.code === data.plan ? "is-current" : ""}"><span class="eyebrow">${p.code === data.plan ? "SEU PLANO ATUAL" : "FINTRY"}</span><h3>${e(p.name)}</h3><p class="plan-description">${e(p.description)}</p><div class="plan-price">${p.monthlyPrice == null ? "Condições a definir" : money(p.monthlyPrice) + "<small> / 30 dias</small>"}</div><ul><li><strong>${p.members}</strong> pessoas, incluindo convites</li><li><strong>${p.accounts}</strong> contas financeiras</li><li><strong>${subscriptionSize(p.storageBytes)}</strong> para comprovantes</li><li>Lançamentos sem limite de quantidade</li><li>Todos os módulos financeiros e comerciais</li></ul>${isAdmin() ? `<button class="btn ${p.code === data.plan ? "secondary" : ""}" data-action="subscription-${evaluation ? "simulate" : "request"}" data-plan="${p.code}" ${pending ? "disabled" : ""}>${evaluation ? "Experimentar plano" : p.code === data.plan && data.status === "ACTIVE" ? "Solicitar renovação" : "Solicitar plano"}</button>` : '<p class="notice">Peça ao administrador para gerenciar o plano.</p>'}</article>`).join("")}</section><p class="notice">${evaluation ? "As mudanças feitas aqui são simulações. Elas não se tornam uma assinatura comercial quando o ambiente é publicado." : "Escolher um plano registra uma solicitação. Quando o pagamento integrado estiver disponível, você pode gerar uma mensalidade para 30 dias de acesso. Só o recebimento confirmado libera o período. A geração recorrente pode ser autorizada após uma mensalidade paga. O Pix/boleto continua exigindo seu pagamento, sem débito automático. O atendimento comercial continua disponível."} Uma mudança para menor capacidade exige que o uso atual caiba no plano. Seus dados não são apagados ao vencer ou encerrar o acesso.</p>`;
 }

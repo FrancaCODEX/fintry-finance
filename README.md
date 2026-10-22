@@ -2,7 +2,9 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.18.0**
+**Versão atual: 0.19.0**
+
+Novo cadastro abre a comparação de planos, com Profissional em teste de 14 dias no modo comercial e opção de começar sem contratar. Veja [primeiro acesso](docs/01-product/first-access.md).
 
 Mensalidades do próprio Fintry por Pix/boleto, preços configuráveis, fatura hospedada e ativação/renovação por recebimento confirmado. Cada emissão concede 30 dias. O Administrador pode autorizar a geração recorrente das próximas faturas; Pix/boleto continuam exigindo pagamento, sem débito automático. Veja [recorrência e operação](docs/05-api/subscription-renewals.md). Consulte [configuração das mensalidades](docs/05-api/subscription-payments.md).
 
