@@ -2683,3 +2683,83 @@ body.navigation-open {
     width: 100%;
   }
 }
+
+/* Boas-vindas e planos após o cadastro. */
+.auth-start-note {
+  padding: 12px 16px;
+  margin: 16px 0;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  font-size: 0.83rem;
+  line-height: 1.6;
+}
+.plan-welcome {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 28px;
+  padding: 28px;
+  margin-bottom: 24px;
+  background: linear-gradient(125deg, var(--paper), var(--soft));
+}
+.plan-welcome h2 {
+  margin: 18px 0 12px;
+  font-size: 1.75rem;
+}
+.plan-welcome p {
+  line-height: 1.75;
+}
+.welcome-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.welcome-steps span:first-child {
+  color: var(--green);
+}
+.welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+.welcome-plan-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--paper);
+}
+.welcome-plan-summary > strong {
+  font-size: 1.5rem;
+  color: var(--ink);
+}
+.welcome-plan-summary p {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+.plan-catalog {
+  scroll-margin-top: 100px;
+}
+@media (max-width: 760px) {
+  .plan-welcome {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    gap: 20px;
+  }
+  .welcome-plan-summary {
+    padding: 18px;
+  }
+  .welcome-actions .btn {
+    width: 100%;
+  }
+}
