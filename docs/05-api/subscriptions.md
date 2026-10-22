@@ -77,4 +77,4 @@ Definir preços e termos, homologar a conta recebedora do próprio Fintry e impl
 
 ## Evolução na 0.17.0
 
-A emissão integrada de mensalidades, preços configuráveis e ativação por recebimento confirmado estão documentados em [mensalidades do Fintry](subscription-payments.md). A ativação manual continua disponível para solicitações sem fatura integrada ou com fatura cancelada. A geração recorrente e o débito automático continuam pendentes. As regras acima descrevem a base entregue na 0.16.0.
+A emissão integrada de mensalidades, preços configuráveis e ativação por recebimento confirmado estão documentados em [mensalidades do Fintry](subscription-payments.md). A ativação manual continua disponível para solicitações sem fatura integrada ou com fatura cancelada. A [0.18.0 acrescenta geração recorrente autorizada](subscription-renewals.md); débito automático continua pendente. As regras acima descrevem a base entregue na 0.16.0.

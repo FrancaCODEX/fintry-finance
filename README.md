@@ -2,9 +2,9 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.17.0**
+**Versão atual: 0.18.0**
 
-Mensalidades do próprio Fintry por Pix/boleto, preços configuráveis, fatura hospedada e ativação/renovação por recebimento confirmado. Cada emissão concede 30 dias; renovação com confirmação do administrador, sem débito automático. Consulte [configuração das mensalidades](docs/05-api/subscription-payments.md).
+Mensalidades do próprio Fintry por Pix/boleto, preços configuráveis, fatura hospedada e ativação/renovação por recebimento confirmado. Cada emissão concede 30 dias. O Administrador pode autorizar a geração recorrente das próximas faturas; Pix/boleto continuam exigindo pagamento, sem débito automático. Veja [recorrência e operação](docs/05-api/subscription-renewals.md). Consulte [configuração das mensalidades](docs/05-api/subscription-payments.md).
 
 Planos Essencial, Profissional e Gestão com capacidade por empresa, teste de 14 dias, solicitações e atendimento comercial. Consulte [planos e operação comercial](docs/05-api/subscriptions.md).
 

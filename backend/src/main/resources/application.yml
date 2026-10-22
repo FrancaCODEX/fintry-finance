@@ -68,6 +68,8 @@ fintry:
     master-key: ${BILLING_MASTER_KEY:}
 
   saas:
+    renewals:
+      scheduler-enabled: ${SAAS_RENEWALS_SCHEDULER_ENABLED:false}
     mode: ${SAAS_MODE:EVALUATION}
     payments:
       enabled: ${SAAS_PAYMENTS_ENABLED:false}
