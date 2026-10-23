@@ -2,6 +2,21 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.20.0] - 2026-10-23
+
+### Experiência e diagnóstico
+
+- Página de assinatura distingue avaliação sem cobrança, emissão desabilitada e emissão em Sandbox/produção, com preços ainda não configurados por plano.
+- Orientações expansíveis para o Administrador explicam quais variáveis conferir e que a aplicação precisa ser recriada usando o arquivo correto. O diagnóstico usa a configuração carregada; não declara credenciais ou webhook homologados.
+- Capacidade Profissional inicial identificada como teste gratuito ou avaliação, sem sugerir assinatura paga. Prazo, dados, limites e contratos existentes são preservados.
+
+### Melhorias e correções
+
+- Solicitações informam a próxima ação para emitir ou o impedimento específico, incluindo preço ausente, acesso legado/simulado e mudança durante período pago. Solicitar não emite cobrança sem a confirmação do pagador.
+- Botão de emissão usa os planos com preço efetivamente configurado para a integração, evitando oferecê-lo com preço apenas no catálogo. Solicitações já vinculadas a fatura orientam a consulta no histórico.
+- Textos de Sandbox deixam explícito que recebimentos de teste não ativam acesso comercial; avaliação não promete fatura ou link.
+- Painel adaptado ao celular e aos temas claro/escuro, exemplo de ambiente local completo e roteiro de diagnóstico/homologação. Nenhuma chamada ao provedor é feita ao carregar a página.
+
 ## [0.19.0] - 2026-10-22
 
 ### Funcionalidades e experiência

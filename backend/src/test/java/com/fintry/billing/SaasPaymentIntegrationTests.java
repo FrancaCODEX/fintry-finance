@@ -200,6 +200,37 @@ class SaasPaymentIntegrationTests {
   }
 
   @Test
+  void availabilityExplainsDisabledIssuanceAndMissingPlanPricesWithoutProviderCalls()
+      throws Exception {
+    var b = new Browser().signup();
+    int before = provider.issued.get();
+    var v = b.request("GET", "/subscription/payments", null, 200);
+    assertTrue(v.path("enabled").asBoolean());
+    assertEquals("READY", v.path("availability").asText());
+    assertEquals(
+        Set.of("ESSENTIAL", "PRO"), json.readValue(v.path("pricedPlans").toString(), Set.class));
+    assertTrue(v.path("invoices").isEmpty());
+    assertFalse(v.toString().contains(config.getApiKey()));
+    assertFalse(v.toString().contains(config.getWebhookToken()));
+    assertFalse(v.toString().contains(config.getAccount()));
+    String r = planRequest(b, "BUSINESS");
+    b.request("POST", "/subscription/payments", input(r, 100), 409);
+    config.setEnabled(false);
+    try {
+      v = b.request("GET", "/subscription/payments", null, 200);
+      assertFalse(v.path("enabled").asBoolean());
+      assertEquals("DISABLED", v.path("availability").asText());
+      b.request("POST", "/subscription/payments", input(r, 100), 409);
+    } finally {
+      config.setEnabled(true);
+    }
+    assertEquals(before, provider.issued.get());
+    assertTrue(b.request("GET", "/subscription/payments", null, 200).path("invoices").isEmpty());
+    assertEquals(SaasSubscription.State.TRIAL, entity(b).getState());
+    assertNull(entity(b).getPaidUntil());
+  }
+
+  @Test
   void explicitPriceConsentAuthorizationAndTenantIsolation() throws Exception {
     var b = new Browser().signup();
     String r = planRequest(b, "PRO");

@@ -63,8 +63,19 @@ public class SaasPaymentService {
       Instant activeUntil,
       LocalDateTime createdAt) {}
 
+  public enum Availability {
+    EVALUATION,
+    DISABLED,
+    READY
+  }
+
   public record View(
-      boolean enabled, Environment environment, int periodDays, List<InvoiceView> invoices) {}
+      boolean enabled,
+      Environment environment,
+      int periodDays,
+      Availability availability,
+      List<SaasPlan.Code> pricedPlans,
+      List<InvoiceView> invoices) {}
 
   private record Reservation(SaasInvoice invoice, boolean created) {}
 
@@ -111,6 +122,12 @@ public class SaasPaymentService {
                 config.isEnabled() && mode == SubscriptionService.Mode.COMMERCIAL,
                 config.getEnvironment(),
                 30,
+                mode != SubscriptionService.Mode.COMMERCIAL
+                    ? Availability.EVALUATION
+                    : config.isEnabled() ? Availability.READY : Availability.DISABLED,
+                Arrays.stream(SaasPlan.Code.values())
+                    .filter(code -> config.price(code) != null)
+                    .toList(),
                 invoices
                     .findTop20ByCompanyIdOrderByCreatedAtDescIdDesc(current.companyId())
                     .stream()
