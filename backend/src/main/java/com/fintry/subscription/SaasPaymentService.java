@@ -61,7 +61,7 @@ public class SaasPaymentService {
       String invoiceUrl,
       String message,
       Instant activeUntil,
-      LocalDateTime createdAt) {}
+      Instant createdAt) {}
 
   public enum Availability {
     EVALUATION,
@@ -112,7 +112,7 @@ public class SaasPaymentService {
         i.getInvoiceUrl(),
         i.getMessage(),
         i.getActiveUntil(),
-        i.getCreatedAt());
+        i.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant());
   }
 
   public View list() {

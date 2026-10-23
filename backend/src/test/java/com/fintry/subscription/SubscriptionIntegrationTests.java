@@ -173,7 +173,11 @@ class SubscriptionIntegrationTests {
     assertTrue(
         Instant.parse(v.path("trialEndsAt").asText())
             .isAfter(Instant.now().plus(Duration.ofDays(13))));
+    var beforeRequest = Instant.now().minusSeconds(1);
     var result = request(b, "BUSINESS", v.path("revision").asLong(), 200);
+    var createdAt = Instant.parse(result.path("requests").get(0).path("createdAt").asText());
+    assertFalse(createdAt.isBefore(beforeRequest));
+    assertFalse(createdAt.isAfter(Instant.now().plusSeconds(1)));
     assertEquals("PRO", result.path("plan").asText());
     assertEquals("TRIAL", result.path("status").asText());
     assertEquals("PENDING", result.path("requests").get(0).path("status").asText());

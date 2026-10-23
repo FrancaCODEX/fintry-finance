@@ -61,7 +61,7 @@ public class SubscriptionService {
       UUID id,
       SaasPlan.Code plan,
       PlanRequest.Status status,
-      LocalDateTime createdAt,
+      Instant createdAt,
       Instant activeUntil) {}
 
   public record View(
@@ -192,7 +192,7 @@ public class SubscriptionService {
                         r.getId(),
                         r.getPlan(),
                         r.getStatus(),
-                        r.getCreatedAt(),
+                        r.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant(),
                         r.getActiveUntil()))
             .toList());
   }
