@@ -60,3 +60,35 @@ A conta/ambiente são registrados na fatura e conferidos em cada consulta. Não 
 Homologue com conta Sandbox e instalação descartável: emissão Pix/boleto, link, evento antes da resposta de criação, token inválido, repetição, resposta incerta, divergências e cancelamento/restauração. Sandbox deve continuar sem ativar plano comercial. Depois, confirme preços e condições com o responsável, configure produção e confira uma transação autorizada, renovação e cancelamento. A entrega usa servidor HTTP simulado; **não comprova homologação real do Sandbox, titularidade da conta ou recebimento em produção**.
 
 Referências oficiais: [criar cobrança](https://docs.asaas.com/reference/criar-nova-cobranca), [consultar cobrança](https://docs.asaas.com/reference/recuperar-uma-unica-cobranca), [eventos de cobrança](https://docs.asaas.com/docs/webhook-para-cobrancas).
+
+
+## Disponibilidade e diagnóstico — 0.20.0
+
+A resposta de `GET /api/v1/subscription/payments` mantém `enabled`, `environment`, `periodDays` e `invoices` e acrescenta:
+
+- `availability`: `EVALUATION` quando o modo da aplicação permite somente simulações, `DISABLED` quando a emissão está desabilitada em modo comercial ou `READY` quando o modo comercial e a emissão estão habilitados.
+- `pricedPlans`: códigos de planos com preço configurado em `SAAS_PRICE_*`. Preço apenas no catálogo não habilita emissão. A elegibilidade da empresa e o preço continuam revalidados no checkout.
+
+`READY` não comprova autenticação no Asaas, comunicação HTTP ou entrega de webhook. Consultar a disponibilidade não chama o provedor e não emite cobranças. Nenhuma credencial, token ou identificador de conta recebedora é exposto.
+
+### Solicitei um plano, mas não apareceu mensalidade
+
+1. Se os botões dizem **Experimentar plano**, o servidor está em `EVALUATION`: a ação apenas simula limites. Para homologar a emissão, use `SAAS_MODE=COMMERCIAL` com `SAAS_PAYMENTS_ENVIRONMENT=SANDBOX` em instalação de teste isolada.
+2. Confira `SAAS_PAYMENTS_ENABLED=true`, identificador de conta e credenciais próprios do operador e preços de emissão. Configuração habilitada incompleta impede inicialização; confira os logs localmente sem compartilhar credenciais.
+3. No Compose local, `.env` na raiz é carregado por padrão. Se editar outro arquivo, use explicitamente `--env-file CAMINHO`. O Compose de produção tem seu próprio arquivo e requisitos; não misture seus volumes com os locais.
+4. Após editar o ambiente, recrie apenas a aplicação. Na raiz, para o Compose local com `.env`:
+
+   ```bash
+   docker compose up -d --build --no-deps app
+   ```
+
+   Se o ambiente local estiver deliberadamente em outro arquivo, adapte o caminho:
+
+   ```bash
+   docker compose --env-file CAMINHO_DO_ENV up -d --build --no-deps app
+   ```
+
+   Não use `down -v`. Não imprima `docker compose config` para compartilhar: ele pode conter as credenciais resolvidas. O procedimento de produção permanece no [guia de publicação](../07-devops/deployment.md).
+5. Atualize **Plano e assinatura** e confira o painel de disponibilidade. Uma empresa anteriormente simulada em avaliação exige conferência comercial ao mudar de modo; para homologar, crie uma empresa de teste nova. O teste Profissional não é uma assinatura paga e não emite mensalidade ao cadastrar.
+6. Solicite o plano e, na solicitação pendente, use **Gerar mensalidade**. Confira preço, pagador, Pix/boleto e confirme a emissão. O link aparece no histórico se a emissão retornar uma fatura válida. Resposta incerta exige consulta, sem nova emissão automática.
+7. Confira a cobrança na conta Sandbox, a consulta, cancelamento e os eventos no webhook público HTTPS. Um pagamento de teste permanece sem ativação comercial, inclusive após eventos repetidos. Esse roteiro precisa ser executado com a instalação e conta reais de homologação; testes com mock não o substituem.

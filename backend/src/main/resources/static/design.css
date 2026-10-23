@@ -2763,3 +2763,55 @@ body.navigation-open {
     width: 100%;
   }
 }
+
+.subscription-readiness {
+  padding: clamp(20px, 3vw, 30px);
+  margin-bottom: 24px;
+  border-left: 4px solid var(--green);
+  overflow-wrap: anywhere;
+}
+.readiness-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.readiness-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--green);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.readiness-heading h2 {
+  margin: 4px 0 0;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+}
+.subscription-readiness p {
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 16px 0 0;
+}
+.subscription-readiness .readiness-prices,
+.subscription-readiness .readiness-trial {
+  padding: 14px 16px;
+  background: var(--soft);
+  border-radius: 12px;
+}
+.subscription-readiness strong {
+  color: var(--ink);
+}
+.subscription-readiness details {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.subscription-readiness summary {
+  cursor: pointer;
+  color: var(--green);
+  font-weight: 600;
+  line-height: 1.6;
+}

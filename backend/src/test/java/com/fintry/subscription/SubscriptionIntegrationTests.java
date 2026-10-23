@@ -161,6 +161,13 @@ class SubscriptionIntegrationTests {
     var v = view(b);
     assertEquals("TRIAL", v.path("status").asText());
     assertEquals("COMMERCIAL", v.path("mode").asText());
+    assertEquals("PRO", v.path("plan").asText());
+    assertTrue(v.path("paidUntil").isNull());
+    var payments = b.request("GET", "/subscription/payments", null, 200);
+    assertFalse(payments.path("enabled").asBoolean());
+    assertEquals("DISABLED", payments.path("availability").asText());
+    assertTrue(payments.path("pricedPlans").isEmpty());
+    assertTrue(payments.path("invoices").isEmpty());
     assertEquals(3, v.path("plans").size());
     assertTrue(v.path("plans").get(0).path("monthlyPrice").isNull());
     assertTrue(

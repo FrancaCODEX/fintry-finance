@@ -23,7 +23,8 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.16.0 | Planos SaaS, capacidade, teste, solicitações e ativação manual | Incorporada à main; base de capacidade e ativação manual |
 | 0.17.0 | Mensalidades Pix/boleto, preços configuráveis e ativação/renovação por recebimento confirmado | Incorporada à main; homologação real pendente |
 | 0.18.0 | Geração recorrente autorizada de mensalidades, controle por ciclo e painel de renovação | Incorporada à main; sem débito automático, homologação real pendente |
-| 0.19.0 | Primeiro acesso com apresentação dos planos e continuidade do teste padrão | Entrega atual |
+| 0.19.0 | Primeiro acesso com apresentação dos planos e continuidade do teste padrão | Incorporada à main |
+| 0.20.0 | Diagnóstico de disponibilidade de cobrança, preços pendentes e clareza entre teste e contratação | Entrega atual; homologação real continua pendente |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
