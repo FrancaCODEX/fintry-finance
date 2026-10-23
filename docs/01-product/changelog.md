@@ -2,6 +2,14 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.20.1] - 2026-10-23
+
+### Correções
+
+- Datas de criação de solicitações de plano e mensalidades são enviadas com fuso explícito (`Z`), evitando interpretar o horário UTC do container como horário local do navegador.
+- Exibição da assinatura continua no fuso de São Paulo: uma solicitação de 19:25 UTC aparece como 16:25, inclusive em navegadores configurados para outros fusos.
+- Conversão utiliza o fuso da JVM que também é utilizado pela auditoria de criação. Nenhum registro, vencimento, período de teste ou acesso pago é regravado.
+
 ## [0.20.0] - 2026-10-23
 
 ### Experiência e diagnóstico

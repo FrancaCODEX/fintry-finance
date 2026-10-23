@@ -92,3 +92,10 @@ A resposta de `GET /api/v1/subscription/payments` mantém `enabled`, `environmen
 5. Atualize **Plano e assinatura** e confira o painel de disponibilidade. Uma empresa anteriormente simulada em avaliação exige conferência comercial ao mudar de modo; para homologar, crie uma empresa de teste nova. O teste Profissional não é uma assinatura paga e não emite mensalidade ao cadastrar.
 6. Solicite o plano e, na solicitação pendente, use **Gerar mensalidade**. Confira preço, pagador, Pix/boleto e confirme a emissão. O link aparece no histórico se a emissão retornar uma fatura válida. Resposta incerta exige consulta, sem nova emissão automática.
 7. Confira a cobrança na conta Sandbox, a consulta, cancelamento e os eventos no webhook público HTTPS. Um pagamento de teste permanece sem ativação comercial, inclusive após eventos repetidos. Esse roteiro precisa ser executado com a instalação e conta reais de homologação; testes com mock não o substituem.
+
+
+## Datas de criação — 0.20.1
+
+`createdAt` de mensalidades e solicitações de plano é retornado como um instante ISO 8601 com `Z` (UTC), por exemplo `2026-10-23T19:25:00Z`. A interface exibe esse instante em `America/Sao_Paulo`, resultando em 16:25 nesse exemplo, independentemente do fuso do navegador.
+
+As colunas de auditoria existentes são `TIMESTAMP` sem fuso. A resposta interpreta esses valores no fuso da JVM, o mesmo utilizado pela auditoria ao gravar, e converte para UTC. No container padrão, esse fuso é UTC. Não altere o fuso da JVM de uma instalação com dados existentes sem um plano de conversão dos horários históricos: o fuso original não está registrado nessas colunas. Esta correção não migra nem regrava os dados; vencimentos (`LocalDate`) e prazos de acesso já armazenados como instantes permanecem inalterados.

@@ -243,7 +243,11 @@ class SaasPaymentIntegrationTests {
     b.token = null;
     b.request("POST", "/subscription/payments", input(r, 100), 403);
     b.token = token;
+    var beforeCheckout = Instant.now().minusSeconds(1);
     var c = checkout(b, r);
+    var createdAt = Instant.parse(c.path("createdAt").asText());
+    assertFalse(createdAt.isBefore(beforeCheckout));
+    assertFalse(createdAt.isAfter(Instant.now().plusSeconds(1)));
     assertEquals("PENDING", c.path("status").asText());
     assertEquals(c.path("id"), checkout(b, r).path("id"));
     assertEquals(before + 1, provider.issued.get());
