@@ -102,22 +102,24 @@ function renderExamples() {
   const loaded = planning.sample.loaded;
   const packVersion = planning.sample.packVersion || 1;
   const current = loaded && packVersion >= 3;
+  const journey = [
+    ["01", "Dashboard", "Comece pelo saldo, valores realizados e previsões do cenário.", "dashboard", "Abrir dashboard"],
+    ["02", "Lançamentos e baixas", "Confira recebimentos e pagamentos parciais, com saldo restante e histórico.", "entries", "Ver lançamentos"],
+    ["03", "Relatórios", "Compare os valores pagos ou recebidos usando as datas das baixas.", "reports", "Abrir relatórios"],
+    ["04", "Conciliação", "Veja dois movimentos agrupados, dois vínculos e um item para revisar.", "reconciliation", "Explorar conciliação"],
+  ];
   const areas = [
-    ["Financeiro", "4 contas, seis meses de receitas/despesas, transferências e compromissos de hoje até os próximos meses.", "dashboard", "Explorar dashboard"],
     ["Pendências e séries", "Atrasados, vencimentos próximos, recorrência mensal e compra parcelada.", "pending", "Ver pendências"],
     ["Clientes e fornecedores", "Contatos de exemplo, cadastros ativos e um registro arquivado.", "contacts", "Ver contatos"],
-    ["Categorias e orçamentos", "Limites mensais com situações dentro do limite, em atenção e excedidas.", "budgets", "Ver orçamentos"],
-    ["Produtos, estoque e vendas", "Estoque baixo/zerado, vendas em situações diferentes e propostas comerciais.", "sales", "Ver vendas"],
-    ["Pagamentos parciais", "Recebimentos e pagamentos em etapas, saldo restante e histórico de baixas.", "entries", "Ver lançamentos"],
-    ["Conciliação bancária", "Extrato OFX fictício, dois movimentos agrupados, vínculos individuais e uma linha em revisão.", "reconciliation", "Explorar conciliação"],
-    ["Relatórios", "Pagamentos parciais discriminados pelas datas e valores efetivamente recebidos ou pagos.", "reports", "Abrir relatórios"],
+    ["Categorias e orçamentos", "Limites mensais dentro do limite, em atenção e excedidos.", "budgets", "Ver orçamentos"],
+    ["Produtos, estoque e vendas", "Estoque baixo ou zerado, vendas em situações diferentes e propostas.", "sales", "Ver vendas"],
   ];
   return (
     head(
       "Explore o Fintry completo.",
       "Um cenário de demonstração que percorre o financeiro da previsão à conciliação.",
     ) +
-    `<section class="card examples-intro"><span class="eyebrow">DADOS FICTÍCIOS · ${current ? "PACOTE 3 ATUALIZADO" : "PACOTE 3 DISPONÍVEL"}</span><h2>${current ? "Seu ambiente de apresentação está pronto." : loaded ? "Complete os exemplos para apresentar o fluxo." : "Explore o Fintry com um cenário completo."}</h2><p>Os registros recebem a identificação Exemplo ou DEMO. A inclusão afeta dashboard e relatórios e preserva seus cadastros, exemplos e alterações atuais.</p>${current ? '<p class="notice success" role="status">Pacote 3 adicionado. As baixas e a conciliação são fictícias; nenhum banco real é acessado. Repetir a solicitação não duplica os registros.</p>' : canWrite() ? `<button class="btn" data-action="sample">${loaded ? "Adicionar exemplos de apresentação" : "Preparar ambiente de apresentação"}</button>` : '<p class="notice">Um Administrador ou membro do Financeiro pode preparar os exemplos.</p>'}</section><section class="examples-grid" aria-label="Conteúdo dos exemplos">${areas.map(([title, text, page, label]) => `<article class="card"><h2>${title}</h2><p>${text}</p><button class="btn text" data-nav="${page}">${label} →</button></article>`).join("")}</section><p class="notice">O pacote é adicionado somente quando você solicita, uma vez por empresa. Extratos, pagamentos e comprovantes são fictícios; nenhuma instituição financeira é acessada. Não cria usuários, senhas ou convites.</p>`
+    `<section class="card examples-intro"><span class="eyebrow">DADOS FICTÍCIOS · ${current ? "PACOTE 3 ATUALIZADO" : "PACOTE 3 DISPONÍVEL"}</span><h2>${current ? "Seu ambiente de apresentação está pronto." : loaded ? "Complete os exemplos para apresentar o fluxo." : "Explore o Fintry com um cenário completo."}</h2><p>Comece pelo percurso principal. Os registros recebem a identificação Exemplo ou DEMO e preservam seus cadastros e alterações atuais.</p>${current ? '<p class="notice success" role="status">Pacote 3 adicionado. As baixas e a conciliação são fictícias; nenhum banco real é acessado. Repetir a solicitação não duplica os registros.</p>' : canWrite() ? `<button class="btn" data-action="sample">${loaded ? "Adicionar exemplos de apresentação" : "Preparar ambiente de apresentação"}</button>` : '<p class="notice">Um Administrador ou membro do Financeiro pode preparar os exemplos.</p>'}</section><section class="examples-journey" aria-label="Percurso principal de apresentação"><div class="examples-section-head"><div><span class="eyebrow">PERCURSO PRINCIPAL</span><h2>Da visão geral à conciliação</h2></div><span>4 etapas · cerca de 3 minutos</span></div><div class="examples-journey-grid">${journey.map(([number, title, text, page, label]) => `<article class="card example-journey-card"><span class="example-step">${number}</span><h3>${title}</h3><p>${text}</p><button class="btn text" data-nav="${page}">${label} →</button></article>`).join("")}</div></section><section class="examples-support"><div class="examples-section-head"><div><span class="eyebrow">PARA EXPLORAR DEPOIS</span><h2>Outros módulos do cenário</h2></div></div><div class="examples-grid" aria-label="Módulos complementares">${areas.map(([title, text, page, label]) => `<article class="card"><h3>${title}</h3><p>${text}</p><button class="btn text" data-nav="${page}">${label} →</button></article>`).join("")}</div></section><p class="notice">O pacote é adicionado somente quando você solicita. Extratos, pagamentos e comprovantes são fictícios; nenhuma instituição financeira é acessada.</p>`
   );
 }
 function sampleDialog() {

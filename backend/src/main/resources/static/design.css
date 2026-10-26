@@ -3299,6 +3299,106 @@ body.navigation-open {
 .dashboard-transactions {
   margin-bottom: 24px;
 }
+.dashboard-tour {
+  margin: 0 0 22px;
+  padding: 22px 24px 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(120deg, var(--paper), color-mix(in srgb, var(--green) 5%, var(--paper)));
+}
+.dashboard-tour-heading,
+.dashboard-tour-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.dashboard-tour-heading h2 {
+  margin: 5px 0 3px;
+  font-size: 19px;
+}
+.dashboard-tour-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.dashboard-tour-heading .demo-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 11px;
+  border-radius: 99px;
+  background: var(--soft);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.demo-label svg {
+  width: 15px;
+  height: 15px;
+}
+.dashboard-tour-steps {
+  align-items: stretch;
+  margin-top: 16px;
+}
+.dashboard-tour-step {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 12px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, transform .18s ease;
+}
+.dashboard-tour-step:hover {
+  border-color: var(--green);
+  transform: translateY(-2px);
+}
+.tour-number {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+}
+.tour-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.tour-copy strong {
+  font-size: 12px;
+}
+.tour-copy small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+.tour-arrow {
+  margin-left: auto;
+  color: var(--green);
+}
+.dashboard-tour-all {
+  display: block;
+  margin: 9px 0 0 auto;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.dashboard-tour-step:focus-visible,
+.dashboard-tour-all:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--green) 42%, transparent);
+  outline-offset: 2px;
+}
 @media (max-width: 1200px) {
   .dashboard-overview {
     grid-template-columns: minmax(250px, 0.85fr) minmax(0, 1.8fr);
@@ -3324,6 +3424,18 @@ body.navigation-open {
   }
   .dashboard-cash .card-head {
     flex-direction: column;
+  }
+}
+@media (max-width: 760px) {
+  .dashboard-tour {
+    padding: 18px;
+  }
+  .dashboard-tour-steps {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dashboard-tour-step {
+    min-height: 60px;
   }
 }
 @media (max-width: 1000px) {

@@ -23,6 +23,7 @@ const state = {
   version: "",
   company: null,
   onboardingEntries: null,
+  demoPack: null,
   series: null,
   seriesPage: 0,
   page: "dashboard",
@@ -1093,6 +1094,7 @@ async function loadData(id) {
     forecast,
     dashboardPending,
     onboardingEntries,
+    demoPack,
   ] = await Promise.all([
     api("/finance/accounts"),
     api("/finance/entries?" + query),
@@ -1129,6 +1131,7 @@ async function loadData(id) {
     state.page === "dashboard"
       ? api("/finance/entries?size=1&page=0")
       : Promise.resolve(null),
+    state.page === "dashboard" ? api("/finance/sample") : Promise.resolve(null),
   ]);
   if (id !== requestId || !state.user) return;
   if (
@@ -1141,6 +1144,7 @@ async function loadData(id) {
   }
   state.dashboardPending = dashboardPending;
   state.onboardingEntries = onboardingEntries;
+  state.demoPack = demoPack;
   state.accounts = accounts;
   state.entries = entries;
   state.summary = summary;
