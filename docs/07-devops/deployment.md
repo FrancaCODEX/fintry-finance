@@ -1,4 +1,4 @@
-# Publicação do Fintry — 0.22.0
+# Publicação do Fintry — 0.24.0
 
 A entrega prepara uma instalação em servidor Linux com Docker Compose, PostgreSQL 17 e Caddy. O repositório não contém servidor, domínio, conta SMTP ou cópia externa contratados. A primeira publicação pública depende desses dados; não é feita ao integrar um PR.
 
@@ -25,7 +25,7 @@ Use o valor gerado como DB_PASSWORD e preencha o arquivo com domínio, contato A
 | MAIL_FROM | Remetente autorizado pelo provedor SMTP |
 | SMTP_HOST/PORT/USERNAME/PASSWORD | Dados do provedor de envio |
 | SMTP_STARTTLS/SMTP_SSL | 587: true/false; 465: false/true |
-| FINTRY_IMAGE | Tag da versão, inicialmente fintry:0.22.0 |
+| FINTRY_IMAGE | Tag da versão da aplicação, atualize para fintry:0.24.0 ao preparar a entrega |
 
 Configure SPF/DKIM/DMARC conforme seu provedor. O Fintry exige SMTP autenticado, STARTTLS obrigatório ou TLS implícito e verificação do certificado; não é preciso desativar a validação TLS para usar certificados públicos válidos.
 

@@ -35,6 +35,9 @@ class PlanningIntegrationTests {
   @org.springframework.beans.factory.annotation.Autowired
   org.springframework.transaction.PlatformTransactionManager transactions;
 
+  @org.springframework.beans.factory.annotation.Autowired
+  com.fintry.sample.SampleRunRepository sampleRuns;
+
   static final AtomicLong DOCS = new AtomicLong(50000000000000L);
   final JsonMapper json = JsonMapper.builder().build();
   final LocalDate today = LocalDate.of(2026, 10, 19);
@@ -423,7 +426,7 @@ class PlanningIntegrationTests {
     var original = expense(b, real, c, "42", true, today);
     assertFalse(b.request("GET", "/finance/sample", null, 200).get("loaded").asBoolean());
     b.request("POST", "/finance/sample", null, 201);
-    assertEquals(4, b.request("GET", "/finance/accounts", null, 200).size());
+    assertEquals(5, b.request("GET", "/finance/accounts", null, 200).size());
     assertTrue(
         b.request("GET", "/finance/entries/" + original, null, 200)
             .get("entry")
@@ -431,13 +434,36 @@ class PlanningIntegrationTests {
             .asText()
             .contains("Despesa de teste"));
     var contacts = b.request("GET", "/contacts?active=true", null, 200);
-    assertEquals(5, contacts.get("totalElements").asInt());
+    assertEquals(7, contacts.get("totalElements").asInt());
     assertTrue(contacts.get("content").get(0).get("email").asText().endsWith("@example.invalid"));
     assertFalse(contacts.get("content").get(0).get("phone").asText().isBlank());
-    assertEquals(6, b.request("GET", "/products?size=100", null, 200).get("totalElements").asInt());
+    assertEquals(10, b.request("GET", "/products?size=100", null, 200).get("totalElements").asInt());
+    assertEquals(3, b.request("GET", "/products?kind=SERVICE&size=100", null, 200).get("totalElements").asInt());
     assertEquals(2, b.request("GET", "/finance/series", null, 200).get("totalElements").asInt());
     var sales = b.request("GET", "/sales", null, 200);
-    assertEquals(4, sales.get("totalElements").asInt());
+    assertEquals(5, sales.get("totalElements").asInt());
+    var proposals = b.request("GET", "/proposals?size=100", null, 200);
+    assertEquals(3, proposals.get("totalElements").asInt());
+    var proposalStates = new HashSet<String>();
+    boolean approvedProposalHasSale = false;
+    for (var proposal : proposals.get("content")) {
+      proposalStates.add(proposal.get("status").asText());
+      if (proposal.get("status").asText().equals("APPROVED")) {
+        approvedProposalHasSale = !proposal.get("saleId").isNull();
+        var details =
+            b.request("GET", "/proposals/" + proposal.get("id").asText(), null, 200);
+        assertFalse(details.get("items").isEmpty());
+      }
+    }
+    assertEquals(Set.of("DRAFT", "OPEN", "APPROVED"), proposalStates);
+    assertTrue(approvedProposalHasSale);
+    var proposalPdf =
+        b.raw(
+            "GET",
+            "/proposals/" + proposals.get("content").get(0).get("id").asText() + "/pdf",
+            null);
+    assertEquals(200, proposalPdf.statusCode());
+    assertTrue(proposalPdf.body().startsWith("%PDF-"));
     var states = new HashSet<String>();
     int files = 0;
     for (var sale : sales.get("content")) {
@@ -467,8 +493,12 @@ class PlanningIntegrationTests {
     assertTrue(budgets.get("warningCount").asInt() > 0);
     assertTrue(budgets.get("exceededCount").asInt() > 0);
     var before = b.request("GET", "/finance/summary?month=2026-10", null, 200);
+    var status = b.request("GET", "/finance/sample", null, 200);
+    assertEquals(2, status.get("packVersion").asInt());
     b.request("POST", "/finance/sample", null, 201);
-    assertEquals(4, b.request("GET", "/finance/accounts", null, 200).size());
+    assertEquals(5, b.request("GET", "/finance/accounts", null, 200).size());
+    assertEquals(10, b.request("GET", "/products?size=100", null, 200).get("totalElements").asInt());
+    assertEquals(3, b.request("GET", "/proposals?size=100", null, 200).get("totalElements").asInt());
     assertEquals(before, b.request("GET", "/finance/summary?month=2026-10", null, 200));
     assertFalse(
         new Browser()
@@ -476,6 +506,29 @@ class PlanningIntegrationTests {
             .request("GET", "/finance/sample", null, 200)
             .get("loaded")
             .asBoolean());
+  }
+
+  @Test
+  void oldExamplePackCanBeExtendedWithoutChangingExistingRecords() throws Exception {
+    var b = new Browser().signup();
+    var oldAccount = b.account("Conta anterior à atualização");
+    UUID company =
+        UUID.fromString(b.request("GET", "/auth/me", null, 200).get("companyId").asText());
+    var oldRun = new com.fintry.sample.SampleRun();
+    oldRun.setCompanyId(company);
+    oldRun.setPackVersion(1);
+    oldRun.setCompletedAt(LocalDateTime.now(ZoneOffset.UTC));
+    sampleRuns.saveAndFlush(oldRun);
+
+    b.request("POST", "/finance/sample", null, 201);
+    assertEquals(2, b.request("GET", "/finance/accounts", null, 200).size());
+    assertTrue(
+        b.request("GET", "/finance/accounts", null, 200).toString().contains(oldAccount));
+    assertEquals(4, b.request("GET", "/products?size=100", null, 200).get("totalElements").asInt());
+    assertEquals(3, b.request("GET", "/proposals?size=100", null, 200).get("totalElements").asInt());
+    b.request("POST", "/finance/sample", null, 201);
+    assertEquals(4, b.request("GET", "/products?size=100", null, 200).get("totalElements").asInt());
+    assertEquals(3, b.request("GET", "/proposals?size=100", null, 200).get("totalElements").asInt());
   }
 
   @Test
@@ -519,7 +572,7 @@ class PlanningIntegrationTests {
       release.countDown();
       pool.shutdownNow();
     }
-    assertEquals(3, b.request("GET", "/finance/accounts", null, 200).size());
-    assertEquals(4, b.request("GET", "/sales", null, 200).get("totalElements").asInt());
+    assertEquals(4, b.request("GET", "/finance/accounts", null, 200).size());
+    assertEquals(5, b.request("GET", "/sales", null, 200).get("totalElements").asInt());
   }
 }

@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.23.0**
+**Versão atual: 0.24.0**
 
 Dashboard com saldo atual em destaque, indicadores realizados por mês, atalhos e gráfico consultável com mouse, toque e teclado. Veja a [visão geral](docs/01-product/dashboard.md).
 
@@ -53,7 +53,7 @@ docker compose up --build -d
 
 Abra **http://localhost:8080**, clique em **Criar conta** e preencha seu nome, empresa, CNPJ com 14 dígitos, e-mail e uma senha com pelo menos 10 caracteres. Para uma avaliação, use dados fictícios.
 
-Abra **Dados de exemplo** no menu (ou **Explorar com dados de exemplo** no primeiro acesso) e confirme **Adicionar exemplos**. O pacote opcional preenche contas, contatos, categorias, seis meses de financeiro, séries, produtos/estoque, vendas, orçamentos e comprovantes fictícios. Pode ser adicionado uma vez por empresa, inclusive se já houver cadastros: preserva seus registros e não duplica ao repetir. Os valores entram nos indicadores da empresa; use uma empresa de avaliação para explorar sem misturar com dados reais. Não é carregado automaticamente.
+Abra **Dados de exemplo** no menu (ou **Explorar com dados de exemplo** no primeiro acesso) e confirme **Adicionar exemplos**. O pacote opcional inclui contas, contatos, categorias, seis meses de financeiro, séries, produtos/estoque, vendas, serviços, propostas em diferentes situações, orçamentos e comprovantes fictícios. Empresas que já receberam o pacote anterior podem adicionar a expansão: seus cadastros e alterações são preservados, sem duplicação ao repetir. Os valores entram nos indicadores da empresa; use uma empresa de avaliação para explorar sem misturar com dados reais. Nada é carregado automaticamente.
 
 O primeiro build baixa as dependências Java. Para acompanhar a inicialização:
 
