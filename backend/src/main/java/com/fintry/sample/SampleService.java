@@ -1,254 +1,728 @@
-YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíó÷N‹Z–‹­¦ëeŠw¬ÕÁ…­…”½´¹™¥¹ÑÉä¹Í…µÁ±”ì()¥µÁ½ÉĞ½´¹™¥¹ÑÉä¹…ÑÑ…¡µ•¹Ğ¹ÑÑ…¡µ•¹ÑM•ÉÙ¥”ì)¥µÁ½ÉĞ½´¹™¥¹ÑÉä¹…Õ‘¥Ğ¹Õ‘¥ÑM•ÉÙ¥”ì)¥µÁ½ÉĞ½´¹™¥¹ÑÉä¹…ÕÑ ¹ÕÉÉ•¹ÑUÍ•Èì)¥µÁ½ÉĞ½´¹™¥¹ÑÉä¹‰Õ‘•Ğ¹	Õ‘•ÑM•ÉÙ¥”ì)¥µÁ½ÉĞ½´¹™¥¹ÑÉä¹½µµ•É”¸¨ì)¥µÁ½ÉĞ½´¹™¥¹ÑÉä¹½µÁ…¹ä¹É•Á½Í¥Ñ½Éä¹½µÁ…¹åI•Á½Í¥Ñ½Éäì)¥µÁ½ÉĞ½´¹™¥¹ÑÉä¹‘¥É•Ñ½Éä¸¨ì)¥µÁ½ÉĞ½´¹™¥¹ÑÉä¹™¥¹…¹”¸¨ì)¥µÁ½ÉĞ©…Ù„¹¥¼¸¨ì)¥µÁ½ÉĞ©…Ù„¹µ…Ñ ¹	¥•¥µ…°ì)¥µÁ½ÉĞ©…Ù„¹¹¥¼¹™¥±”¹¥±•Ìì)¥µÁ½ÉĞ©…Ù„¹Ñ¥µ”¸¨ì)¥µÁ½ÉĞ©…Ù„¹ÕÑ¥°¸¨ì)¥µÁ½ÉĞ±½µ‰½¬¹I•ÅÕ¥É•‘ÉÍ½¹ÍÑÉÕÑ½Èì)¥µÁ½ÉĞ½Éœ¹…Á…¡”¹Á‘™‰½à¹Á‘µ½‘•°¸¨ì)¥µÁ½ÉĞ½Éœ¹…Á…¡”¹Á‘™‰½à¹Á‘µ½‘•°¹™½¹Ğ¸¨ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹¡ÑÑÀ¹!ÑÑÁMÑ…ÑÕÌì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹ÍÑ•É•½ÑåÁ”¹M•ÉÙ¥”ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹ÑÉ…¹Í…Ñ¥½¸¹…¹¹½Ñ…Ñ¥½¸¹QÉ…¹Í…Ñ¥½¹…°ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹İ•ˆ¹µÕ±Ñ¥Á…ÉĞ¹5Õ±Ñ¥Á…ÉÑ¥±”ì)¥µÁ½ÉĞ½Éœ¹ÍÁÉ¥¹™É…µ•İ½É¬¹İ•ˆ¹Í•ÉÙ•È¹I•ÍÁ½¹Í•MÑ…ÑÕÍá•ÁÑ¥½¸ì()M•ÉÙ¥”)I•ÅÕ¥É•‘ÉÍ½¹ÍÑÉÕÑ½È)QÉ…¹Í…Ñ¥½¹…°¡É•…‘=¹±ä€ôÑÉÕ”¤)ÁÕ‰±¥Œ±…ÍÌM…µÁ±•M•ÉÙ¥”ì(€ÁÉ¥Ù…Ñ”™¥¹…°ÕÉÉ•¹ÑUÍ•ÈÕÉÉ•¹Ğì(€ÁÉ¥Ù…Ñ”™¥¹…°½µÁ…¹åI•Á½Í¥Ñ½Éä½µÁ…¹¥•Ìì(€ÁÉ¥Ù…Ñ”™¥¹…°M…µÁ±•IÕ¹I•Á½Í¥Ñ½ÉäÉÕ¹Ìì(€ÁÉ¥Ù…Ñ”™¥¹…°¥¹…¹•M•ÉÙ¥”™¥¹…¹”ì(€ÁÉ¥Ù…Ñ”™¥¹…°¥É•Ñ½ÉåM•ÉÙ¥”‘¥É•Ñ½Éäì(€ÁÉ¥Ù…Ñ”™¥¹…°½µµ•É•M•ÉÙ¥”½µµ•É”ì(€ÁÉ¥Ù…Ñ”™¥¹…°AÉ½Á½Í…±M•ÉÙ¥”ÁÉ½Á½Í…±Ìì(€ÁÉ¥Ù…Ñ”™¥¹…°M•É¥•ÍM•ÉÙ¥”Í•É¥•Ìì(€ÁÉ¥Ù…Ñ”™¥¹…°	Õ‘•ÑM•ÉÙ¥”‰Õ‘•ÑÌì(€ÁÉ¥Ù…Ñ”™¥¹…°ÑÑ…¡µ•¹ÑM•ÉÙ¥”…ÑÑ…¡µ•¹ÑÌì(€ÁÉ¥Ù…Ñ”™¥¹…°I•½¹¥±¥…Ñ¥½¹M•ÉÙ¥”É•½¹¥±¥…Ñ¥½¸ì(€ÁÉ¥Ù…Ñ”™¥¹…°Õ‘¥ÑM•ÉÙ¥”…Õ‘¥Ğì(€ÁÉ¥Ù…Ñ”™¥¹…°±½¬±½¬ì((€ÁÕ‰±¥ŒÉ•½ÉMÑ…ÑÕÌ¡‰½½±•…¸±½…‘•°¥¹ĞÁ…­Y•ÉÍ¥½¸°1½…±…Ñ•Q¥µ”½µÁ±•Ñ•‘Ğ¤íô((€ÁÉ¥Ù…Ñ”É•½É•µ½5½Ù•µ•¹Ğ¡MÑÉ¥¹œ½‘”°1½…±…Ñ”‘…Ñ”°MÑÉ¥¹œ…µ½Õ¹Ğ°MÑÉ¥¹œ‘•ÍÉ¥ÁÑ¥½¸¤íô((€ÁÕ‰±¥ŒMÑ…ÑÕÌÍÑ…ÑÕÌ ¤ì(€€€É•ÑÕÉ¸ÉÕ¹Ì¹™¥¹‘	å%¡ÕÉÉ•¹Ğ¹½µÁ…¹å% ¤¤(€€€€€€€€¹µ…À¡È€´ø¹•ÜMÑ…ÑÕÌ¡ÑÉÕ”°È¹•ÑA…­Y•ÉÍ¥½¸ ¤°È¹•Ñ½µÁ±•Ñ•‘Ğ ¤¤¤(€€€€€€€€¹½É±Í”¡¹•ÜMÑ…ÑÕÌ¡™…±Í”°€Ä°¹Õ±°¤¤ì(€ô((€ÁÉ¥Ù…Ñ”	¥•¥µ…°µ½¹•ä¡MÑÉ¥¹œÙ…±Õ”¤ì(€€€É•ÑÕÉ¸¹•Ü	¥•¥µ…°¡Ù…±Õ”¤ì(€ô((€ÁÉ¥Ù…Ñ”¥¹…¹•M•ÉÙ¥”¹¹ÑÉå%¹ÁÕĞ¥¹ÁÕĞ (€€€€€UU%…½Õ¹Ğ°(€€€€€MÑÉ¥¹œ‘•ÍÉ¥ÁÑ¥½¸°(€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”ÑåÁ”°(€€€€€MÑÉ¥¹œ…µ½Õ¹Ğ°(€€€€€1½…±…Ñ”‘Õ”°(€€€€€‰½½±•…¸Á…¥°(€€€€€UU%…Ñ•½Éä°(€€€€€UU%½¹Ñ…Ğ¤ì(€€€É•ÑÕÉ¸¹•Ü¥¹…¹•M•ÉÙ¥”¹¹ÑÉå%¹ÁÕĞ (€€€€€€€…½Õ¹Ğ°(€€€€€€€‘•ÍÉ¥ÁÑ¥½¸°(€€€€€€€¹Õ±°°(€€€€€€€ÑåÁ”°(€€€€€€€µ½¹•ä¡…µ½Õ¹Ğ¤°(€€€€€€€‘Õ”°(€€€€€€€Á…¥°(€€€€€€€Á…¥€ü‘Õ”€è¹Õ±°°(€€€€€€€…Ñ•½Éä°(€€€€€€€½¹Ñ…Ğ¤ì(€ô((€ÁÉ¥Ù…Ñ”UU%•¹ÑÉä (€€€€€UU%…½Õ¹Ğ°(€€€€€MÑÉ¥¹œ‘•ÍÉ¥ÁÑ¥½¸°(€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”ÑåÁ”°(€€€€€MÑÉ¥¹œ…µ½Õ¹Ğ°(€€€€€1½…±…Ñ”‘Õ”°(€€€€€‰½½±•…¸Á…¥°(€€€€€UU%…Ñ•½Éä°(€€€€€UU%½¹Ñ…Ğ¤ì(€€€É•ÑÕÉ¸™¥¹…¹”(€€€€€€€€¹É•…Ñ•¹ÑÉä¡¥¹ÁÕĞ¡…½Õ¹Ğ°‘•ÍÉ¥ÁÑ¥½¸°ÑåÁ”°…µ½Õ¹Ğ°‘Õ”°Á…¥°…Ñ•½Éä°½¹Ñ…Ğ¤¤(€€€€€€€€¹¥ ¤ì(€ô((€ÁÉ¥Ù…Ñ”UU%½¹Ñ…Ğ¡MÑÉ¥¹œ¹…µ”°½¹Ñ…Ğ¹-¥¹­¥¹°¥¹Ğ¥¹‘•à°MÑÉ¥¹œÁÉ•™¥à°‰½½±•…¸…Ñ¥Ù”¤ì(€€€É•ÑÕÉ¸‘¥É•Ñ½Éä(€€€€€€€€¹Í…Ù•½¹Ñ…Ğ (€€€€€€€€€€€¹Õ±°°(€€€€€€€€€€€¹•Ü¥É•Ñ½ÉåM•ÉÙ¥”¹½¹Ñ…Ñ%¹ÁÕĞ (€€€€€€€€€€€€€€€ÁÉ•™¥à€¬¹…µ”°(€€€€€€€€€€€€€€€­¥¹°(€€€€€€€€€€€€€€€€ˆÀÀÀÀÀÀÀÀÀÀÀˆ€¬MÑÉ¥¹œ¹™½Éµ…Ğ ˆ”ÀÍˆ°¥¹‘•à¤°(€€€€€€€€€€€€€€€€‰½¹Ñ…Ñ¼ˆ€¬¥¹‘•à€¬€‰•á…µÁ±”¹¥¹Ù…±¥ˆ°(€€€€€€€€€€€€€€€€ˆ ÄÄ¤€ÀÀÀÀ´ÀÀÀÀˆ°(€€€€€€€€€€€€€€€€‰…‘…ÍÑÉ¼™¥Óµ¥¼Á…É„•áÁ±½É…È¼¥¹ÑÉä¸½Õµ•¹Ñ¼”½¹Ñ…Ñ¼Í•´Ù…±¥‘…‘”¸ˆ(€€€€€€€€€€€€€€€€€€€€¬€ˆAÉ•™•Ë©¹¥„è…Ñ•¹‘¥µ•¹Ñ¼Á½È”µµ…¥°¸ˆ°(€€€€€€€€€€€€€€€…Ñ¥Ù”¤¤(€€€€€€€€¹¥ ¤ì(€ô((€ÁÉ¥Ù…Ñ”UU%…Ñ•½Éä¡MÑÉ¥¹œ¹…µ”°¥¹…¹¥…±…Ñ•½Éä¹-¥¹­¥¹°MÑÉ¥¹œÁÉ•™¥à¤ì(€€€MÑÉ¥¹œ‰…Í”€ôÁÉ•™¥à€¬¹…µ”°±…‰•°€ô‰…Í”ì(€€€Ù…È¹…µ•Ì€ô¹•Ü!…Í¡M•ĞñMÑÉ¥¹œø ¤ì(€€€™½È€¡Ù…ÈŒ€è‘¥É•Ñ½Éä¹…Ñ•½É¥•Ì ¤¤¹…µ•Ì¹…‘¡Œ¹¹…µ” ¤¹Ñ½1½İ•É…Í”¡1½…±”¹I==P¤¤ì(€€€™½È€¡¥¹ĞÍÕ™™¥à€ô€Èì¹…µ•Ì¹½¹Ñ…¥¹Ì¡±…‰•°¹Ñ½1½İ•É…Í”¡1½…±”¹I==P¤¤ìÍÕ™™¥à¬¬¤(€€€€€±…‰•°€ô‰…Í”€¬€ˆ€ ˆ€¬ÍÕ™™¥à€¬€ˆ¤ˆì(€€€É•ÑÕÉ¸‘¥É•Ñ½Éä¹Í…Ù•…Ñ•½Éä¡¹Õ±°°¹•Ü¥É•Ñ½ÉåM•ÉÙ¥”¹…Ñ•½Éå%¹ÁÕĞ¡±…‰•°°­¥¹°ÑÉÕ”¤¤¹¥ ¤ì(€ô((€ÁÉ¥Ù…Ñ”½µµ•É•M•ÉÙ¥”¹AÉ½‘ÕÑY¥•ÜÁÉ½‘ÕĞ (€€€€€MÑÉ¥¹œÍ­Ô°(€€€€€MÑÉ¥¹œ¹…µ”°(€€€€€MÑÉ¥¹œÕ¹¥Ğ°(€€€€€MÑÉ¥¹œÁÉ¥”°(€€€€€MÑÉ¥¹œ½ÍĞ°(€€€€€MÑÉ¥¹œÅÕ…¹Ñ¥Ñä°(€€€€€MÑÉ¥¹œµ¥¹¥µÕ´°(€€€€€‰½½±•…¸…Ñ¥Ù”¤ì(€€€É•ÑÕÉ¸½µµ•É”¹Í…Ù” (€€€€€€€¹Õ±°°(€€€€€€€¹•Ü½µµ•É•M•ÉÙ¥”¹AÉ½‘ÕÑ%¹ÁÕĞ (€€€€€€€€€€€Í­Ô°¹…µ”°Õ¹¥Ğ°µ½¹•ä¡ÁÉ¥”¤°µ½¹•ä¡½ÍĞ¤°µ½¹•ä¡µ¥¹¥µÕ´¤°…Ñ¥Ù”°µ½¹•ä¡ÅÕ…¹Ñ¥Ñä¤¤¤ì(€ô((€ÁÉ¥Ù…Ñ”½µµ•É•M•ÉÙ¥”¹AÉ½‘ÕÑY¥•ÜÍ•ÉÙ¥”¡MÑÉ¥¹œÍ­Ô°MÑÉ¥¹œ¹…µ”°MÑÉ¥¹œÁÉ¥”°MÑÉ¥¹œ½ÍĞ¤ì(€€€É•ÑÕÉ¸½µµ•É”¹Í…Ù” (€€€€€€€¹Õ±°°(€€€€€€€¹•Ü½µµ•É•M•ÉÙ¥”¹AÉ½‘ÕÑ%¹ÁÕĞ (€€€€€€€€€€€Í­Ô°(€€€€€€€€€€€¹…µ”°(€€€€€€€€€€€€‰U8ˆ°(€€€€€€€€€€€µ½¹•ä¡ÁÉ¥”¤°(€€€€€€€€€€€µ½¹•ä¡½ÍĞ¤°(€€€€€€€€€€€	¥•¥µ…°¹iI<°(€€€€€€€€€€€ÑÉÕ”°(€€€€€€€€€€€	¥•¥µ…°¹iI<°(€€€€€€€€€€€AÉ½‘ÕĞ¹-¥¹¹MIY%¤¤ì(€ô((€ÁÉ¥Ù…Ñ”AÉ½Á½Í…±M•ÉÙ¥”¹Y¥•ÜÁÉ½Á½Í…° (€€€€€MÑÉ¥¹œÑ¥Ñ±”°(€€€€€UU%ÕÍÑ½µ•È°(€€€€€1½…±…Ñ”Ù…±¥‘U¹Ñ¥°°(€€€€€1¥ÍĞñ½µµ•É•M•ÉÙ¥”¹1¥¹•%¹ÁÕĞø¥Ñ•µÌ¤ì(€€€É•ÑÕÉ¸ÁÉ½Á½Í…±Ì(€€€€€€€€¹É•…Ñ” (€€€€€€€€€€€¹•ÜAÉ½Á½Í…±M•ÉÙ¥”¹%¹ÁÕĞ (€€€€€€€€€€€€€€€UU%¹É…¹‘½µUU% ¤°(€€€€€€€€€€€€€€€Ñ¥Ñ±”°(€€€€€€€€€€€€€€€ÕÍÑ½µ•È°(€€€€€€€€€€€€€€€€‰•µ½¹ÍÑÉ‡Ÿ¼™¥Óµ¥„ƒ
-ÜÁÉ½Á½ÍÑ„»¼•¹Ù¥…‘„…¼±¥•¹Ñ”¸ˆ°(€€€€€€€€€€€€€€€Ù…±¥‘U¹Ñ¥°°(€€€€€€€€€€€€€€€¥Ñ•µÌ¤¤(€€€€€€€€¹ÁÉ½Á½Í…° ¤ì(€ô((€ÁÉ¥Ù…Ñ”½µµ•É•M•ÉÙ¥”¹M…±•Y¥•Ü‘É…™Ğ (€€€€€UU%ÕÍÑ½µ•È°MÑÉ¥¹œ¹½Ñ•Ì°½µµ•É•M•ÉÙ¥”¹AÉ½‘ÕÑY¥•ÜÀ°MÑÉ¥¹œÅÕ…¹Ñ¥Ñä¤ì(€€€É•ÑÕÉ¸½µµ•É”(€€€€€€€€¹‘É…™Ğ (€€€€€€€€€€€¹•Ü½µµ•É•M•ÉÙ¥”¹É…™Ñ%¹ÁÕĞ (€€€€€€€€€€€€€€€UU%¹É…¹‘½µUU% ¤°(€€€€€€€€€€€€€€€ÕÍÑ½µ•È°(€€€€€€€€€€€€€€€¹½Ñ•Ì°(€€€€€€€€€€€€€€€1¥ÍĞ¹½˜¡¹•Ü½µµ•É•M•ÉÙ¥”¹1¥¹•%¹ÁÕĞ¡À¹¥ ¤°µ½¹•ä¡ÅÕ…¹Ñ¥Ñä¤°À¹ÁÉ¥” ¤¤¤¤¤(€€€€€€€€¹Í…±” ¤ì(€ô((€QÉ…¹Í…Ñ¥½¹…°(€ÁÕ‰±¥ŒMÑ…ÑÕÌÁ½ÁÕ±…Ñ” ¤ì(€€€UU%½µÁ…¹ä€ôÕÉÉ•¹Ğ¹½µÁ…¹å% ¤ì(€€€½µÁ…¹¥•Ì(€€€€€€€€¹±½¬¡½µÁ…¹ä¤(€€€€€€€€¹½É±Í•Q¡É½Ü (€€€€€€€€€€€€ ¤€´ø¹•ÜI•ÍÁ½¹Í•MÑ…ÑÕÍá•ÁÑ¥½¸¡!ÑÑÁMÑ…ÑÕÌ¹9=Q}=U9°€‰µÁÉ•Í„»¼•¹½¹ÑÉ…‘„¸ˆ¤¤ì(€€€Ù…È•á¥ÍÑ¥¹œ€ôÍÑ…ÑÕÌ ¤ì(€€€¥˜€¡•á¥ÍÑ¥¹œ¹±½…‘• ¤€˜˜•á¥ÍÑ¥¹œ¹Á…­Y•ÉÍ¥½¸ ¤€øô€Ì¤É•ÑÕÉ¸•á¥ÍÑ¥¹œì(€€€MÑÉ¥¹œÑ½­•¸€ôUU%¹É…¹‘½µUU% ¤¹Ñ½MÑÉ¥¹œ ¤¹ÍÕ‰ÍÑÉ¥¹œ À°€à¤°ÁÉ•™¥à€ô€‰má•µÁ±½t€ˆì(€€€Ù…ÈÑ½‘…ä€ô1½…±…Ñ”¹¹½Ü¡±½¬¹İ¥Ñ¡i½¹”¡i½¹•%¹½˜ ‰µ•É¥„½M…½}A…Õ±¼ˆ¤¤¤ì(€€€Ù…Èµ½¹Ñ €ôe•…É5½¹Ñ ¹™É½´¡Ñ½‘…ä¤ì(€€€¥˜€ …•á¥ÍÑ¥¹œ¹±½…‘• ¤¤ì(€€€Ù…È‰…¹¬€ô(€€€€€€€™¥¹…¹”(€€€€€€€€€€€€¹É•…Ñ•½Õ¹Ğ (€€€€€€€€€€€€€€€¹•Ü¥¹…¹•M•ÉÙ¥”¹½Õ¹Ñ%¹ÁÕĞ¡ÁÉ•™¥à€¬€‰	…¹¼ÁÉ¥¹¥Á…°ˆ°µ½¹•ä ˆàÔÀÀˆ¤¤¤(€€€€€€€€€€€€¹¥ ¤ì(€€€Ù…È…Í €ô(€€€€€€€™¥¹…¹”(€€€€€€€€€€€€¹É•…Ñ•½Õ¹Ğ¡¹•Ü¥¹…¹•M•ÉÙ¥”¹½Õ¹Ñ%¹ÁÕĞ¡ÁÉ•™¥à€¬€‰…¥á„‘„±½©„ˆ°µ½¹•ä ˆÄÈÀÀˆ¤¤¤(€€€€€€€€€€€€¹¥ ¤ì(€€€Ù…Èİ…±±•Ğ€ô(€€€€€€€™¥¹…¹”(€€€€€€€€€€€€¹É•…Ñ•½Õ¹Ğ (€€€€€€€€€€€€€€€¹•Ü¥¹…¹•M•ÉÙ¥”¹½Õ¹Ñ%¹ÁÕĞ¡ÁÉ•™¥à€¬€‰…ÉÑ•¥É„‘¥¥Ñ…°ˆ°µ½¹•ä ˆØÀÀˆ¤¤¤(€€€€€€€€€€€€¹¥ ¤ì(€€€UU%…ÕÉ½É„€ô½¹Ñ…Ğ ‰MÑÕ‘¥¼ÕÉ½É„ˆ°½¹Ñ…Ğ¹-¥¹¹UMQ=5H°€ÄÀÄ°ÁÉ•™¥à°ÑÉÕ”¤°(€€€€€€€…™”€ô½¹Ñ…Ğ ‰…›¤!½É¥é½¹Ñ”ˆ°½¹Ñ…Ğ¹-¥¹¹UMQ=5H°€ÄÀÈ°ÁÉ•™¥à°ÑÉÕ”¤°(€€€€€€€¹½ÉÑ”€ô½¹Ñ…Ğ ‰A…Á•±…É¥„9½ÉÑ”ˆ°½¹Ñ…Ğ¹-¥¹¹MUAA1%H°€ÄÀÌ°ÁÉ•™¥à°ÑÉÕ”¤°(€€€€€€€±½Õ€ô½¹Ñ…Ğ ‰9ÕÙ•´•ÉÉ…µ•¹Ñ…Ìˆ°½¹Ñ…Ğ¹-¥¹¹MUAA1%H°€ÄÀĞ°ÁÉ•™¥à°ÑÉÕ”¤°(€€€€€€€Á…É•¥É¼€ô½¹Ñ…Ğ ‰½±•Ñ¥Ù¼•¹ÑÉ…°ˆ°½¹Ñ…Ğ¹-¥¹¹	=Q °€ÄÀÔ°ÁÉ•™¥à°ÑÉÕ”¤°(€€€€€€€¥¹…Ñ¥Ù”€ô½¹Ñ…Ğ ‰±¥•¹Ñ”…ÉÅÕ¥Ù…‘¼ˆ°½¹Ñ…Ğ¹-¥¹¹UMQ=5H°€ÄÀØ°ÁÉ•™¥à°™…±Í”¤ì(€€€UU%Í•ÉÙ¥•Ì€ô…Ñ•½Éä ‰M•ÉÙ§½Ìˆ°¥¹…¹¥…±…Ñ•½Éä¹-¥¹¹%9=5°ÁÉ•™¥à¤°(€€€€€€€É•¹Ğ€ô…Ñ•½Éä ‰±ÕÕ•°ˆ°¥¹…¹¥…±…Ñ•½Éä¹-¥¹¹aA9M°ÁÉ•™¥à¤°(€€€€€€€Í½™Ñİ…É”€ô…Ñ•½Éä ‰M½™Ñİ…É”ˆ°¥¹…¹¥…±…Ñ•½Éä¹-¥¹¹aA9M°ÁÉ•™¥à¤°(€€€€€€€µ…É­•Ñ¥¹œ€ô…Ñ•½Éä ‰5…É­•Ñ¥¹œˆ°¥¹…¹¥…±…Ñ•½Éä¹-¥¹¹aA9M°ÁÉ•™¥à¤°(€€€€€€€½™™¥”€ô…Ñ•½Éä ‰ÍÉ¥ÓÍÉ¥¼ˆ°¥¹…¹¥…±…Ñ•½Éä¹-¥¹¹aA9M°ÁÉ•™¥à¤°(€€€€€€€•ÅÕ¥Áµ•¹Ğ€ô…Ñ•½Éä ‰ÅÕ¥Á…µ•¹Ñ½Ìˆ°¥¹…¹¥…±…Ñ•½Éä¹-¥¹¹aA9M°ÁÉ•™¥à¤°(€€€€€€€ÕÑ¥±¥Ñ¥•Ì€ô…Ñ•½Éä ‰¹•É¥„”¥¹Ñ•É¹•Ğˆ°¥¹…¹¥…±…Ñ•½Éä¹-¥¹¹aA9M°ÁÉ•™¥à¤°(€€€€€€€ÑÉ…Ù•°€ô…Ñ•½Éä ‰•Í±½…µ•¹Ñ½Ìˆ°¥¹…¹¥…±…Ñ•½Éä¹-¥¹¹	=Q °ÁÉ•™¥à¤ì(€€€™½È€¡¥¹Ğ¤€ô€Ôì¤€øô€Àì¤´´¤ì(€€€€€Ù…È‘…Ñ”€ôµ½¹Ñ ¹µ¥¹ÕÍ5½¹Ñ¡Ì¡¤¤¹…Ñ…ä Ä¤ì(€€€€€•¹ÑÉä (€€€€€€€€€‰…¹¬°(€€€€€€€€€ÁÉ•™¥à€¬€‰½¹ÑÉ…Ñ¼µ•¹Í…°ÕÉ½É„ˆ°(€€€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹%9=5°(€€€€€€€€€€ˆˆ€¬€ ØäÀÀ€¬€ Ô€´¤¤€¨€ÜÌÀ¤°(€€€€€€€€€‘…Ñ”°(€€€€€€€€€ÑÉÕ”°(€€€€€€€€€Í•ÉÙ¥•Ì°(€€€€€€€€€…ÕÉ½É„¤ì(€€€€€•¹ÑÉä (€€€€€€€€€İ…±±•Ğ°(€€€€€€€€€ÁÉ•™¥à€¬€‰AÉ½©•Ñ¼…›¤!½É¥é½¹Ñ”ˆ°(€€€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹%9=5°(€€€€€€€€€€ˆˆ€¬€ ÈÌÀÀ€¬€ Ô€´¤¤€¨€ÄÜÀ¤°(€€€€€€€€€‘…Ñ”°(€€€€€€€€€ÑÉÕ”°(€€€€€€€€€Í•ÉÙ¥•Ì°(€€€€€€€€€…™”¤ì(€€€€€•¹ÑÉä (€€€€€€€€€‰…¹¬°(€€€€€€€€€ÁÉ•™¥à€¬€‰±ÕÕ•°‘¼•ÍÁ‡¼ˆ°(€€€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹aA9M°(€€€€€€€€€€ˆÄàÀÀˆ°(€€€€€€€€€‘…Ñ”°(€€€€€€€€€ÑÉÕ”°(€€€€€€€€€É•¹Ğ°(€€€€€€€€€Á…É•¥É¼¤ì(€€€€€•¹ÑÉä (€€€€€€€€€‰…¹¬°(€€€€€€€€€ÁÉ•™¥à€¬€‰•ÉÉ…µ•¹Ñ…Ì‘„•ÅÕ¥Á”ˆ°(€€€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹aA9M°(€€€€€€€€€€ˆÌàä¸äÀˆ°(€€€€€€€€€‘…Ñ”°(€€€€€€€€€ÑÉÕ”°(€€€€€€€€€Í½™Ñİ…É”°(€€€€€€€€€±½Õ¤ì(€€€€€•¹ÑÉä (€€€€€€€€€‰…¹¬°(€€€€€€€€€ÁÉ•™¥à€¬€‰…µÁ…¹¡„‘”‘¥ÙÕ±‡Ÿ¼ˆ°(€€€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹aA9M°(€€€€€€€€€€ˆˆ€¬€ ÌÈÀ€¬€ Ô€´¤¤€¨€ÜÔ¤°(€€€€€€€€€‘…Ñ”°(€€€€€€€€€ÑÉÕ”°(€€€€€€€€€µ…É­•Ñ¥¹œ°(€€€€€€€€€Á…É•¥É¼¤ì(€€€ô(€€€UU%É••¥ÁĞ€ô(€€€€€€€•¹ÑÉä (€€€€€€€€€€€…Í °(€€€€€€€€€€€ÁÉ•™¥à€¬€‰5…Ñ•É¥…¥Ì‘”•ÍÉ¥ÓÍÉ¥¼ˆ°(€€€€€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹aA9M°(€€€€€€€€€€€€ˆÄĞÔ¸ÔÀˆ°(€€€€€€€€€€€Ñ½‘…ä°(€€€€€€€€€€€ÑÉÕ”°(€€€€€€€€€€€½™™¥”°(€€€€€€€€€€€¹½ÉÑ”¤ì(€€€•¹ÑÉä (€€€€€€€‰…¹¬°(€€€€€€€ÁÉ•™¥à€¬€‰AÉ½©•Ñ¼½´Ù•¹¥µ•¹Ñ¼¡½©”ˆ°(€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹%9=5°(€€€€€€€€ˆĞÈÀÀˆ°(€€€€€€€Ñ½‘…ä°(€€€€€€€™…±Í”°(€€€€€€€Í•ÉÙ¥•Ì°(€€€€€€€…ÕÉ½É„¤ì(€€€•¹ÑÉä (€€€€€€€‰…¹¬°(€€€€€€€ÁÉ•™¥à€¬€‰±¥•¹Ñ”•´…ÑÉ…Í¼ˆ°(€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹%9=5°(€€€€€€€€ˆäàÀˆ°(€€€€€€€Ñ½‘…ä¹µ¥¹ÕÍ…åÌ Ğ¤°(€€€€€€€™…±Í”°(€€€€€€€Í•ÉÙ¥•Ì°(€€€€€€€…™”¤ì(€€€•¹ÑÉä (€€€€€€€‰…¹¬°(€€€€€€€ÁÉ•™¥à€¬€‰%¹Ñ•É¹•Ğ•´…ÑÉ…Í¼ˆ°(€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹aA9M°(€€€€€€€€ˆÄÜä¸äÀˆ°(€€€€€€€Ñ½‘…ä¹µ¥¹ÕÍ…åÌ È¤°(€€€€€€€™…±Í”°(€€€€€€€ÕÑ¥±¥Ñ¥•Ì°(€€€€€€€±½Õ¤ì(€€€•¹ÑÉä (€€€€€€€‰…¹¬°(€€€€€€€ÁÉ•™¥à€¬€‰I•Ù¥Ï¼‘”…µÁ…¹¡„ˆ°(€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹aA9M°(€€€€€€€€ˆÈàÀˆ°(€€€€€€€Ñ½‘…ä¹Á±ÕÍ…åÌ Ì¤°(€€€€€€€™…±Í”°(€€€€€€€µ…É­•Ñ¥¹œ°(€€€€€€€Á…É•¥É¼¤ì(€€€•¹ÑÉä (€€€€€€€İ…±±•Ğ°(€€€€€€€ÁÉ•™¥à€¬€‰¹ÑÉ•„¹„ÁËÍá¥µ„Í•µ…¹„ˆ°(€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹%9=5°(€€€€€€€€ˆÄØÔÀˆ°(€€€€€€€Ñ½‘…ä¹Á±ÕÍ…åÌ Ü¤°(€€€€€€€™…±Í”°(€€€€€€€Í•ÉÙ¥•Ì°(€€€€€€€…™”¤ì(€€€•¹ÑÉä (€€€€€€€‰…¹¬°(€€€€€€€ÁÉ•™¥à€¬€‰5…Ñ•É¥…¥Ì„É•Á½Èˆ°(€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹aA9M°(€€€€€€€€ˆÈÌÀˆ°(€€€€€€€Ñ½‘…ä¹Á±ÕÍ…åÌ ÄÈ¤°(€€€€€€€™…±Í”°(€€€€€€€½™™¥”°(€€€€€€€¹½ÉÑ”¤ì(€€€•¹ÑÉä (€€€€€€€‰…¹¬°(€€€€€€€ÁÉ•™¥à€¬€‰AÉ½©•Ñ¼ÁËÍá¥µ¼·©Ìˆ°(€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹%9=5°(€€€€€€€€ˆÌÄÀÀˆ°(€€€€€€€Ñ½‘…ä¹Á±ÕÍ…åÌ ÈÔ¤°(€€€€€€€™…±Í”°(€€€€€€€Í•ÉÙ¥•Ì°(€€€€€€€…ÕÉ½É„¤ì(€€€•¹ÑÉä (€€€€€€€‰…¹¬°(€€€€€€€ÁÉ•™¥à€¬€‰AÉ•Ù¥Ï¼‘”µ…¹ÕÑ•»Ÿ¼ˆ°(€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹aA9M°(€€€€€€€€ˆĞÔÀˆ°(€€€€€€€Ñ½‘…ä¹Á±ÕÍ…åÌ ĞÔ¤°(€€€€€€€™…±Í”°(€€€€€€€•ÅÕ¥Áµ•¹Ğ°(€€€€€€€Á…É•¥É¼¤ì(€€€UU%…¹•±±•€ô(€€€€€€€•¹ÑÉä (€€€€€€€€€€€…Í °(€€€€€€€€€€€ÁÉ•™¥à€¬€‰½µÁÉ„…¹•±…‘„ˆ°(€€€€€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹aA9M°(€€€€€€€€€€€€ˆäÀˆ°(€€€€€€€€€€€Ñ½‘…ä°(€€€€€€€€€€€™…±Í”°(€€€€€€€€€€€½™™¥”°(€€€€€€€€€€€¹½ÉÑ”¤ì(€€€™¥¹…¹”¹…¹•°¡…¹•±±•¤ì(€€€™¥¹…¹”¹ÑÉ…¹Í™•È (€€€€€€€¹•Ü¥¹…¹•M•ÉÙ¥”¹QÉ…¹Í™•É%¹ÁÕĞ (€€€€€€€€€€€‰…¹¬°…Í °µ½¹•ä ˆÌÀÀˆ¤°Ñ½‘…ä°ÁÉ•™¥à€¬€‰I•™½Ë¼‘¼…¥á„ˆ¤¤ì(€€€Í•É¥•Ì¹É•…Ñ” (€€€€€€€¹•ÜM•É¥•ÍM•ÉÙ¥”¹%¹ÁÕĞ (€€€€€€€€€€€UU%¹É…¹‘½µUU% ¤°(€€€€€€€€€€€¥¹…¹¥…±M•É¥•Ì¹-¥¹¹IUII%9°(€€€€€€€€€€€€Ø°(€€€€€€€€€€€¥¹ÁÕĞ (€€€€€€€€€€€€€€€‰…¹¬°(€€€€€€€€€€€€€€€ÁÉ•™¥à€¬€‰ÍÍ¥¹…ÑÕÉ„µ•¹Í…°‘”ÍÕÁ½ÉÑ”ˆ°(€€€€€€€€€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹aA9M°(€€€€€€€€€€€€€€€€ˆÄÔä¸äÀˆ°(€€€€€€€€€€€€€€€Ñ½‘…ä°(€€€€€€€€€€€€€€€™…±Í”°(€€€€€€€€€€€€€€€Í½™Ñİ…É”°(€€€€€€€€€€€€€€€±½Õ¤¤¤ì(€€€Í•É¥•Ì¹É•…Ñ” (€€€€€€€¹•ÜM•É¥•ÍM•ÉÙ¥”¹%¹ÁÕĞ (€€€€€€€€€€€UU%¹É…¹‘½µUU% ¤°(€€€€€€€€€€€¥¹…¹¥…±M•É¥•Ì¹-¥¹¹%9MQ1159P°(€€€€€€€€€€€€Ğ°(€€€€€€€€€€€¥¹ÁÕĞ (€€€€€€€€€€€€€€€‰…¹¬°(€€€€€€€€€€€€€€€ÁÉ•™¥à€¬€‰9½Ñ•‰½½¬‘„•ÅÕ¥Á”ˆ°(€€€€€€€€€€€€€€€¥¹…¹¥…±¹ÑÉä¹QåÁ”¹aA9M°(€€€€€€€€€€€€€€€€ˆÌÈÀÀˆ°(€€€€€€€€€€€€€€€Ñ½‘…ä¹µ¥¹ÕÍ…åÌ Ü¤°(€€€€€€€€€€€€€€€ÑÉÕ”°(€€€€€€€€€€€€€€€•ÅÕ¥Áµ•¹Ğ°(€€€€€€€€€€€€€€€¹½ÉÑ”¤¤¤ì(€€€MÑÉ¥¹œÍ­Ô€ô€‰5<´ˆ€¬Ñ½¯÷¶‰Ëkºwµç\™]\›™YH˜Y
-]\›Ü˜K‘VSTÈ0­ÈYYÈØ[˜Ù[YÈÛÛH]›ÛpéğèÛÈ‹[‹ŒHŠNÂˆÛÛ[Y\˜ÙK˜ÛÛ™š\›J™]\›™YšY
+package com.fintry.sample;
 
-K™]ÈÛÛ[Y\˜ÙTÙ\šXÙKÛÛ™š\›R[œ]
-˜[šËÙ^KYKÙ^JJNÂˆÛÛ[Y\˜ÙK˜Ø[˜Ù[
-™]\›™YšY
+import com.fintry.attachment.AttachmentService;
+import com.fintry.audit.AuditService;
+import com.fintry.auth.CurrentUser;
+import com.fintry.budget.BudgetService;
+import com.fintry.commerce.*;
+import com.fintry.company.repository.CompanyRepository;
+import com.fintry.directory.*;
+import com.fintry.finance.*;
+import java.io.*;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.time.*;
+import java.util.*;
+import lombok.RequiredArgsConstructor;
+import org.apache.pdfbox.pdmodel.*;
+import org.apache.pdfbox.pdmodel.font.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
-JNÂˆ›Üˆ
-˜\ˆHˆ\İ›ÙŠ[Û›Z[\Ó[ÛÊJK[Û
-JHÂˆYÙ]ËœØ]™J[™]ÈYÙ]Ù\šXÙK’[œ]
-KÔİš[™Ê
-K™[[Û™^JŒŒŠJJNÂˆYÙ]ËœØ]™J[™]ÈYÙ]Ù\šXÙK’[œ]
-KÔİš[™Ê
-KÛÙØ\™K[Û™^JLŠJJNÂˆYÙ]ËœØ]™J[™]ÈYÙ]Ù\šXÙK’[œ]
-KÔİš[™Ê
-KX\šÙ][™Ë[Û™^JŒŠJJNÂˆYÙ]ËœØ]™J[™]ÈYÙ]Ù\šXÙK’[œ]
-KÔİš[™Ê
-KÙ™šXÙK[Û™^JŒŠJJNÂˆYÙ]ËœØ]™J[™]ÈYÙ]Ù\šXÙK’[œ]
-KÔİš[™Ê
-K\]Z\Y[[Û™^JŒMLŠJJNÂˆBˆ›ÛÙŠ™XÙZ\˜ÛÛ\›İ˜[KY\ØÜš]Üš[ËY^[\Ëœˆ‹“X]\šXZ\ÈH\ØÜš]Üš[È‹”‰MKLŠNÂˆ›ÛÙŠˆZYØ[K™[RY
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class SampleService {
+  private final CurrentUser current;
+  private final CompanyRepository companies;
+  private final SampleRunRepository runs;
+  private final FinanceService finance;
+  private final DirectoryService directory;
+  private final CommerceService commerce;
+  private final ProposalService proposals;
+  private final SeriesService series;
+  private final BudgetService budgets;
+  private final AttachmentService attachments;
+  private final ReconciliationService reconciliation;
+  private final AuditService audit;
+  private final Clock clock;
 
-Kˆœ™XÚX›Ë]™[™KY^[\Ëœˆ‹ˆ•™[™H[[Ûœİ˜]]˜HHØY\››ÜÈ‹ˆ”‰KŠNÂˆBˆYˆ
-Y^\İ[™Ë›ØYY
+  public record Status(boolean loaded, int packVersion, LocalDateTime completedAt) {}
 
-H^\İ[™ËœXÚÕ™\œÚ[ÛŠ
-HŠBˆYÛÛ[Y\˜ÚX[^[\\Ê™Yš^ÚÙ[‹Ù^JNÂˆY™\Ù[][Û‘^[\\Ê™Yš^ÚÙ[‹Ù^JNÂˆ˜\ˆ[ˆH[œË™š[™RY
-ÛÛ\[JK›Ü‘[ÙQÙ]
-Ø[\T[›™]ÊNÂˆ[‹œÙ]ÛÛ\[RY
-ÛÛ\[JNÂˆ[‹œÙ]XÚÕ™\œÚ[ÛŠÊNÂˆ[‹œÙ]ÛÛ\]Y]
-ØØ[]U[YK››İÊÛØÚÊJNÂˆ[œËœØ]™P[™›\Ú
-[ŠNÂˆ]Y]˜Ú[™ÙJˆ”ĞSTWÓĞQ‹ˆ”ĞSTH‹ˆÛÛ\[Kˆ‘YÜÈH^[\È0­ÈXÛİHÈ‹ˆX\›ÙŠ
-Kˆ]Y]Ù\šXÙK™šY[Ê”XÛİH‹Ë’Y[YšXØYÜˆ‹ÚÙ[ŠJNÂˆ™]\›ˆİ]\Ê
-NÂˆB‚ˆš]˜]HØØ[]H™XÙ[]JØØ[]HÙ^K[^\ĞYÛÊHÂˆ™]\›ˆÙ^K›Z[\Ñ^\ÊX]›Z[Š^\ĞYÛËÙ^K™Ù]^SÙ“[Û
+  private record DemoMovement(String code, LocalDate date, String amount, String description) {}
 
-HHS
-JNÂˆB‚ˆš]˜]H›ÚYY™\Ù[][Û‘^[\\Êİš[™È™Yš^İš[™ÈÚÙ[‹ØØ[]HÙ^JHÂˆİš[™ÈX™[H™Yš^
-È\™\Ù[péğèÛÈ0­ÈÂˆ˜\ˆXØÛİ[Bˆš[˜[˜ÙK˜XØÛİ[Ê
-Kœİ™X[J
-Bˆ™š[\ŠHOˆK›˜[YJ
-K™\]X[Ê™Yš^
-È˜[˜ÛÈš[˜Ú\[ŠJBˆ™š[™š\œİ
+  public Status status() {
+    return runs.findById(current.companyId())
+        .map(r -> new Status(true, r.getPackVersion(), r.getCompletedAt()))
+        .orElse(new Status(false, 1, null));
+  }
 
-Bˆ›X\
-š[˜[˜ÙTÙ\šXÙKXØÛİ[šY]ÎšY
-Bˆ›Ü‘[ÙQÙ]
-ˆ
+  private BigDecimal money(String value) {
+    return new BigDecimal(value);
+  }
 
-HO‚ˆš[˜[˜ÙBˆ˜Ü™X]PXØÛİ[
-ˆ™]Èš[˜[˜ÙTÙ\šXÙKXØÛİ[[œ]
-ˆ™Yš^
-È˜[˜ÛÈH\™\Ù[péğèÛÈ‹šYÑXÚ[X[–‘T“ÊJBˆšY
+  private FinanceService.EntryInput input(
+      UUID account,
+      String description,
+      FinancialEntry.Type type,
+      String amount,
+      LocalDate due,
+      boolean paid,
+      UUID category,
+      UUID contact) {
+    return new FinanceService.EntryInput(
+        account,
+        description,
+        null,
+        type,
+        money(amount),
+        due,
+        paid,
+        paid ? due : null,
+        category,
+        contact);
+  }
 
-JNÂˆ[ÛÛXİ[™^HX]˜XœÊURQœ˜[™ÛUURQ
+  private UUID entry(
+      UUID account,
+      String description,
+      FinancialEntry.Type type,
+      String amount,
+      LocalDate due,
+      boolean paid,
+      UUID category,
+      UUID contact) {
+    return finance
+        .createEntry(input(account, description, type, amount, due, paid, category, contact))
+        .id();
+  }
 
-Kš\ÚÛÙJ
-H	HN
-H
-ÈLNÂˆURQİ\İÛY\ˆHÛÛXİ
-]\›Ü˜H\ÚYÛˆ‹ÛÛXİ’Ú[™ÕTÕÓQT‹ÛÛXİ[™^™Yš^YJNÂˆURQİ\Y\ˆBˆÛÛXİ
-˜[˜ÛÈH[[Ûœİ˜péğèÛÈ‹ÛÛXİ’Ú[™”ÕTQT‹ÛÛXİ[™^
-ÈK™Yš^YJNÂˆURQ[˜ÛÛYPØ]YÛÜHHØ]YÛÜJ”›Ú™]ÜÈ\ÜXÚXZ\È‹š[˜[˜ÚX[Ø]YÛÜK’Ú[™’SÓÓQK™Yš^
-NÂˆURQ^[œÙPØ]YÛÜHBˆØ]YÛÜJ•\šY˜\È˜[˜ğè\šX\È‹š[˜[˜ÚX[Ø]YÛÜK’Ú[™‘VS”ÑK™Yš^
-NÂ‚ˆ˜\ˆÜ›İ\Y[HBˆ[JˆXØÛİ[ˆX™[
-È”›Ú™]ÈHY[YYHš\İX[0­È˜Z^H[H]\\È‹ˆš[˜[˜ÚX[[K•\K’SÓÓQKˆŒÌŒ‹ˆÙ^Kœ\Ñ^\ÊL
-Kˆ˜[ÙKˆ[˜ÛÛYPØ]YÛÜKˆİ\İÛY\ŠNÂˆš[˜[˜ÙKœ^JˆÜ›İ\Y[Kˆ™]Èš[˜[˜ÙTÙ\šXÙK”^[Y[[œ]
-™XÙ[]JÙ^KÊK[Û™^JŒÌŒŠJJNÂˆš[˜[˜ÙKœ^JˆÜ›İ\Y[Kˆ™]Èš[˜[˜ÙTÙ\šXÙK”^[Y[[œ]
-™XÙ[]JÙ^KJK[Û™^JLŒŠJJNÂ‚ˆ˜\ˆ\X[^[œÙHBˆ[JˆXØÛİ[ˆX™[
-È‘\]Z\[Y[ÜÈ0­ÈYØ[Y[È\˜ÚX[‹ˆš[˜[˜ÚX[[K•\K‘VS”ÑKˆŒMŒŒ‹ˆÙ^Kœ\Ñ^\Ê
-Kˆ˜[ÙKˆ^[œÙPØ]YÛÜKˆİ\Y\ŠNÂˆš[˜[˜ÙKœ^Jˆ\X[^[œÙKˆ™]Èš[˜[˜ÙTÙ\šXÙK”^[Y[[œ]
-™XÙ[]JÙ^KŠK[Û™^JŒÍLŒŠJJNÂ‚ˆ˜\ˆ[šÙY[˜ÛÛYHBˆ[JˆXØÛİ[ˆX™[
-ÈÛÛœİ[ÜšXH0­È™XÙXš[Y[ÈÛÛ˜Ú[XYÈ‹ˆš[˜[˜ÚX[[K•\K’SÓÓQKˆŒ‹ˆÙ^Kˆ˜[ÙKˆ[˜ÛÛYPØ]YÛÜKˆİ\İÛY\ŠNÂˆ˜\ˆ[šÙY^[œÙHBˆ[JˆXØÛİ[ˆX™[
-È•\šY˜HH›ØÙ\ÜØ[Y[È‹ˆš[˜[˜ÚX[[K•\K‘VS”ÑKˆŒL‹ˆÙ^Kˆ˜[ÙKˆ^[œÙPØ]YÛÜKˆİ\Y\ŠNÂ‚ˆ˜\ˆ[İ™[Y[ÈBˆ\İ›ÙŠˆ™]È[[Ó[İ™[Y[
-‘Ô“ÕTLH‹™XÙ[]JÙ^KŠKÌŒ‹”V“Ò‘UÈUT“ÔHKÌˆŠKˆ™]È[[Ó[İ™[Y[
-‘Ô“ÕTLˆ‹™XÙ[]JÙ^KJKŒ‹”V“Ò‘UÈUT“ÔH‹ÌˆŠKˆ™]È[[Ó[İ™[Y[
-“S’ËRSˆ‹Ù^KŒ‹”VÓÓ”ÕSÔ’PHUT“ÔHŠKˆ™]È[[Ó[İ™[Y[
-“S’ËSÕU‹Ù^K‹LL‹•T’QH“ĞÑTÔĞSQS•ÈŠKˆ™]È[[Ó[İ™[Y[
-“ÔSˆ‹Ù^K‹LÌL‹MH‹ÓÓTHÑSHSĞSQS•ÈTH‘U’TĞTˆŠJNÂˆ™XÛÛ˜Ú[X][Û‹š[\Üİ][Y[
-ˆ™]È™XÛÛ˜Ú[X][Û”Ù\šXÙK’[\Ü[œ]
-ˆXØÛİ[ˆ™\Ù[][Û“Ù
-ÚÙ[‹[İ™[Y[ÊKˆ˜]˜K][œİ™X[K’[İ™X[Kœ˜[™ÙPÛÜÙY
-K[İ™[Y[ËœÚ^™J
-JK˜›ŞY
+  private UUID contact(String name, Contact.Kind kind, int index, String prefix, boolean active) {
+    return directory
+        .saveContact(
+            null,
+            new DirectoryService.ContactInput(
+                prefix + name,
+                kind,
+                "00000000000" + String.format("%03d", index),
+                "contato" + index + "@example.invalid",
+                "(11) 0000-0000",
+                "Cadastro fictÃ­cio para explorar o Fintry. Documento e contato sem validade."
+                    + " PreferÃªncia: atendimento por e-mail.",
+                active))
+        .id();
+  }
 
-KÓ\İ
+  private UUID category(String name, FinancialCategory.Kind kind, String prefix) {
+    String base = prefix + name, label = base;
+    var names = new HashSet<String>();
+    for (var c : directory.categories()) names.add(c.name().toLowerCase(Locale.ROOT));
+    for (int suffix = 2; names.contains(label.toLowerCase(Locale.ROOT)); suffix++)
+      label = base + " (" + suffix + ")";
+    return directory.saveCategory(null, new DirectoryService.CategoryInput(label, kind, true)).id();
+  }
 
-JJNÂˆ˜\ˆ[™\ÈBˆ™XÛÛ˜Ú[X][Û‹›\İ
-XØÛİ[[L
-K˜ÛÛ[
+  private CommerceService.ProductView product(
+      String sku,
+      String name,
+      String unit,
+      String price,
+      String cost,
+      String quantity,
+      String minimum,
+      boolean active) {
+    return commerce.save(
+        null,
+        new CommerceService.ProductInput(
+            sku, name, unit, money(price), money(cost), money(minimum), active, money(quantity)));
+  }
 
-Kœİ™X[J
-Bˆ˜ÛÛXİ
-ˆ˜]˜K][œİ™X[KÛÛXİÜœËÓX\
-ˆ™XÛÛ˜Ú[X][Û”Ù\šXÙK“[™UšY]Î™š]Y[™HOˆ[™JJNÂˆ˜\ˆÜ›İ\[™\ÈBˆ\İ›ÙŠˆ[™\Ë™Ù]
-‘’S•–KT‘TÑS•USÓ‹Hˆ
-ÈÚÙ[ˆ
-È‹QÔ“ÕTLHŠKˆ[™\Ë™Ù]
-‘’S•–KT‘TÑS•USÓ‹Hˆ
-ÈÚÙ[ˆ
-È‹QÔ“ÕTLˆŠJNÂˆ™XÛÛ˜Ú[X][Û‹™Ü›İ\
-ˆ™]È™XÛÛ˜Ú[X][Û”Ù\šXÙK‘Ü›İ\[œ]
-ˆXØÛİ[ˆÜ›İ\[™\Ëœİ™X[J
-K›X\
-™XÛÛ˜Ú[X][Û”Ù\šXÙK“[™UšY]ÎšY
-KÓ\İ
+  private CommerceService.ProductView service(String sku, String name, String price, String cost) {
+    return commerce.save(
+        null,
+        new CommerceService.ProductInput(
+            sku,
+            name,
+            "UN",
+            money(price),
+            money(cost),
+            BigDecimal.ZERO,
+            true,
+            BigDecimal.ZERO,
+            Product.Kind.SERVICE));
+  }
 
-KˆÜ›İ\Y[Kˆ‘[[Ûœİ˜péğèÛÎˆÚ\ÈÜ°êY]ÜÈ˜[˜ğè\š[ÜÈÛÛ˜Ú[XYÜÈÛÛH[H™XÙXš[Y[È\˜ÚX[ˆŠJNÂˆ[šÑ[[Ó[İ™[Y[
-ˆ[™\Ë™Ù]
-‘’S•–KT‘TÑS•USÓ‹Hˆ
-ÈÚÙ[ˆ
-È‹SS’ËRSˆŠKˆ[šÙY[˜ÛÛYKˆ”™XÙXš[Y[È[[Ûœİ˜]]›Èš[˜İ[YÈ[È[°éØ[Y[ÈÛÜœ™\ÜÛ™[KˆŠNÂˆ[šÑ[[Ó[İ™[Y[
-ˆ[™\Ë™Ù]
-‘’S•–KT‘TÑS•USÓ‹Hˆ
-ÈÚÙ[ˆ
-È‹SS’ËSÕUŠKˆ[šÙY^[œÙKˆ•\šY˜H[[Ûœİ˜]]˜Hš[˜İ[YH0è\Ü\ØHÛÜœ™\ÜÛ™[KˆŠNÂˆB‚ˆš]˜]H›ÚY[šÑ[[Ó[İ™[Y[
-ˆ™XÛÛ˜Ú[X][Û”Ù\šXÙK“[™UšY]È[İ™[Y[URQ[RYİš[™È™X\ÛÛŠHÂˆ™XÛÛ˜Ú[X][Û‹œ™\ÛÛ™Jˆ[İ™[Y[šY
+  private ProposalService.View proposal(
+      String title,
+      UUID customer,
+      LocalDate validUntil,
+      List<CommerceService.LineInput> items) {
+    return proposals
+        .create(
+            new ProposalService.Input(
+                UUID.randomUUID(),
+                title,
+                customer,
+                "DemonstraÃ§Ã£o fictÃ­cia Â· proposta nÃ£o enviada ao cliente.",
+                validUntil,
+                items))
+        .proposal();
+  }
 
-Kˆ™]È™XÛÛ˜Ú[X][Û”Ù\šXÙK”™\ÛÛ][ÛŠˆ[İ™[Y[œ™]š\Ú[ÛŠ
-K™XÛÛ˜Ú[X][Û”Ù\šXÙKXİ[Û‹“S’Ë[RY[[™X\ÛÛŠJNÂˆB‚ˆš]˜]Hİš[™È™\Ù[][Û“Ù
-İš[™ÈÚÙ[‹\İ[[Ó[İ™[Y[ˆ[İ™[Y[ÊHÂˆİš[™È›İÜÈBˆ[İ™[Y[Ëœİ™X[J
-Bˆ›X\
-ˆ[İ™[Y[O‚ˆÕU““•TO“ÕTÔÕQˆ‚ˆ
-È[İ™[Y[™]J
-K™›Ü›X]
-˜]˜K[YK™›Ü›X]‘]U[YQ›Ü›X]\‹TÒP×ÒTÓ×ÑUJBˆ
-È“SUˆ‚ˆ
-È[İ™[Y[˜[[İ[
+  private CommerceService.SaleView draft(
+      UUID customer, String notes, CommerceService.ProductView p, String quantity) {
+    return commerce
+        .draft(
+            new CommerceService.DraftInput(
+                UUID.randomUUID(),
+                customer,
+                notes,
+                List.of(new CommerceService.LineInput(p.id(), money(quantity), p.price()))))
+        .sale();
+  }
 
-Bˆ
-È’UQ‘’S•–KT‘TÑS•USÓ‹H‚ˆ
-ÈÚÙ[‚ˆ
-È‹H‚ˆ
-È[İ™[Y[˜ÛÙJ
-Bˆ
-ÈSQOˆ‚ˆ
-È[İ™[Y[™\ØÜš\[ÛŠ
-Bˆ
-ÈÔÕU“ˆŠBˆ˜ÛÛXİ
-˜]˜K][œİ™X[KÛÛXİÜœËš›Ú[š[™Ê
-JNÂˆ™]\›ˆ“Ñ–PQTŒL‘UN“Ñ–ÑÓS•‘T”ÒSÓŒL—”ÑPÕT’UN““Ó‘W‘SÓÑS‘Î•U‹NÒT”ÑU““Ó‘W—ˆ‚ˆ
-ÈÑ–S’ÓTÑÔÔ”ÕŒOÕU“””ÏÕU”ÏÕT‘Q”“S’ĞPĞÕ”“ÓOS’ÒQNNO”SÒQŒOPĞÕQ‘SSËH‚ˆ
-ÈÚÙ[‚ˆ
-ÈPĞÕTOÒPÒÒS‘ÏĞS’ĞPĞÕ”“ÓOS’ÕS“TÕˆ‚ˆ
-È›İÜÂˆ
-ÈĞS’ÕS“TÕÔÕU”ÏÔÕU“””ÏĞS’ÓTÑÔÔ”ÕŒOÓÑ–ˆÂˆB‚ˆš]˜]H›ÚYYÛÛ[Y\˜ÚX[^[\\Êˆİš[™È™Yš^İš[™ÈÚÙ[‹ØØ[]HÙ^JHÂˆURQXØÛİ[Bˆš[˜[˜ÙBˆ˜Ü™X]PXØÛİ[
-ˆ™]Èš[˜[˜ÙTÙ\šXÙKXØÛİ[[œ]
-™Yš^
-ÈÛÛHÛÛY\˜ÚX[‹šYÑXÚ[X[–‘T“ÊJBˆšY
+  @Transactional
+  public Status populate() {
+    UUID company = current.companyId();
+    companies
+        .lock(company)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empresa nÃ£o encontrada."));
+    var existing = status();
+    if (existing.loaded() && existing.packVersion() >= 3) return existing;
+    String token = UUID.randomUUID().toString().substring(0, 8), prefix = "[Exemplo] ";
+    var today = LocalDate.now(clock.withZone(ZoneId.of("America/Sao_Paulo")));
+    var month = YearMonth.from(today);
+    if (!existing.loaded()) {
+    var bank =
+        finance
+            .createAccount(
+                new FinanceService.AccountInput(prefix + "Banco principal", money("8500")))
+            .id();
+    var cash =
+        finance
+            .createAccount(new FinanceService.AccountInput(prefix + "Caixa da loja", money("1200")))
+            .id();
+    var wallet =
+        finance
+            .createAccount(
+                new FinanceService.AccountInput(prefix + "Carteira digital", money("600")))
+            .id();
+    UUID aurora = contact("Studio Aurora", Contact.Kind.CUSTOMER, 101, prefix, true),
+        cafe = contact("CafÃ© Horizonte", Contact.Kind.CUSTOMER, 102, prefix, true),
+        norte = contact("Papelaria Norte", Contact.Kind.SUPPLIER, 103, prefix, true),
+        cloud = contact("Nuvem Ferramentas", Contact.Kind.SUPPLIER, 104, prefix, true),
+        parceiro = contact("Coletivo Central", Contact.Kind.BOTH, 105, prefix, true),
+        inactive = contact("Cliente arquivado", Contact.Kind.CUSTOMER, 106, prefix, false);
+    UUID services = category("ServiÃ§os", FinancialCategory.Kind.INCOME, prefix),
+        rent = category("Aluguel", FinancialCategory.Kind.EXPENSE, prefix),
+        software = category("Software", FinancialCategory.Kind.EXPENSE, prefix),
+        marketing = category("Marketing", FinancialCategory.Kind.EXPENSE, prefix),
+        office = category("EscritÃ³rio", FinancialCategory.Kind.EXPENSE, prefix),
+        equipment = category("Equipamentos", FinancialCategory.Kind.EXPENSE, prefix),
+        utilities = category("Energia e internet", FinancialCategory.Kind.EXPENSE, prefix),
+        travel = category("Deslocamentos", FinancialCategory.Kind.BOTH, prefix);
+    for (int i = 5; i >= 0; i--) {
+      var date = month.minusMonths(i).atDay(1);
+      entry(
+          bank,
+          prefix + "Contrato mensal Aurora",
+          FinancialEntry.Type.INCOME,
+          "" + (6900 + (5 - i) * 730),
+          date,
+          true,
+          services,
+          aurora);
+      entry(
+          wallet,
+          prefix + "Projeto CafÃ© Horizonte",
+          FinancialEntry.Type.INCOME,
+          "" + (2300 + (5 - i) * 170),
+          date,
+          true,
+          services,
+          cafe);
+      entry(
+          bank,
+          prefix + "Aluguel do espaÃ§o",
+          FinancialEntry.Type.EXPENSE,
+          "1800",
+          date,
+          true,
+          rent,
+          parceiro);
+      entry(
+          bank,
+          prefix + "Ferramentas da equipe",
+          FinancialEntry.Type.EXPENSE,
+          "389.90",
+          date,
+          true,
+          software,
+          cloud);
+      entry(
+          bank,
+          prefix + "Campanha de divulgaÃ§Ã£o",
+          FinancialEntry.Type.EXPENSE,
+          "" + (320 + (5 - i) * 75),
+          date,
+          true,
+          marketing,
+          parceiro);
+    }
+    UUID receipt =
+        entry(
+            cash,
+            prefix + "Materiais de escritÃ³rio",
+            FinancialEntry.Type.EXPENSE,
+            "145.50",
+            today,
+            true,
+            office,
+            norte);
+    entry(
+        bank,
+        prefix + "Projeto com vencimento hoje",
+        FinancialEntry.Type.INCOME,
+        "4200",
+        today,
+        false,
+        services,
+        aurora);
+    entry(
+        bank,
+        prefix + "Cliente em atraso",
+        FinancialEntry.Type.INCOME,
+        "980",
+        today.minusDays(4),
+        false,
+        services,
+        cafe);
+    entry(
+        bank,
+        prefix + "Internet em atraso",
+        FinancialEntry.Type.EXPENSE,
+        "179.90",
+        today.minusDays(2),
+        false,
+        utilities,
+        cloud);
+    entry(
+        bank,
+        prefix + "RevisÃ£o de campanha",
+        FinancialEntry.Type.EXPENSE,
+        "280",
+        today.plusDays(3),
+        false,
+        marketing,
+        parceiro);
+    entry(
+        wallet,
+        prefix + "Entrega na prÃ³xima semana",
+        FinancialEntry.Type.INCOME,
+        "1650",
+        today.plusDays(7),
+        false,
+        services,
+        cafe);
+    entry(
+        bank,
+        prefix + "Materiais a repor",
+        FinancialEntry.Type.EXPENSE,
+        "230",
+        today.plusDays(12),
+        false,
+        office,
+        norte);
+    entry(
+        bank,
+        prefix + "Projeto prÃ³ximo mÃªs",
+        FinancialEntry.Type.INCOME,
+        "3100",
+        today.plusDays(25),
+        false,
+        services,
+        aurora);
+    entry(
+        bank,
+        prefix + "PrevisÃ£o de manutenÃ§Ã£o",
+        FinancialEntry.Type.EXPENSE,
+        "450",
+        today.plusDays(45),
+        false,
+        equipment,
+        parceiro);
+    UUID cancelled =
+        entry(
+            cash,
+            prefix + "Compra cancelada",
+            FinancialEntry.Type.EXPENSE,
+            "90",
+            today,
+            false,
+            office,
+            norte);
+    finance.cancel(cancelled);
+    finance.transfer(
+        new FinanceService.TransferInput(
+            bank, cash, money("300"), today, prefix + "ReforÃ§o do caixa"));
+    series.create(
+        new SeriesService.Input(
+            UUID.randomUUID(),
+            FinancialSeries.Kind.RECURRING,
+            6,
+            input(
+                bank,
+                prefix + "Assinatura mensal de suporte",
+                FinancialEntry.Type.EXPENSE,
+                "159.90",
+                today,
+                false,
+                software,
+                cloud)));
+    series.create(
+        new SeriesService.Input(
+            UUID.randomUUID(),
+            FinancialSeries.Kind.INSTALLMENT,
+            4,
+            input(
+                bank,
+                prefix + "Notebook da equipe",
+                FinancialEntry.Type.EXPENSE,
+                "3200",
+                today.minusDays(7),
+                true,
+                equipment,
+                norte)));
+    String sku = "DEMO-" + token + "-";
+    var notebook =
+        product(sku + "CAD", "Caderno pontilhado Â· exemplo", "UN", "34.90", "15", "40", "5", true);
+    var pen = product(sku + "CAN", "Caneta preta Â· exemplo", "CX", "29.90", "12", "3", "5", true);
+    var coffee =
+        product(sku + "CAF", "CafÃ© especial Â· exemplo", "KG", "64.90", "32", "12.5", "2", true);
+    product(sku + "PLA", "Planner semanal Â· exemplo", "UN", "49.90", "20", "0", "3", true);
+    product(sku + "GARR", "Garrafa tÃ©rmica Â· exemplo", "UN", "89.90", "40", "15", "2", true);
+    product(sku + "OLD", "Modelo anterior Â· exemplo", "UN", "19.90", "8", "2", "0", false);
+    commerce.movement(
+        new CommerceService.MovementInput(
+            UUID.randomUUID(),
+            coffee.id(),
+            StockMovement.Kind.IN,
+            money("5"),
+            "ReposiÃ§Ã£o fictÃ­cia para demonstraÃ§Ã£o"));
+    commerce.movement(
+        new CommerceService.MovementInput(
+            UUID.randomUUID(),
+            notebook.id(),
+            StockMovement.Kind.OUT,
+            money("2"),
+            "Amostras fictÃ­cias para divulgaÃ§Ã£o"));
+    draft(aurora, "EXEMPLO Â· pedido aguardando aprovaÃ§Ã£o", notebook, "3");
+    var unpaid = draft(cafe, "EXEMPLO Â· entrega combinada, a receber", coffee, "1.5");
+    commerce.confirm(
+        unpaid.id(), new CommerceService.ConfirmInput(bank, today.plusDays(5), false, null));
+    var paid = draft(parceiro, "EXEMPLO Â· pedido recebido no caixa", notebook, "2");
+    var paidSale =
+        commerce.confirm(paid.id(), new CommerceService.ConfirmInput(cash, today, true, today));
+    var returned = draft(aurora, "EXEMPLO Â· pedido cancelado com devoluÃ§Ã£o", pen, "1");
+    commerce.confirm(returned.id(), new CommerceService.ConfirmInput(bank, today, true, today));
+    commerce.cancel(returned.id());
+    for (var m : List.of(month.minusMonths(1), month)) {
+      budgets.save(null, new BudgetService.Input(m.toString(), rent, money("2000")));
+      budgets.save(null, new BudgetService.Input(m.toString(), software, money("500")));
+      budgets.save(null, new BudgetService.Input(m.toString(), marketing, money("600")));
+      budgets.save(null, new BudgetService.Input(m.toString(), office, money("600")));
+      budgets.save(null, new BudgetService.Input(m.toString(), equipment, money("1500")));
+    }
+    proof(receipt, "comprovante-escritorio-exemplo.pdf", "Materiais de escritorio", "R$ 145,50");
+    proof(
+        paidSale.entryId(),
+        "recibo-venda-exemplo.pdf",
+        "Venda demonstrativa de cadernos",
+        "R$ 69,80");
+    }
+    if (!existing.loaded() || existing.packVersion() < 2)
+      addCommercialExamples(prefix, token, today);
+    addPresentationExamples(prefix, token, today);
+    var run = runs.findById(company).orElseGet(SampleRun::new);
+    run.setCompanyId(company);
+    run.setPackVersion(3);
+    run.setCompletedAt(LocalDateTime.now(clock));
+    runs.saveAndFlush(run);
+    audit.change(
+        "SAMPLE_LOAD",
+        "SAMPLE",
+        company,
+        "Dados de exemplo Â· pacote 3",
+        Map.of(),
+        AuditService.fields("Pacote", 3, "Identificador", token));
+    return status();
+  }
 
-NÂˆ[ÛÛXİ[™^HX]˜XœÊURQœ˜[™ÛUURQ
+  private LocalDate recentDate(LocalDate today, int daysAgo) {
+    return today.minusDays(Math.min(daysAgo, today.getDayOfMonth() - 1L));
+  }
 
-Kš\ÚÛÙJ
-H	HÌ
-H
-ÈŒÂˆURQ]\›Ü˜HHÛÛXİ
-‘[\™\ØH]\›Ü˜H‹ÛÛXİ’Ú[™ÕTÕÓQT‹ÛÛXİ[™^™Yš^YJNÂˆURQØY™HHÛÛXİ
-“Y\˜ØYÈÜš^›ÛH‹ÛÛXİ’Ú[™ÕTÕÓQT‹ÛÛXİ[™^
-ÈK™Yš^YJNÂˆ˜\ˆÚ]Bˆ›ÙXİ
-ˆ‘SSËHˆ
-ÈÚÙ[ˆ
-È‹RÒU‹ˆ’Ú]H[\[péğèÛÈ0­È^[\È‹ˆ•Sˆ‹ˆKL‹ˆˆ‹ˆŒÌ‹ˆŒÈ‹ˆYJNÂˆ˜\ˆÙ]\HÙ\šXÙJ‘SSËHˆ
-ÈÚÙ[ˆ
-È‹TÑU‹’[\[péğèÛÈHÚ\İ[XH0­È^[\È‹ŒN‹ŒŠNÂˆ˜\ˆİ\ÜHÙ\šXÙJ‘SSËHˆ
-ÈÚÙ[ˆ
-È‹TÕT‹”İ\ÜHY[œØ[0­È^[\È‹L‹ŒLŒŠNÂˆ˜\ˆ˜Z[š[™ÈHÙ\šXÙJ‘SSËHˆ
-ÈÚÙ[ˆ
-È‹U‘H‹•™Z[˜[Y[ÈH\]Z\H0­È^[\È‹ÍL‹ŒLŠNÂˆ˜\ˆ[™\ÈBˆ\İ›ÙŠˆ™]ÈÛÛ[Y\˜ÙTÙ\šXÙK“[™R[œ]
-Ù]\šY
+  private void addPresentationExamples(String prefix, String token, LocalDate today) {
+    String label = prefix + "ApresentaÃ§Ã£o Â· ";
+    var account =
+        finance.accounts().stream()
+            .filter(a -> a.name().equals(prefix + "Banco principal"))
+            .findFirst()
+            .map(FinanceService.AccountView::id)
+            .orElseGet(
+                () ->
+                    finance
+                        .createAccount(
+                            new FinanceService.AccountInput(
+                                prefix + "Banco de apresentaÃ§Ã£o", BigDecimal.ZERO))
+                        .id());
+    int contactIndex = Math.abs(UUID.randomUUID().hashCode() % 98) + 901;
+    UUID customer = contact("Aurora Design", Contact.Kind.CUSTOMER, contactIndex, prefix, true);
+    UUID supplier =
+        contact("Banco de demonstraÃ§Ã£o", Contact.Kind.SUPPLIER, contactIndex + 1, prefix, true);
+    UUID incomeCategory = category("Projetos especiais", FinancialCategory.Kind.INCOME, prefix);
+    UUID expenseCategory =
+        category("Tarifas bancÃ¡rias", FinancialCategory.Kind.EXPENSE, prefix);
 
-K[Û™^JŒHŠKÙ]\œšXÙJ
-JKˆ™]ÈÛÛ[Y\˜ÙTÙ\šXÙK“[™R[œ]
-Ú]šY
+    var groupedEntry =
+        entry(
+            account,
+            label + "Projeto de identidade visual Â· baixa em etapas",
+            FinancialEntry.Type.INCOME,
+            "3000.00",
+            today.plusDays(10),
+            false,
+            incomeCategory,
+            customer);
+    finance.pay(
+        groupedEntry,
+        new FinanceService.PaymentInput(recentDate(today, 3), money("300.00")));
+    finance.pay(
+        groupedEntry,
+        new FinanceService.PaymentInput(recentDate(today, 1), money("450.00")));
 
-K[Û™^JŒÈŠKÚ]œšXÙJ
-JJNÂˆ›ÜÜØ[
-ˆ™Yš^
-È’[\[péğèÛÈÈš[˜[˜ÙZ\›È‹ˆ]\›Ü˜KˆÙ^Kœ\Ñ^\ÊÌ
-Kˆ[™\ÊNÂˆ˜\ˆ™YÛİX][™ÈBˆ›ÜÜØ[
-ˆ™Yš^
-È”İ\ÜHH™Z[˜[Y[È‹ˆØY™KˆÙ^Kœ\Ñ^\ÊŒ
-Kˆ\İ›ÙŠˆ™]ÈÛÛ[Y\˜ÙTÙ\šXÙK“[™R[œ]
-İ\ÜšY
+    var partialExpense =
+        entry(
+            account,
+            label + "Equipamentos Â· pagamento parcial",
+            FinancialEntry.Type.EXPENSE,
+            "1600.00",
+            today.plusDays(8),
+            false,
+            expenseCategory,
+            supplier);
+    finance.pay(
+        partialExpense,
+        new FinanceService.PaymentInput(recentDate(today, 2), money("350.00")));
 
-K[Û™^JŒÈŠKİ\ÜœšXÙJ
-JKˆ™]ÈÛÛ[Y\˜ÙTÙ\šXÙK“[™R[œ]
-˜Z[š[™ËšY
+    var linkedIncome =
+        entry(
+            account,
+            label + "Consultoria Â· recebimento conciliado",
+            FinancialEntry.Type.INCOME,
+            "880.00",
+            today,
+            false,
+            incomeCategory,
+            customer);
+    var linkedExpense =
+        entry(
+            account,
+            label + "Tarifa de processamento",
+            FinancialEntry.Type.EXPENSE,
+            "28.90",
+            today,
+            false,
+            expenseCategory,
+            supplier);
 
-K[Û™^JŒHŠK˜Z[š[™ËœšXÙJ
-JKˆ™]ÈÛÛ[Y\˜ÙTÙ\šXÙK“[™R[œ]
-Ú]šY
+    var movements =
+        List.of(
+            new DemoMovement("GROUP-1", recentDate(today, 2), "700.00", "PIX PROJETO AURORA 1/2"),
+            new DemoMovement("GROUP-2", recentDate(today, 1), "800.00", "PIX PROJETO AURORA 2/2"),
+            new DemoMovement("LINK-IN", today, "880.00", "PIX CONSULTORIA AURORA"),
+            new DemoMovement("LINK-OUT", today, "-28.90", "TARIFA PROCESSAMENTO"),
+            new DemoMovement("OPEN", today, "-312.55", "COMPRA SEM LANCAMENTO PARA REVISAR"));
+    reconciliation.importStatement(
+        new ReconciliationService.ImportInput(
+            account,
+            presentationOfx(token, movements),
+            java.util.stream.IntStream.rangeClosed(1, movements.size()).boxed().toList()));
+    var lines =
+        reconciliation.list(account, null, 0, 50).content().stream()
+            .collect(
+                java.util.stream.Collectors.toMap(
+                    ReconciliationService.LineView::fitId, line -> line));
+    var groupLines =
+        List.of(
+            lines.get("FINTRY-PRESENTATION-" + token + "-GROUP-1"),
+            lines.get("FINTRY-PRESENTATION-" + token + "-GROUP-2"));
+    reconciliation.group(
+        new ReconciliationService.GroupInput(
+            account,
+            groupLines.stream().map(ReconciliationService.LineView::id).toList(),
+            groupedEntry,
+            "DemonstraÃ§Ã£o: dois crÃ©ditos bancÃ¡rios conciliados com um recebimento parcial."));
+    linkDemoMovement(
+        lines.get("FINTRY-PRESENTATION-" + token + "-LINK-IN"),
+        linkedIncome,
+        "Recebimento demonstrativo vinculado ao lanÃ§amento correspondente.");
+    linkDemoMovement(
+        lines.get("FINTRY-PRESENTATION-" + token + "-LINK-OUT"),
+        linkedExpense,
+        "Tarifa demonstrativa vinculada Ã  despesa correspondente.");
+  }
 
-K[Û™^JŒˆŠKÚ]œšXÙJ
-JJJNÂˆ™YÛİX][™ÈBˆ›ÜÜØ[Ë˜[œÚ][ÛŠˆ™YÛİX][™ËšY
+  private void linkDemoMovement(
+      ReconciliationService.LineView movement, UUID entryId, String reason) {
+    reconciliation.resolve(
+        movement.id(),
+        new ReconciliationService.Resolution(
+            movement.revision(), ReconciliationService.Action.LINK, entryId, null, null, reason));
+  }
 
-Kˆ™]È›ÜÜØ[Ù\šXÙK•˜[œÚ][ÛŠ™YÛİX][™Ë™\œÚ[ÛŠ
-K›ÜÜØ[”İ]\Ë“ÔSŠJNÂˆ˜\ˆ\›İ™YBˆ›ÜÜØ[
-ˆ™Yš^
-È”XÛİHHÜ™Ø[š^˜péğèÛÈ‹ˆ]\›Ü˜KˆÙ^Kœ\Ñ^\ÊÌ
-Kˆ\İ›ÙŠˆ™]ÈÛÛ[Y\˜ÙTÙ\šXÙK“[™R[œ]
-İ\ÜšY
+  private String presentationOfx(String token, List<DemoMovement> movements) {
+    String rows =
+        movements.stream()
+            .map(
+                movement ->
+                    "<STMTTRN><TRNTYPE>OTHER<DTPOSTED>"
+                        + movement.date().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE)
+                        + "<TRNAMT>"
+                        + movement.amount()
+                        + "<FITID>FINTRY-PRESENTATION-"
+                        + token
+                        + "-"
+                        + movement.code()
+                        + "<NAME>"
+                        + movement.description()
+                        + "</STMTTRN>")
+            .collect(java.util.stream.Collectors.joining());
+    return "OFXHEADER:100\nDATA:OFXSGML\nVERSION:102\nSECURITY:NONE\nENCODING:UTF-8\nCHARSET:NONE\n\n"
+        + "<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><CURDEF>BRL<BANKACCTFROM><BANKID>999<BRANCHID>0001<ACCTID>DEMO-"
+        + token
+        + "<ACCTTYPE>CHECKING</BANKACCTFROM><BANKTRANLIST>"
+        + rows
+        + "</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>";
+  }
 
-K[Û™^JŒHŠKİ\ÜœšXÙJ
-JKˆ™]ÈÛÛ[Y\˜ÙTÙ\šXÙK“[™R[œ]
-Ú]šY
+  private void addCommercialExamples(
+      String prefix, String token, LocalDate today) {
+    UUID account =
+        finance
+            .createAccount(
+                new FinanceService.AccountInput(prefix + "Conta comercial", BigDecimal.ZERO))
+            .id();
+    int contactIndex = Math.abs(UUID.randomUUID().hashCode() % 700) + 200;
+    UUID aurora = contact("Empresa Aurora", Contact.Kind.CUSTOMER, contactIndex, prefix, true);
+    UUID cafe = contact("Mercado Horizonte", Contact.Kind.CUSTOMER, contactIndex + 1, prefix, true);
+    var kit =
+        product(
+            "DEMO-" + token + "-KIT",
+            "Kit de implantaÃ§Ã£o Â· exemplo",
+            "UN",
+            "89.90",
+            "42",
+            "30",
+            "3",
+            true);
+    var setup = service("DEMO-" + token + "-SET", "ImplantaÃ§Ã£o de sistema Â· exemplo", "1800", "600");
+    var support = service("DEMO-" + token + "-SUP", "Suporte mensal Â· exemplo", "450", "120");
+    var training = service("DEMO-" + token + "-TRE", "Treinamento da equipe Â· exemplo", "750", "250");
+    var lines =
+        List.of(
+            new CommerceService.LineInput(setup.id(), money("1"), setup.price()),
+            new CommerceService.LineInput(kit.id(), money("3"), kit.price()));
+    proposal(
+        prefix + "ImplantaÃ§Ã£o do financeiro",
+        aurora,
+        today.plusDays(30),
+        lines);
+    var negotiating =
+        proposal(
+            prefix + "Suporte e treinamento",
+            cafe,
+            today.plusDays(20),
+            List.of(
+                new CommerceService.LineInput(support.id(), money("3"), support.price()),
+                new CommerceService.LineInput(training.id(), money("1"), training.price()),
+                new CommerceService.LineInput(kit.id(), money("2"), kit.price())));
+    negotiating =
+        proposals.transition(
+            negotiating.id(),
+            new ProposalService.Transition(negotiating.version(), Proposal.Status.OPEN));
+    var approved =
+        proposal(
+            prefix + "Pacote de organizaÃ§Ã£o",
+            aurora,
+            today.plusDays(30),
+            List.of(
+                new CommerceService.LineInput(support.id(), money("1"), support.price()),
+                new CommerceService.LineInput(kit.id(), money("2"), kit.price())));
+    approved =
+        proposals.transition(
+            approved.id(), new ProposalService.Transition(approved.version(), Proposal.Status.OPEN));
+    proposals.approve(
+        approved.id(),
+        new ProposalService.Approval(
+            approved.version(),
+            new CommerceService.ConfirmInput(account, today.plusDays(12), false, null)));
+  }
 
-K[Û™^JŒˆŠKÚ]œšXÙJ
-JJJNÂˆ\›İ™YBˆ›ÜÜØ[Ë˜[œÚ][ÛŠˆ\›İ™YšY
+  private void proof(UUID entry, String name, String description, String amount) {
+    try (var doc = new PDDocument();
+        var out = new ByteArrayOutputStream()) {
+      var page = new PDPage();
+      doc.addPage(page);
+      try (var text = new PDPageContentStream(doc, page)) {
+        text.beginText();
+        text.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), 16);
+        text.setLeading(28);
+        text.newLineAtOffset(55, 735);
+        for (var line :
+            List.of(
+                "FINTRY - DOCUMENTO DE EXEMPLO",
+                "Sem validade fiscal ou bancaria",
+                description,
+                amount,
+                "Dados ficticios para demonstracao da plataforma.")) {
+          text.showText(line);
+          text.newLine();
+        }
+        text.endText();
+      }
+      doc.save(out);
+      attachments.upload(entry, new SampleFile(name, out.toByteArray()));
+    } catch (IOException ex) {
+      throw new IllegalStateException("NÃ£o foi possÃ­vel gerar o comprovante de exemplo.", ex);
+    }
+  }
 
-K™]È›ÜÜØ[Ù\šXÙK•˜[œÚ][ÛŠ\›İ™Y™\œÚ[ÛŠ
-K›ÜÜØ[”İ]\Ë“ÔSŠJNÂˆ›ÜÜØ[Ë˜\›İ™Jˆ\›İ™YšY
+  private record SampleFile(String filename, byte[] content) implements MultipartFile {
+    public String getName() {
+      return "file";
+    }
 
-Kˆ™]È›ÜÜØ[Ù\šXÙK\›İ˜[
-ˆ\›İ™Y™\œÚ[ÛŠ
-Kˆ™]ÈÛÛ[Y\˜ÙTÙ\šXÙKÛÛ™š\›R[œ]
-XØÛİ[Ù^Kœ\Ñ^\ÊLŠK˜[ÙK[
-JJNÂˆB‚ˆš]˜]H›ÚY›ÛÙŠURQ[Kİš[™È˜[YKİš[™È\ØÜš\[Û‹İš[™È[[İ[
-HÂˆH
-˜\ˆØÈH™]ÈØİ[Y[
+    public String getOriginalFilename() {
+      return filename;
+    }
 
-NÂˆ˜\ˆİ]H™]È]P\œ˜^Sİ]]İ™X[J
-JHÂˆ˜\ˆYÙHH™]ÈYÙJ
-NÂˆØË˜YYÙJYÙJNÂˆH
-˜\ˆ^H™]ÈYÙPÛÛ[İ™X[JØËYÙJJHÂˆ^˜™YÚ[•^
+    public String getContentType() {
+      return "application/pdf";
+    }
 
-NÂˆ^œÙ]›Û
-™]È\LQ›Û
-İ[™\™M›ÛË‘›Û˜[YK’S‘UPĞJKMŠNÂˆ^œÙ]XY[™Ê
-NÂˆ^›™]Ó[™P]Ù™œÙ]
-MKÌÍJNÂˆ›Üˆ
-˜\ˆ[™H‚ˆ\İ›ÙŠˆ‘’S•–HHĞÕSQS•ÈHVSTÈ‹ˆ”Ù[H˜[YYHš\ØØ[İH˜[˜Ø\šXH‹ˆ\ØÜš\[Û‹ˆ[[İ[ˆ‘YÜÈšXİXÚ[ÜÈ\˜H[[Ûœİ˜XØ[ÈH]Y›Ü›XKˆŠJHÂˆ^œÚİÕ^
-[™JNÂˆ^›™]Ó[™J
-NÂˆBˆ^™[™^
+    public boolean isEmpty() {
+      return content.length == 0;
+    }
 
-NÂˆBˆØËœØ]™Jİ]
-NÂˆ]XÚY[Ë\ØY
-[K™]ÈØ[\Qš[J˜[YKİ]Ğ]P\œ˜^J
-JJNÂˆHØ]Ú
-SÑ^Ù\[Ûˆ^
-HÂˆ›İÈ™]È[YØ[İ]Q^Ù\[ÛŠ“°èÛÈ›ÚHÜÜğë]™[Ù\˜\ˆÈÛÛ\›İ˜[HH^[\Ëˆ‹^
-NÂˆBˆB‚ˆš]˜]H™XÛÜ™Ø[\Qš[Jİš[™Èš[[˜[YK]V×HÛÛ[
-H[\[Y[È][\\š[HÂˆX›XÈİš[™ÈÙ]˜[YJ
-HÂˆ™]\›ˆ™š[HÂˆB‚ˆX›XÈİš[™ÈÙ]ÜšYÚ[˜[š[[˜[YJ
-HÂˆ™]\›ˆš[[˜[YNÂˆB‚ˆX›XÈİš[™ÈÙ]ÛÛ[\J
-HÂˆ™]\›ˆ˜\XØ][Û‹ÜˆÂˆB‚ˆX›XÈ›ÛÛX[ˆ\Ñ[\J
-HÂˆ™]\›ˆÛÛ[›[™İOHÂˆB‚ˆX›XÈÛ™ÈÙ]Ú^™J
-HÂˆ™]\›ˆÛÛ[›[™İÂˆB‚ˆX›XÈ]V×HÙ]]\Ê
-HÂˆ™]\›ˆÛÛ[˜ÛÛ™J
-NÂˆB‚ˆX›XÈ[œ]İ™X[HÙ][œ]İ™X[J
-HÂˆ™]\›ˆ™]È]P\œ˜^R[œ]İ™X[JÛÛ[
-NÂˆB‚ˆX›XÈ›ÚY˜[œÙ™\•Êš[H\İ
-H›İÜÈSÑ^Ù\[ÛˆÂˆš[\ËÜš]J\İÔ]
+    public long getSize() {
+      return content.length;
+    }
 
-KÛÛ[
-NÂˆBˆBŸB
+    public byte[] getBytes() {
+      return content.clone();
+    }
+
+    public InputStream getInputStream() {
+      return new ByteArrayInputStream(content);
+    }
+
+    public void transferTo(File dest) throws IOException {
+      Files.write(dest.toPath(), content);
+    }
+  }
+}
