@@ -2,6 +2,17 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.23.0] - 2026-10-26
+
+### Operação das notificações de cobrança
+
+- Webhooks Asaas são autenticados e registrados em fila persistente antes de responder ao provedor; eventos repetidos são deduplicados por conexão e identificador.
+- Processamento em segundo plano consulta a API Asaas e confirma os dados vinculados ao lançamento; o status e o valor enviados pelo webhook continuam sem autoridade para dar baixa.
+- Falhas temporárias recebem novas tentativas com espera progressiva. Após oito tentativas, o evento fica em falha para revisão e o Administrador pode solicitar novo processamento.
+- Painel administrativo mostra eventos recentes, pendentes, em processamento e com falha, sem expor chaves, tokens ou dados de pagamento.
+- Migração aditiva cria a fila e seus índices; eventos órfãos ou divergentes não alteram lançamentos e podem ser revisados.
+- A rotina de eventos é iniciada pela aplicação sem configuração manual no ambiente. Sandbox e Produção seguem as credenciais já configuradas por empresa.
+
 ## [0.22.0] - 2026-10-26
 
 ### Primeiros passos e identidade da empresa

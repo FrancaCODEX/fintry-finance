@@ -27,6 +27,16 @@ public class BillingController {
     return service.list(page);
   }
 
+  @GetMapping("/webhook-operations")
+  BillingService.WebhookOperations webhookOperations() {
+    return service.webhookOperations();
+  }
+
+  @PostMapping("/webhook-operations/{id}/retry")
+  void retryWebhook(@PathVariable UUID id) {
+    service.retryWebhook(id);
+  }
+
   @PostMapping
   BillingService.View issue(@Valid @RequestBody BillingService.IssueInput input) {
     return service.issue(input);

@@ -1,9 +1,10 @@
 "use strict";
-const billing = { page: 0, data: null, config: null };
+const billing = { page: 0, data: null, config: null, operations: null };
 function resetBilling() {
   billing.page = 0;
   billing.data = null;
   billing.config = null;
+  billing.operations = null;
 }
 const canCollect = () => state.user?.permissions?.includes("WRITE_FINANCE");
 const billingLabels = {
@@ -17,13 +18,15 @@ const billingLabels = {
   REVIEW: "Revisar no Asaas",
 };
 async function loadBilling(id) {
-  const [config, data] = await Promise.all([
+  const [config, data, operations] = await Promise.all([
     api("/billing/connection"),
     api("/billing?page=" + billing.page),
+    isAdmin() ? api("/billing/webhook-operations") : Promise.resolve(null),
   ]);
   if (id !== requestId || !state.user || state.page !== "billing") return;
   billing.config = config;
   billing.data = data;
+  billing.operations = operations;
   shell();
   const sandbox = config.environment !== "PRODUCTION";
   document.querySelector("#page-content").innerHTML =
@@ -33,7 +36,17 @@ async function loadBilling(id) {
       `${isAdmin() ? '<button class="btn secondary" data-action="billing-config">Conexão Asaas</button>' : ""}${canWrite() ? `<button class="btn" data-action="billing-new" ${!config.configured ? "disabled" : ""}>${icon("plus")} Nova cobrança</button>` : ""}`,
     ) +
     `<section class="card billing-hero"><div class="billing-hero-symbol" aria-hidden="true">${icon("wallet")}</div><div><span class="eyebrow">COBRANÇAS · ASAAS</span><h2>${!config.configured ? "Conecte sua conta para começar" : sandbox ? "Experimente antes de cobrar" : "Conta configurada para receber"}</h2><p>${!config.configured ? "O administrador pode conectar a empresa e escolher o ambiente de testes ou produção." : sandbox ? "Este é um ambiente de testes. Pagamentos simulados não alteram saldos, receitas ou tarifas." : "A baixa acontece quando o valor fica disponível no Asaas. A tarifa é registrada separadamente na mesma conta do lançamento."}</p></div><span class="badge ${sandbox ? "pending" : "paid"}">${!config.configured ? "Não conectado" : sandbox ? "Testes" : "Produção"}</span></section>` +
-    `<section class="card billing-register"><div class="billing-register-head"><div><h2>Suas cobranças</h2><p class="muted">${data.totalElements} registro(s) · até 20 por página</p></div><button class="btn secondary small" data-action="billing-refresh">Atualizar lista</button></div><div class="billing-list">${data.content.map((c) => `<article class="billing-item"><div class="billing-item-main"><span class="billing-method">${c.method === "PIX" ? "Pix" : "Boleto"}</span><h3>${e(c.description)}</h3><small>Vencimento ${dateLabel(c.dueDate)} · ${c.environment === "SANDBOX" ? "Teste" : "Produção"}</small><span class="badge ${["RECEIVED", "TEST_RECEIVED"].includes(c.status) ? "paid" : ["REVIEW", "OVERDUE"].includes(c.status) ? "cancelled" : "pending"}">${e(billingLabels[c.status])}</span></div><div class="billing-item-value"><strong>${money(c.amount)}</strong>${c.netAmount != null ? `<small>Líquido ${money(c.netAmount)}</small>` : ""}<button class="btn secondary small" data-action="billing-details" data-id="${c.id}">Ver cobrança →</button></div>${c.message ? `<p class="billing-message">${e(c.message)}</p>` : ""}</article>`).join("") || '<div class="empty"><h3>Sua próxima receita começa aqui</h3><p>Cadastre uma receita pendente com cliente e CPF/CNPJ. Depois, emita Pix ou boleto por esta página.</p></div>'}</div><div class="pagination"><button class="btn secondary small" data-action="billing-prev" ${!data.number ? "disabled" : ""}>Anterior</button><span>${data.number + 1} / ${Math.max(1, data.totalPages)}</span><button class="btn secondary small" data-action="billing-next" ${data.number + 1 >= data.totalPages ? "disabled" : ""}>Próxima</button></div></section><p class="notice">Os links são compartilhados por você. O Fintry não envia avisos automáticos aos clientes. Para cobranças sem confirmação ou divergentes, use Consultar Asaas antes de qualquer nova tentativa.</p>`;
+    `${operations ? renderWebhookOperations(operations) : ""}<section class="card billing-register"><div class="billing-register-head"><div><h2>Suas cobranças</h2><p class="muted">${data.totalElements} registro(s) · até 20 por página</p></div><button class="btn secondary small" data-action="billing-refresh">Atualizar lista</button></div><div class="billing-list">${data.content.map((c) => `<article class="billing-item"><div class="billing-item-main"><span class="billing-method">${c.method === "PIX" ? "Pix" : "Boleto"}</span><h3>${e(c.description)}</h3><small>Vencimento ${dateLabel(c.dueDate)} · ${c.environment === "SANDBOX" ? "Teste" : "Produção"}</small><span class="badge ${["RECEIVED", "TEST_RECEIVED"].includes(c.status) ? "paid" : ["REVIEW", "OVERDUE"].includes(c.status) ? "cancelled" : "pending"}">${e(billingLabels[c.status])}</span></div><div class="billing-item-value"><strong>${money(c.amount)}</strong>${c.netAmount != null ? `<small>Líquido ${money(c.netAmount)}</small>` : ""}<button class="btn secondary small" data-action="billing-details" data-id="${c.id}">Ver cobrança →</button></div>${c.message ? `<p class="billing-message">${e(c.message)}</p>` : ""}</article>`).join("") || '<div class="empty"><h3>Sua próxima receita começa aqui</h3><p>Cadastre uma receita pendente com cliente e CPF/CNPJ. Depois, emita Pix ou boleto por esta página.</p></div>'}</div><div class="pagination"><button class="btn secondary small" data-action="billing-prev" ${!data.number ? "disabled" : ""}>Anterior</button><span>${data.number + 1} / ${Math.max(1, data.totalPages)}</span><button class="btn secondary small" data-action="billing-next" ${data.number + 1 >= data.totalPages ? "disabled" : ""}>Próxima</button></div></section><p class="notice">Os links são compartilhados por você. O Fintry não envia avisos automáticos aos clientes. Para cobranças sem confirmação ou divergentes, use Consultar Asaas antes de qualquer nova tentativa.</p>`;
+}
+
+function renderWebhookOperations(data) {
+  const labels = {
+    PENDING: "Aguardando processamento",
+    PROCESSING: "Em processamento",
+    PROCESSED: "Processada",
+    FAILED: "Falha após tentativas",
+  };
+  return `<section class="card billing-ops" aria-label="Operação de notificações"><div class="billing-register-head"><div><span class="eyebrow">OPERAÇÃO</span><h2>Notificações do Asaas</h2><p class="muted">Eventos são processados em segundo plano. Falhas temporárias recebem novas tentativas automaticamente.</p></div><button class="btn secondary small" data-action="billing-refresh">Atualizar</button></div><div class="billing-ops-counts"><span><strong>${data.pending}</strong> aguardando</span><span><strong>${data.processing}</strong> processando</span><span class="${data.failed ? "has-failures" : ""}"><strong>${data.failed}</strong> com falha</span></div>${data.recent.length ? `<div class="billing-ops-list">${data.recent.map((event) => `<article class="billing-ops-row"><div><span class="badge ${event.status === "PROCESSED" ? "paid" : event.status === "FAILED" ? "cancelled" : "pending"}">${e(labels[event.status])}</span><small>${dateLabel(event.receivedAt?.slice(0, 10))} · ${event.attempts} tentativa(s)</small>${event.message ? `<p>${e(event.message)}</p>` : ""}</div>${event.status === "FAILED" ? `<button class="btn secondary small" data-action="billing-webhook-retry" data-id="${event.id}">Tentar novamente</button>` : ""}</article>`).join("")}</div>` : '<p class="muted">Nenhuma notificação recebida ainda.</p>'}<p class="field-help">O histórico mostra até 50 eventos recentes. A repetição do webhook é segura e não cria cobranças novas.</p></section>`;
 }
 async function billingActionInternal(button) {
   const action = button.dataset.action;
@@ -51,6 +64,13 @@ async function billingActionInternal(button) {
     await safeLoad();
   }
   if (action === "billing-refresh") await safeLoad();
+  if (action === "billing-webhook-retry" && isAdmin()) {
+    await api(`/billing/webhook-operations/${button.dataset.id}/retry`, {
+      method: "POST",
+    });
+    toast("Evento colocado na fila para nova tentativa.");
+    await safeLoad();
+  }
   if (action === "billing-config" && isAdmin()) {
     const c = billing.config;
     const frozen = c.locked && c.environment === "PRODUCTION";
@@ -159,7 +179,7 @@ async function billingActionInternal(button) {
 }
 
 document.addEventListener("click", async (event) => {
-  const button = event.target.closest("#modal [data-action]");
+  const button = event.target.closest("[data-action]");
   if (!button?.dataset.action?.startsWith("billing-")) return;
   button.disabled = true;
   try {

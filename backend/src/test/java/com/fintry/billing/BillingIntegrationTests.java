@@ -31,8 +31,15 @@ class BillingIntegrationTests {
   final String today = LocalDate.now(ZoneId.of("America/Sao_Paulo")).toString();
   @Autowired MockAsaas provider;
   @Autowired BillingConnectionRepository connections;
+  @Autowired BillingService billingService;
   @Autowired com.fintry.subscription.SubscriptionRepository subscriptions;
   @Autowired com.fintry.auth.UserRepository users;
+  volatile boolean deferWebhookProcessing;
+
+  @BeforeEach
+  void resetWebhookProcessing() {
+    deferWebhookProcessing = false;
+  }
 
   @TestConfiguration
   static class Config {
@@ -51,6 +58,7 @@ class BillingIntegrationTests {
     final ConcurrentMap<String, String> owners = new ConcurrentHashMap<>();
     final AtomicInteger issued = new AtomicInteger(), customerCount = new AtomicInteger();
     volatile boolean failAfterCreate, maliciousUrl;
+    final AtomicInteger failReads = new AtomicInteger();
 
     MockAsaas() throws Exception {
       server.createContext(
@@ -117,6 +125,10 @@ class BillingIntegrationTests {
                 out = Map.of("totalCount", found.size(), "data", found);
               } else {
                 String id = path.split("/")[3];
+                if (method.equals("GET") && failReads.getAndUpdate(n -> Math.max(0, n - 1)) > 0) {
+                  ex.sendResponseHeaders(503, -1);
+                  return;
+                }
                 var p = payments.get(id);
                 if (p == null || !key.equals(owners.get(id))) {
                   ex.sendResponseHeaders(404, -1);
@@ -304,7 +316,7 @@ class BillingIntegrationTests {
                     json.writeValueAsString(
                         Map.of(
                             "id",
-                            "evt_repeat",
+                            "evt_" + UUID.randomUUID().toString().replace("-", ""),
                             "event",
                             "PAYMENT_RECEIVED",
                             "payment",
@@ -312,10 +324,35 @@ class BillingIntegrationTests {
             .build();
     var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
     assertEquals(expected, response.statusCode(), response.body());
+    if (expected == 204 && !deferWebhookProcessing) billingService.processWebhookQueue();
   }
 
   JsonNode detail(Browser b, String entry) throws Exception {
     return b.request("GET", "/finance/entries/" + entry, null, 200).path("entry");
+  }
+
+  @Test
+  void webhookIsQueuedAndTransientProviderFailureSchedulesRetry() throws Exception {
+    var b = new Browser().signup();
+    var config = configure(b, "PRODUCTION");
+    String entry = entry(b, b.account("Fila de cobrança"));
+    var charge = issue(b, entry, "PIX");
+    var payment = payment(charge);
+    payment.put("status", "RECEIVED");
+    provider.failReads.set(1);
+    deferWebhookProcessing = true;
+    event(b, config, payment.get("id").toString(), token(b), 204);
+    var queued =
+        b.request("GET", "/billing/webhook-operations", null, 200);
+    assertEquals(1, queued.path("pending").asInt());
+    assertEquals("PENDING", detail(b, entry).path("status").asText());
+
+    billingService.processWebhookQueue();
+    var retried = b.request("GET", "/billing/webhook-operations", null, 200);
+    assertEquals(1, retried.path("pending").asInt());
+    assertEquals(1, retried.path("recent").get(0).path("attempts").asInt());
+    assertTrue(retried.path("recent").get(0).path("message").asText().contains("temporária"));
+    assertEquals("PENDING", detail(b, entry).path("status").asText());
   }
 
   @Test

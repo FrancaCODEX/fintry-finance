@@ -26,9 +26,11 @@ public class BillingWebhookController {
     try {
       var p = JsonMapper.builder().build().readTree(bytes);
       if (p == null || !p.isObject()) throw new IllegalArgumentException();
+      var eventId = p.path("id").asText("");
       var providerId = p.path("payment").path("id").asText("");
-      if (!providerId.matches("pay_[A-Za-z0-9_-]{1,90}")) throw new IllegalArgumentException();
-      service.webhook(id, token, providerId);
+      if (!eventId.matches("[A-Za-z0-9_-]{1,100}")
+          || !providerId.matches("pay_[A-Za-z0-9_-]{1,90}")) throw new IllegalArgumentException();
+      service.webhook(id, token, eventId, providerId);
     } catch (tools.jackson.core.JacksonException | IllegalArgumentException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Evento inválido.");
     }
