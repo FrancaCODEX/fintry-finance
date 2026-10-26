@@ -2066,17 +2066,19 @@ function renderDetails() {
   const data = detailData,
     row = data.entry;
   const status =
-    row.status === "PAID"
-      ? row.type === "INCOME"
-        ? "Recebido"
-        : "Pago"
-      : row.status === "CANCELLED"
-        ? "Cancelado"
-        : row.status === "PARTIAL"
-          ? "Pagamento parcial"
-        : row.dueDate < localDate()
-          ? "Em atraso"
-          : "Pendente";
+    row.seriesPaused
+      ? "Pausado"
+      : row.status === "PAID"
+        ? row.type === "INCOME"
+          ? "Recebido"
+          : "Pago"
+        : row.status === "CANCELLED"
+          ? "Cancelado"
+          : row.status === "PARTIAL"
+            ? "Pagamento parcial"
+            : row.dueDate < localDate()
+              ? "Em atraso"
+              : "Pendente";
   const item = (label, value) =>
     `<div><dt>${label}</dt><dd>${e(value || "—")}</dd></div>`;
   drawer.innerHTML = `<div class="drawer-header"><div><span class="eyebrow">${row.transferId ? "Transferência entre contas" : row.type === "INCOME" ? "Receita" : "Despesa"}</span><h2 id="drawer-title" tabindex="-1">${e(row.description)}</h2></div><button class="close" data-action="drawer-close" aria-label="Fechar detalhes">×</button></div><div class="drawer-amount ${row.type === "INCOME" ? "positive" : "negative"}">${money(row.amount)}</div><span class="badge ${["PENDING", "PARTIAL"].includes(row.status) ? "pending" : row.status === "CANCELLED" ? "cancelled" : ""}">${status}</span><dl class="detail-grid">${item("Conta", data.accountName)}${item("Categoria", row.category)}${item("Cliente / fornecedor", row.contactName)}${item("Valor original", money(row.amount))}${item("Recebido / pago", money(row.receivedAmount))}${item("Saldo restante", money(row.remainingAmount))}${item("Vencimento", dateLabel(row.dueDate))}${item("Baixa final", dateLabel(row.paymentDate))}${item("Registrado em", dateLabel(data.createdAt?.slice(0, 10)))}${item("Última alteração", dateLabel(data.updatedAt?.slice(0, 10)))}${row.seriesId ? item(row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição mensal", row.sequenceNumber + " de " + row.seriesCount) : ""}</dl><section class="payment-history"><h3>Pagamentos registrados</h3>${data.payments.length ? `<ul>${data.payments.map((p) => `<li><span>${dateLabel(p.paymentDate)}</span><strong>${money(p.amount)}</strong></li>`).join("")}</ul>` : '<p class="muted">Nenhum pagamento registrado.</p>'}</section><div class="drawer-actions">${["PENDING", "PARTIAL"].includes(row.status) ? `<button class="btn" data-action="pay" data-id="${row.id}">${row.type === "INCOME" ? (row.status === "PARTIAL" ? "Registrar recebimento" : "Receber") : (row.status === "PARTIAL" ? "Registrar pagamento" : "Pagar")}</button>${row.status === "PENDING" && !row.seriesId && !row.transferId && !row.saleId ? `<button class="btn secondary" data-action="edit-entry" data-id="${row.id}">Editar lançamento</button>` : ""}` : ""}${row.status !== "CANCELLED" && !row.transferId && !row.saleId ? `<button class="btn text" data-action="cancel" data-id="${row.id}">Cancelar lançamento</button>` : ""}</div>${row.saleId ? `<p class="notice">Receita vinculada a uma venda. Para devolver itens e estornar a receita, cancele pela página Vendas.</p><button class="btn secondary" data-action="sale-details" data-id="${row.saleId}">Abrir venda vinculada</button>` : ""}<section class="attachments-section" aria-labelledby="attachments-title"><div class="card-head"><div><h3 id="attachments-title">Comprovantes</h3><p>${detailFiles.length} de 10 arquivos · PDF, PNG ou JPEG</p></div></div><p class="muted attachment-hint">Os arquivos ficam vinculados somente a este lançamento, inclusive após a baixa ou o cancelamento.</p><div class="attachment-list">${detailFiles.length ? detailFiles.map((file) => `<article class="attachment-item"><div class="attachment-type" aria-hidden="true">${file.contentType === "application/pdf" ? "PDF" : "IMG"}</div><div class="attachment-info"><strong>${e(file.filename)}</strong><small>${fileSize(file.byteCount)} · ${dateLabel(file.createdAt?.slice(0, 10))}<br>Enviado por ${e(file.uploadedByName)}</small></div><div class="attachment-actions"><button class="btn secondary small" data-action="attachment-download" data-file="${file.id}" aria-label="Baixar ${e(file.filename)}">Baixar</button><button class="btn text small" data-action="attachment-remove" data-file="${file.id}" aria-label="Remover ${e(file.filename)}">Remover</button></div>${removalId === file.id ? `<div class="remove-confirm" role="alert"><p>Remover este comprovante? O arquivo será excluído. O lançamento será preservado.</p><button class="btn danger small" data-action="attachment-confirm" data-file="${file.id}">Confirmar remoção</button><button class="btn secondary small" data-action="attachment-keep">Manter arquivo</button></div>` : ""}</article>`).join("") : '<div class="attachment-empty">Nenhum comprovante anexado. Adicione notas, recibos ou comprovantes de pagamento.</div>'}</div>${detailFiles.length < 10 ? `<form id="attachment-form"><label class="field">Adicionar comprovante<input name="file" type="file" required accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg" aria-describedby="attachment-help"></label><p id="attachment-help" class="muted attachment-hint">Até 5 MB por arquivo e 10 arquivos por lançamento.</p><p id="attachment-error" class="form-error" role="alert"></p><button type="submit" class="btn">Anexar comprovante</button></form>` : '<p class="notice">Limite de 10 comprovantes atingido. Remova um arquivo para anexar outro.</p>'}</section><div class="drawer-footer">${themeToggle()}<button class="btn secondary" data-action="drawer-close">Fechar detalhes</button></div>`;
