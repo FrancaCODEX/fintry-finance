@@ -45,6 +45,7 @@ deploy/production.env
 /backups/
 *.dump
 *.dump.json
+deploy/production.env.example
 
 # Python operation tooling
 __pycache__/
