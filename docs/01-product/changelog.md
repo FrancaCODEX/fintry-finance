@@ -2,6 +2,22 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.21.0] - 2026-10-23
+
+### Visual e experiência
+
+- Dashboard reorganizado com destaque para o saldo atual de todas as contas, indicadores realizados do mês e previsões pendentes com contextos distintos.
+- Atalhos para lançamentos, transferências, relatórios e conciliação; perfis sem permissão de escrita recebem alternativas de consulta.
+- Gráfico de seis meses permite consultar valores com mouse, toque e teclado, incluindo navegação por setas, resumo do mês selecionado e tabela alternativa acessível.
+- Painel de atrasos atuais mantém sua própria data de referência, independente do mês selecionado. Ações e detalhes existentes continuam disponíveis.
+- Layout responsivo, contraste nos temas claro/escuro, estados sem movimentação e retorno rápido ao mês atual.
+
+### Código e clareza dos indicadores
+
+- Renderização e interação do dashboard separadas em `dashboard.js`, com verificação de sintaxe no CI. Categorias continuam usando o componente compartilhado com relatórios.
+- Comparação de resultado anterior negativo apresenta variação em reais, evitando uma porcentagem de interpretação ambígua.
+- Nenhuma alteração no cálculo do backend, datas de vencimento, saldos, pagamentos ou regras de cobrança. Resultado de caixa continua identificado como diferente de lucro contábil.
+
 ## [0.20.1] - 2026-10-23
 
 ### Correções
