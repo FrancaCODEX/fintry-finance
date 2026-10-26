@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.24.0**
+**Versão atual: 0.25.0**
 
 Dashboard com saldo atual em destaque, indicadores realizados por mês, atalhos e gráfico consultável com mouse, toque e teclado. Veja a [visão geral](docs/01-product/dashboard.md).
 
@@ -121,7 +121,7 @@ Em **Pendências**, acompanhe lançamentos ainda não realizados de todas as dat
 
 Filtre por descrição, tipo, conta e origem (sem série, recorrências ou parcelamentos). Os indicadores respeitam esses filtros e mostram todos os grupos; o grupo selecionado restringe a lista e seus totais. Totais incluem todas as páginas, sem tratar valores pendentes como saldo realizado. Realizados, cancelados e transferências ficam fora da central.
 
-Use Detalhes, Pagar/Receber ou as ações permitidas para o lançamento. A confirmação continua exigindo a data da baixa; não há pagamento automático ou baixa em lote. Receitas de vendas continuam protegidas contra cancelamento isolado. O perfil Somente leitura consulta sem ações de escrita.
+Use Detalhes, Pagar/Receber ou as ações permitidas para o lançamento. Uma baixa pode ser parcial: informe o valor recebido ou pago e a data. O Fintry mostra o total recebido, o saldo restante e o histórico de cada pagamento; os indicadores e relatórios por data de pagamento usam os valores efetivamente baixados. A confirmação continua manual; não há pagamento automático ou baixa em lote. Receitas de vendas continuam protegidas contra cancelamento isolado. O perfil Somente leitura consulta sem ações de escrita.
 
 O dashboard mostra os primeiros cinco vencimentos entre hoje e os próximos sete dias e um atalho para atrasos. Esse bloco usa datas atuais, independentemente do mês selecionado nos indicadores financeiros acima. Na central, consulte todos os resultados.
 
@@ -189,7 +189,7 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 - Layout responsivo e dados de exemplo opcionais.
 - Migrações Flyway e testes de integração HTTP.
 
-**Como os números são calculados:** saldo inicial + receitas realizadas − despesas realizadas. Pendências usam o vencimento; indicadores realizados usam a data de pagamento. O saldo disponível é o saldo atual de todas as contas, independentemente do mês selecionado. Transferências afetam cada conta, mas não entram nas receitas/despesas e no resultado. Valores são armazenados com `BigDecimal` e duas casas decimais. A baixa repetida do mesmo lançamento não duplica o movimento.
+**Como os números são calculados:** saldo inicial + receitas recebidas − despesas pagas. Pendências usam o vencimento e descontam pagamentos parciais; indicadores realizados usam a data e o valor de cada baixa. O saldo disponível é o saldo atual de todas as contas, independentemente do mês selecionado. Transferências afetam cada conta, mas não entram nas receitas/despesas e no resultado. Valores são armazenados com `BigDecimal` e duas casas decimais. A baixa repetida do mesmo lançamento não duplica o movimento.
 
 ## Stack e estrutura
 

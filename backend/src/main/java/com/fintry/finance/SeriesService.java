@@ -44,6 +44,7 @@ public class SeriesService {
       LocalDate firstDueDate,
       LocalDate lastDueDate,
       int paid,
+      int partial,
       int pending,
       int cancelled,
       boolean stopped) {}
@@ -200,10 +201,11 @@ public class SeriesService {
   }
 
   private View view(FinancialSeries s, List<FinancialEntry> items) {
-    int paid = 0, pending = 0, cancelled = 0;
+    int paid = 0, partial = 0, pending = 0, cancelled = 0;
     for (var e : items) {
       switch (e.getStatus()) {
         case PAID -> paid++;
+        case PARTIAL -> partial++;
         case PENDING -> pending++;
         case CANCELLED -> cancelled++;
       }
@@ -218,6 +220,7 @@ public class SeriesService {
         s.getFirstDueDate(),
         s.getLastDueDate(),
         paid,
+        partial,
         pending,
         cancelled,
         s.isStopped());

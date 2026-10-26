@@ -182,8 +182,8 @@ public class BudgetService {
     for (var c : categories.findByCompanyIdOrderByNameAsc(company)) cats.put(c.getId(), c);
     var amounts =
         em.createQuery(
-                "select e.categoryId,e.status,sum(e.amount) from FinancialEntry e where"
-                    + " e.companyId=:company and e.type=:type and e.status in (:paid,:pending) and"
+                "select e.categoryId,e.status,sum(e.paidAmount),sum(e.amount-e.paidAmount) from FinancialEntry e where"
+                    + " e.companyId=:company and e.type=:type and e.status in (:paid,:pending,:partial) and"
                     + " e.transferId is null and e.dueDate>=:start and e.dueDate<:end group by"
                     + " e.categoryId,e.status",
                 Object[].class)
@@ -191,13 +191,19 @@ public class BudgetService {
             .setParameter("type", FinancialEntry.Type.EXPENSE)
             .setParameter("paid", FinancialEntry.Status.PAID)
             .setParameter("pending", FinancialEntry.Status.PENDING)
+            .setParameter("partial", FinancialEntry.Status.PARTIAL)
             .setParameter("start", date)
             .setParameter("end", date.plusMonths(1))
             .getResultList();
     var paid = new HashMap<UUID, BigDecimal>();
     var pending = new HashMap<UUID, BigDecimal>();
-    for (var a : amounts)
-      (a[1] == FinancialEntry.Status.PAID ? paid : pending).put((UUID) a[0], (BigDecimal) a[2]);
+    for (var a : amounts) {
+      var category = (UUID) a[0];
+      var settled = (BigDecimal) a[2];
+      var remaining = (BigDecimal) a[3];
+      if (settled.signum() > 0) paid.merge(category, settled, BigDecimal::add);
+      if (remaining.signum() > 0) pending.merge(category, remaining, BigDecimal::add);
+    }
     var rows = new ArrayList<Row>();
     BigDecimal total = BigDecimal.ZERO, used = BigDecimal.ZERO, planned = BigDecimal.ZERO;
     int warning = 0, exceeded = 0;

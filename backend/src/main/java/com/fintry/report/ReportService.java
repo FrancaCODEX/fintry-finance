@@ -27,7 +27,7 @@ public class ReportService {
     public record Totals(BigDecimal income,BigDecimal expense,BigDecimal result,BigDecimal pendingIncome,BigDecimal pendingExpense) {}
     public record CategoryTotal(String category,BigDecimal amount) {}
     public record Row(UUID id,String description,String category,String contactName,String accountName,
-        FinancialEntry.Type type,FinancialEntry.Status status,BigDecimal amount,LocalDate dueDate,LocalDate paymentDate,Integer sequenceNumber,Integer seriesCount) {}
+        FinancialEntry.Type type,FinancialEntry.Status status,BigDecimal amount,LocalDate dueDate,LocalDate paymentDate,Integer sequenceNumber,Integer seriesCount,UUID paymentId) {}
     public record Report(String companyName,Filters filters,Totals totals,List<CategoryTotal> categories,
         List<Row> content,long totalElements,int totalPages,int number) {}
     public record Export(String companyName,Filters filters,Totals totals,List<Row> rows,String accountName) {}
@@ -39,6 +39,7 @@ public class ReportService {
     private final AccountRepository accounts;
     private final CompanyRepository companies;
     private final EntryRepository entries;
+    private final EntryPaymentRepository payments;
     private final FinanceService finance;
     private final EntityManager em;
 
@@ -69,19 +70,38 @@ public class ReportService {
             return cb.and(p.toArray(Predicate[]::new));
         };
     }
+    private Specification<EntryPayment> paymentFilter(Filters f) {
+        UUID company=current.companyId();
+        return (root,query,cb)->{
+            var entry=root.join("entry");var p=new ArrayList<Predicate>();
+            p.add(cb.equal(root.get("companyId"),company));
+            p.add(cb.between(root.get("paymentDate"),f.start(),f.end()));
+            p.add(cb.notEqual(entry.get("status"),CANCELLED));p.add(cb.isNull(entry.get("transferId")));
+            if(f.type()!=null)p.add(cb.equal(entry.get("type"),f.type()));
+            if(f.accountId()!=null)p.add(cb.equal(entry.get("accountId"),f.accountId()));
+            if(f.category()!=null&&!f.category().isBlank())p.add(cb.like(cb.lower(entry.get("category")),contains(f.category()),'!'));
+            if(f.contact()!=null&&!f.contact().isBlank())p.add(cb.like(cb.lower(entry.get("contactName")),contains(f.contact()),'!'));
+            return cb.and(p.toArray(Predicate[]::new));
+        };
+    }
     private BigDecimal zero(Object value){return value==null?BigDecimal.ZERO:(BigDecimal)value;}
     private Expression<BigDecimal> sum(CriteriaBuilder cb,Root<FinancialEntry> root,FinancialEntry.Status status,FinancialEntry.Type type) {
         return cb.sum(cb.<BigDecimal>selectCase().when(cb.and(cb.equal(root.get("status"),status),cb.equal(root.get("type"),type)),root.<BigDecimal>get("amount")).otherwise(BigDecimal.ZERO));
     }
     private Totals totals(Specification<FinancialEntry> spec) {
         var cb=em.getCriteriaBuilder();var query=cb.createTupleQuery();var root=query.from(FinancialEntry.class);
-        query.multiselect(sum(cb,root,PAID,INCOME),sum(cb,root,PAID,EXPENSE),sum(cb,root,PENDING,INCOME),sum(cb,root,PENDING,EXPENSE));
+        var paidIncome=cb.sum(cb.<BigDecimal>selectCase().when(cb.and(cb.notEqual(root.get("status"),CANCELLED),cb.equal(root.get("type"),INCOME)),root.<BigDecimal>get("paidAmount")).otherwise(BigDecimal.ZERO));
+        var paidExpense=cb.sum(cb.<BigDecimal>selectCase().when(cb.and(cb.notEqual(root.get("status"),CANCELLED),cb.equal(root.get("type"),EXPENSE)),root.<BigDecimal>get("paidAmount")).otherwise(BigDecimal.ZERO));
+        var remaining=cb.diff(root.<BigDecimal>get("amount"),root.<BigDecimal>get("paidAmount"));
+        var pendingIncome=cb.sum(cb.<BigDecimal>selectCase().when(cb.and(cb.notEqual(root.get("status"),CANCELLED),cb.equal(root.get("type"),INCOME)),remaining).otherwise(BigDecimal.ZERO));
+        var pendingExpense=cb.sum(cb.<BigDecimal>selectCase().when(cb.and(cb.notEqual(root.get("status"),CANCELLED),cb.equal(root.get("type"),EXPENSE)),remaining).otherwise(BigDecimal.ZERO));
+        query.multiselect(paidIncome,paidExpense,pendingIncome,pendingExpense);
         query.where(spec.toPredicate(root,query,cb));var row=em.createQuery(query).getSingleResult();
         var income=zero(row.get(0));var expense=zero(row.get(1));return new Totals(income,expense,income.subtract(expense),zero(row.get(2)),zero(row.get(3)));
     }
     private List<CategoryTotal> categories(Specification<FinancialEntry> spec) {
-        var cb=em.getCriteriaBuilder();var query=cb.createTupleQuery();var root=query.from(FinancialEntry.class);var total=cb.sum(root.<BigDecimal>get("amount"));
-        query.multiselect(root.get("category"),total).where(cb.and(spec.toPredicate(root,query,cb),cb.equal(root.get("status"),PAID),cb.equal(root.get("type"),EXPENSE)))
+        var cb=em.getCriteriaBuilder();var query=cb.createTupleQuery();var root=query.from(FinancialEntry.class);var total=cb.sum(root.<BigDecimal>get("paidAmount"));
+        query.multiselect(root.get("category"),total).where(cb.and(spec.toPredicate(root,query,cb),cb.notEqual(root.get("status"),CANCELLED),cb.equal(root.get("type"),EXPENSE)))
             .groupBy(root.get("category")).orderBy(cb.desc(total),cb.asc(root.get("category")));
         return em.createQuery(query).getResultList().stream().map(row->new CategoryTotal((String)row.get(0),zero(row.get(1)))).toList();
     }
@@ -89,17 +109,37 @@ public class ReportService {
         var names=new HashMap<UUID,String>();for(var a:accounts.findByCompanyIdOrderByNameAsc(current.companyId()))names.put(a.getId(),a.getName());return names;
     }
     private Row row(FinancialEntry e,Map<UUID,String> names) {
-        return new Row(e.getId(),e.getDescription(),e.getCategory(),e.getContactName(),names.getOrDefault(e.getAccountId(),"Conta"),e.getType(),e.getStatus(),e.getAmount(),e.getDueDate(),e.getPaymentDate(),e.getSequenceNumber(),e.getSeriesCount());
+        return new Row(e.getId(),e.getDescription(),e.getCategory(),e.getContactName(),names.getOrDefault(e.getAccountId(),"Conta"),e.getType(),e.getStatus(),e.getAmount(),e.getDueDate(),e.getPaymentDate(),e.getSequenceNumber(),e.getSeriesCount(),null);
+    }
+    private Row paymentRow(EntryPayment payment,Map<UUID,String> names) {
+        var e=payment.getEntry();
+        return new Row(e.getId(),e.getDescription(),e.getCategory(),e.getContactName(),names.getOrDefault(e.getAccountId(),"Conta"),e.getType(),e.getStatus(),payment.getAmount(),e.getDueDate(),payment.getPaymentDate(),e.getSequenceNumber(),e.getSeriesCount(),payment.getId());
+    }
+    private Totals paymentTotals(Specification<EntryPayment> spec) {
+        var cb=em.getCriteriaBuilder();var query=cb.createTupleQuery();var payment=query.from(EntryPayment.class);var entry=payment.join("entry");
+        var income=cb.sum(cb.<BigDecimal>selectCase().when(cb.equal(entry.get("type"),INCOME),payment.<BigDecimal>get("amount")).otherwise(BigDecimal.ZERO));
+        var expense=cb.sum(cb.<BigDecimal>selectCase().when(cb.equal(entry.get("type"),EXPENSE),payment.<BigDecimal>get("amount")).otherwise(BigDecimal.ZERO));
+        query.multiselect(income,expense).where(spec.toPredicate(payment,query,cb));var row=em.createQuery(query).getSingleResult();
+        var in=zero(row.get(0));var out=zero(row.get(1));return new Totals(in,out,in.subtract(out),BigDecimal.ZERO,BigDecimal.ZERO);
+    }
+    private List<CategoryTotal> paymentCategories(Specification<EntryPayment> spec) {
+        var cb=em.getCriteriaBuilder();var query=cb.createTupleQuery();var payment=query.from(EntryPayment.class);var entry=payment.join("entry");var total=cb.sum(payment.<BigDecimal>get("amount"));
+        query.multiselect(entry.get("category"),total).where(cb.and(spec.toPredicate(payment,query,cb),cb.equal(entry.get("type"),EXPENSE)))
+            .groupBy(entry.get("category")).orderBy(cb.desc(total),cb.asc(entry.get("category")));
+        return em.createQuery(query).getResultList().stream().map(row->new CategoryTotal((String)row.get(0),zero(row.get(1)))).toList();
     }
     private Sort sort(Filters f){return Sort.by(Sort.Order.asc(f.basis()==Basis.PAYMENT?"paymentDate":"dueDate"),Sort.Order.asc("createdAt"),Sort.Order.asc("id"));}
     private String companyName(){return companies.findById(current.companyId()).orElseThrow().getLegalName();}
     public Report report(Filters f,int page,int size) {
         validate(f);if(page<0 || size<1 || size>100)throw invalid("Paginação inválida.");
+        if(f.basis()==Basis.PAYMENT){var spec=paymentFilter(f);var result=payments.findAll(spec,PageRequest.of(page,size,Sort.by(Sort.Order.asc("paymentDate"),Sort.Order.asc("createdAt"),Sort.Order.asc("id"))));var names=accountNames();return new Report(companyName(),f,paymentTotals(spec),paymentCategories(spec),result.stream().map(p->paymentRow(p,names)).toList(),result.getTotalElements(),result.getTotalPages(),page);}
         var spec=filter(f);var result=entries.findAll(spec,PageRequest.of(page,size,sort(f)));var names=accountNames();
         return new Report(companyName(),f,totals(spec),categories(spec),result.stream().map(e->row(e,names)).toList(),result.getTotalElements(),result.getTotalPages(),page);
     }
     public Export export(Filters f) {
-        validate(f);var spec=filter(f);var result=entries.findAll(spec,PageRequest.of(0,5001,sort(f)));
+        validate(f);
+        if(f.basis()==Basis.PAYMENT){var spec=paymentFilter(f);var result=payments.findAll(spec,PageRequest.of(0,5001,Sort.by(Sort.Order.asc("paymentDate"),Sort.Order.asc("createdAt"),Sort.Order.asc("id"))));if(result.getTotalElements()>5000)throw invalid("A exportação permite até 5.000 pagamentos. Reduza o período ou refine os filtros.");var names=accountNames();return new Export(companyName(),f,paymentTotals(spec),result.stream().map(p->paymentRow(p,names)).toList(),f.accountId()==null?"Todas as contas":names.get(f.accountId()));}
+        var spec=filter(f);var result=entries.findAll(spec,PageRequest.of(0,5001,sort(f)));
         if(result.getTotalElements()>5000)throw invalid("A exportação permite até 5.000 lançamentos. Reduza o período ou refine os filtros.");
         var names=accountNames();return new Export(companyName(),f,totals(spec),result.stream().map(e->row(e,names)).toList(),f.accountId()==null?"Todas as contas":names.get(f.accountId()));
     }

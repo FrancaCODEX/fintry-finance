@@ -29,6 +29,7 @@ public class BillingService {
   private final CurrentUser current;
   private final CompanyRepository companies;
   private final EntryRepository entries;
+  private final EntryPaymentRepository entryPayments;
   private final ContactRepository contacts;
   private final BillingConnectionRepository connections;
   private final BillingChargeRepository charges;
@@ -710,6 +711,8 @@ public class BillingService {
     }
     e.setStatus(FinancialEntry.Status.PAID);
     e.setPaymentDate(date);
+    e.setPaidAmount(e.getAmount());
+    savePayment(e, e.getAmount(), date);
     BigDecimal fee = b.getAmount().subtract(net);
     if (fee.signum() > 0) {
       var f = new FinancialEntry();
@@ -722,12 +725,24 @@ public class BillingService {
       f.setDueDate(date);
       f.setPaymentDate(date);
       f.setStatus(FinancialEntry.Status.PAID);
+      f.setPaidAmount(fee);
       entries.saveAndFlush(f);
+      savePayment(f, fee, date);
       b.setFeeEntryId(f.getId());
     }
     b.setSettledDate(date);
     b.setNetAmount(net);
     b.setStatus(RECEIVED);
     b.setMessage(null);
+  }
+
+  private void savePayment(FinancialEntry entry, BigDecimal amount, LocalDate date) {
+    var payment = new EntryPayment();
+    payment.setCompanyId(entry.getCompanyId());
+    payment.setEntry(entry);
+    payment.setAccountId(entry.getAccountId());
+    payment.setAmount(amount);
+    payment.setPaymentDate(date);
+    entryPayments.save(payment);
   }
 }

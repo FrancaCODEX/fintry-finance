@@ -236,7 +236,8 @@ class FinanceIntegrationTests {
     @Test void reportTotalsCoverAllPagesAndExportRequiresRefiningLargeSelections() throws Exception {
         var b=new Browser().signup();var account=b.account("Conta","0");String company=b.request("GET","/auth/me",null,200).get("companyId").asText();
         var batch=new ArrayList<Object[]>();for(int i=0;i<5001;i++)batch.add(new Object[]{UUID.randomUUID(),UUID.fromString(company),UUID.fromString(account),"Registro de volume",LocalDate.parse(today),LocalDate.parse(today)});
-        jdbc.batchUpdate("INSERT INTO financial_entries(id,company_id,account_id,description,category,type,amount,due_date,payment_date,status,created_at,updated_at) VALUES(?,?,?,?,'Teste','INCOME',1,?,?,'PAID',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",batch);
+        jdbc.batchUpdate("INSERT INTO financial_entries(id,company_id,account_id,description,category,type,amount,paid_amount,due_date,payment_date,status,created_at,updated_at) VALUES(?,?,?,?,'Teste','INCOME',1,1,?,?,'PAID',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",batch);
+        jdbc.batchUpdate("INSERT INTO entry_payments(id,company_id,entry_id,account_id,amount,payment_date,created_at,updated_at) VALUES(?,?,?,?,1,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",batch.stream().map(row->new Object[]{row[0],row[1],row[0],row[2],row[5]}).toList());
         var report=b.request("GET",reportQuery(today,today),null,200);assertEquals(5001,report.get("totalElements").asInt());assertEquals(20,report.get("content").size());amount("5001",report.get("totals").get("income"));
         b.request("GET","/reports/export?start="+today+"&end="+today+"&format=csv",null,400);
     }
@@ -321,6 +322,21 @@ class FinanceIntegrationTests {
         var rows=b.request("GET","/finance/entries?size=100",null,200).get("content");
         for(var row:rows)if(!row.get("transferId").isNull())
             b.request("POST","/finance/entries/"+row.get("id").asText()+"/cancel",null,400);
+    }
+    @Test void partialPaymentsTrackHistoryRemainingBalanceAndCashReports() throws Exception {
+        var b=new Browser().signup();String account=b.account("Banco","0");
+        String id=b.request("POST","/finance/entries",b.entry(account,false,"100.00","INCOME"),201).get("id").asText();
+        var first=b.request("POST","/finance/entries/"+id+"/pay",Map.of("paymentDate",today,"amount","40.00"),200);
+        assertEquals("PARTIAL",first.get("status").asText());amount("40",first.get("receivedAmount"));amount("60",first.get("remainingAmount"));
+        amount("40",b.summary().get("balance"));amount("40",b.summary().get("income"));amount("60",b.summary().get("pendingIncome"));
+        var dueReport=b.request("GET",reportQuery(today,today)+"&basis=DUE&status=PARTIAL",null,200);amount("40",dueReport.get("totals").get("income"));amount("60",dueReport.get("totals").get("pendingIncome"));
+        var forecast=b.request("GET","/reports/forecast?days=30&includeOverdue=true",null,200);amount("60",forecast.get("pendingIncome"));amount("100",forecast.get("closingBalance"));
+        var details=b.request("GET","/finance/entries/"+id,null,200);assertEquals(1,details.get("payments").size());amount("40",details.get("payments").get(0).get("amount"));
+        b.request("POST","/finance/entries/"+id+"/pay",Map.of("paymentDate",today,"amount","60.01"),400);
+        var paid=b.request("POST","/finance/entries/"+id+"/pay",Map.of("paymentDate",today,"amount","60.00"),200);
+        assertEquals("PAID",paid.get("status").asText());amount("0",paid.get("remainingAmount"));amount("100",b.summary().get("balance"));amount("0",b.summary().get("pendingIncome"));
+        details=b.request("GET","/finance/entries/"+id,null,200);assertEquals(2,details.get("payments").size());
+        var report=b.request("GET",reportQuery(today,today),null,200);assertEquals(2,report.get("totalElements").asInt());amount("100",report.get("totals").get("income"));
     }
     @Test void companiesCannotReadOrMutateEachOthersData() throws Exception {
         var a=new Browser().signup();var b=new Browser().signup();String account=a.account("Privada","750");
