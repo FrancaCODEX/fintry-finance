@@ -62,6 +62,9 @@ public class FinancialEntry extends BaseEntity {
   private Integer sequenceNumber;
   private Integer seriesCount;
 
+  @Column(nullable = false)
+  private boolean seriesPaused;
+
   @Enumerated(EnumType.STRING)
   @Column(length = 12)
   private FinancialSeries.Kind seriesKind;

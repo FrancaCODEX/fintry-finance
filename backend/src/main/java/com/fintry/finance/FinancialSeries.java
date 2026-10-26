@@ -21,5 +21,6 @@ public class FinancialSeries extends BaseEntity {
     @Column(nullable=false,precision=18,scale=2) private BigDecimal totalAmount;
     @Column(nullable=false) private LocalDate firstDueDate;
     @Column(nullable=false) private LocalDate lastDueDate;
+    @Column(nullable=false) private boolean paused;
     @Column(nullable=false) private boolean stopped;
 }

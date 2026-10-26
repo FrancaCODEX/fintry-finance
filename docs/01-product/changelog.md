@@ -2,6 +2,16 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.27.0] - 2026-10-26
+
+### Controle de recorrências
+
+- Recorrências mensais podem ser pausadas e retomadas; a pausa suspende apenas ocorrências futuras pendentes e preserva datas e pagamentos.
+- Ocorrências vencidas ou parcialmente pagas permanecem ativas durante a pausa. Retomar restaura somente as ocorrências suspensas, sem criar duplicatas.
+- Encerrar uma recorrência é definitivo e cancela pendências futuras e vencidas, preservando pagamentos e baixas parciais. Parcelamentos continuam com cancelamento de pendências, sem pausa/retomada.
+- A lista e os detalhes identificam ocorrências pausadas, e as ações de pausa, retomada e encerramento pedem confirmação e registram auditoria.
+- Migração aditiva V22 adiciona marcadores de pausa para série e ocorrência; dados financeiros existentes são preservados.
+
 ## [0.26.0] - 2026-10-26
 
 ### Conciliação agrupada

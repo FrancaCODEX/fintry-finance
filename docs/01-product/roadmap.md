@@ -31,8 +31,9 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.23.0 | Fila persistente de webhooks Asaas, tentativas automáticas e painel operacional | Incorporada à main (PR #26) |
 | 0.24.0 | Expansão segura dos exemplos para serviços e propostas comerciais | Incorporada à main (PR #27) |
 | 0.25.0 | Pagamentos parciais e acompanhamento do saldo restante | Incorporada à main (PR #28) |
-| 0.26.0 | Conciliação agrupada, divergências e tarifas com histórico | Em andamento |
-| 0.27.0 | Modelos de recorrência com pausa, retomada e término controlado | Planejada |
+| 0.26.0 | Conciliação agrupada, divergências e tarifas com histórico | Incorporada à main (PR #29) |
+| 0.27.0 | Modelos de recorrência com pausa, retomada e término controlado | Em andamento |
+| 0.28.0 | Rodada dedicada a UX e interface: limpeza visual, identidade, acessibilidade e usabilidade móvel | Próxima |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
@@ -47,3 +48,6 @@ Em 23/10/2026, o usuário confirmou emissão, abertura da fatura e recebimento S
 
 
 Em 26/10/2026, a 0.25.0 foi incorporada à main. A 0.26.0 permite agrupar movimentos bancários da mesma conta e direção em uma baixa parcial ou total, com cada movimento preservado na data própria e o motivo registrado. Tarifas e saídas são conciliadas separadamente, sem compensação automática de sinais.
+
+
+Em 26/10/2026, após a v0.26.0 incorporada na PR #29, a v0.27.0 implementa pausa, retomada e encerramento controlado de recorrências. A etapa seguinte fica dedicada a uma rodada de UX e interface, priorizando uma apresentação mais limpa, original, bonita e utilizável para demonstrar o projeto no LinkedIn.
