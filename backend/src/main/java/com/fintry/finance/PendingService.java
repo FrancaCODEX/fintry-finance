@@ -96,7 +96,8 @@ public class PendingService {
     var groups = List.of(Group.ALL, Group.OVERDUE, Group.TODAY, Group.NEXT7, Group.NEXT30);
     for (var group : groups) {
       Predicate range = window(group, root, cb, today);
-      columns.add(cb.coalesce(cb.sum(cb.<Long>selectCase().when(range, 1L).otherwise(0L)), 0L));
+      Predicate outstanding = cb.greaterThan(root.<BigDecimal>get("amount").subtract(root.<BigDecimal>get("paidAmount")), BigDecimal.ZERO);
+      columns.add(cb.coalesce(cb.sum(cb.<Long>selectCase().when(cb.and(range, outstanding), 1L).otherwise(0L)), 0L));
       for (var type : List.of(FinancialEntry.Type.INCOME, FinancialEntry.Type.EXPENSE))
         columns.add(
             cb.coalesce(
@@ -104,7 +105,7 @@ public class PendingService {
                     cb.<BigDecimal>selectCase()
                         .when(
                             cb.and(range, cb.equal(root.get("type"), type)),
-                            root.<BigDecimal>get("amount"))
+                            root.<BigDecimal>get("amount").subtract(root.<BigDecimal>get("paidAmount")))
                         .otherwise(BigDecimal.ZERO)),
                 BigDecimal.ZERO));
     }
@@ -151,7 +152,7 @@ public class PendingService {
         (root, q, cb) -> {
           var p = new ArrayList<Predicate>();
           p.add(cb.equal(root.get("companyId"), company));
-          p.add(cb.equal(root.get("status"), FinancialEntry.Status.PENDING));
+          p.add(root.get("status").in(FinancialEntry.Status.PENDING, FinancialEntry.Status.PARTIAL));
           p.add(cb.isNull(root.get("transferId")));
           if (type != null) p.add(cb.equal(root.get("type"), type));
           if (accountId != null) p.add(cb.equal(root.get("accountId"), accountId));

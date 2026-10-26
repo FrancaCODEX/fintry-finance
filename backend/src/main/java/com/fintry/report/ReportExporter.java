@@ -19,7 +19,7 @@ public class ReportExporter {
     private static final String[] HEADERS={"Descrição","Tipo","Situação","Conta","Categoria","Cliente / fornecedor","Vencimento","Pagamento","Valor","Parcela / repetição"};
     private String date(LocalDate d){return d==null?"":DATE.format(d);}
     private String money(BigDecimal v){return "R$ "+String.format(new Locale("pt","BR"),"%,.2f",v);}
-    private String status(com.fintry.finance.FinancialEntry.Status s){return switch(s){case PAID->"Realizado";case PENDING->"Pendente";case CANCELLED->"Cancelado";};}
+    private String status(com.fintry.finance.FinancialEntry.Status s){return switch(s){case PAID->"Realizado";case PARTIAL->"Parcial";case PENDING->"Pendente";case CANCELLED->"Cancelado";};}
     private String type(com.fintry.finance.FinancialEntry.Type t){return t==com.fintry.finance.FinancialEntry.Type.INCOME?"Receita":"Despesa";}
     private String caption(ReportService.Export d){return date(d.filters().start())+" a "+date(d.filters().end())+" · Por "+(d.filters().basis()==ReportService.Basis.PAYMENT?"pagamento":"vencimento");}
     private String filters(ReportService.Export d){var f=d.filters();return "Conta: "+d.accountName()+" | Tipo: "+(f.type()==null?"Todos":type(f.type()))+" | Situação: "+(f.basis()==ReportService.Basis.PAYMENT?"Realizado":f.status()==null?"Ativos":status(f.status()))+" | Categoria: "+(f.category()==null||f.category().isBlank()?"Todas":f.category())+" | Contato: "+(f.contact()==null||f.contact().isBlank()?"Todos":f.contact());}

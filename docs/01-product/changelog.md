@@ -2,6 +2,17 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.25.0] - 2026-10-26
+
+### Pagamentos parciais
+
+- Lançamentos aceitam várias baixas com valor e data próprios, mantendo o valor original, total recebido/pago e saldo restante.
+- Painel de detalhes mostra o histórico de pagamentos. Tabela e cartões identificam lançamentos parciais e exibem o saldo em aberto.
+- Saldo das contas, dashboard, orçamento, fluxo projetado e relatórios consideram apenas os valores efetivamente baixados; pendências e previsões usam o restante.
+- Relatório por pagamento passa a listar cada baixa pela data e pelo valor recebido/pago; exportações mantêm os mesmos filtros.
+- Migração aditiva cria o histórico de baixas e registra os lançamentos já realizados como um único pagamento, preservando saldos e relatórios existentes.
+- Cobranças Asaas e transferências continuam registrando seus movimentos financeiros completos; a baixa manual de um lançamento com cobrança ativa continua bloqueada.
+
 ## [0.24.0] - 2026-10-26
 
 ### Dados de exemplo ampliados

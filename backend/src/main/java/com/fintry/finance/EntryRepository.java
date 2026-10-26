@@ -23,8 +23,9 @@ public interface EntryRepository
   Optional<FinancialEntry> findByIdAndCompanyId(UUID id, UUID companyId);
 
   @Query(
-      "select e.dueDate,e.type,sum(e.amount) from FinancialEntry e where e.companyId=:company and"
-          + " e.status='PENDING' and e.transferId is null and e.dueDate<=:end and (:account is null"
+      "select e.dueDate,e.type,sum(e.amount-e.paidAmount) from FinancialEntry e where"
+          + " e.companyId=:company and e.status in ('PENDING','PARTIAL')"
+          + " and e.transferId is null and e.dueDate<=:end and (:account is null"
           + " or e.accountId=:account) group by e.dueDate,e.type")
   List<Object[]> forecast(
       @Param("company") UUID company, @Param("account") UUID account, @Param("end") LocalDate end);
@@ -46,19 +47,9 @@ public interface EntryRepository
   Optional<FinancialEntry> lock(@Param("id") UUID id, @Param("company") UUID companyId);
 
   @Query(
-      "select e from FinancialEntry e where e.companyId=:company and e.status='PAID' and"
-          + " e.paymentDate between :start and :end and e.transferId is null")
-  List<FinancialEntry> paidBetween(
-      @Param("company") UUID company, @Param("start") LocalDate start, @Param("end") LocalDate end);
-
-  @Query(
-      "select e.accountId, e.type, sum(e.amount) from FinancialEntry e where e.companyId=:company"
-          + " and e.status='PAID' group by e.accountId,e.type")
-  List<Object[]> balances(@Param("company") UUID company);
-
-  @Query(
-      "select e.type, sum(e.amount) from FinancialEntry e where e.companyId=:company and"
-          + " e.status='PENDING' and e.dueDate between :start and :end group by e.type")
+      "select e.type, sum(e.amount-e.paidAmount) from FinancialEntry e where e.companyId=:company"
+          + " and e.status in ('PENDING','PARTIAL') and e.dueDate between :start and :end"
+          + " group by e.type")
   List<Object[]> pending(
       @Param("company") UUID company, @Param("start") LocalDate start, @Param("end") LocalDate end);
 }

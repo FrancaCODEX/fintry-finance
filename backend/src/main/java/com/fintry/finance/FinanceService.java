@@ -27,6 +27,7 @@ public class FinanceService {
   private final AccountRepository accounts;
   private final com.fintry.subscription.SubscriptionService subscriptions;
   private final EntryRepository entries;
+  private final EntryPaymentRepository payments;
   private final StatementLineRepository statementLines;
   private final com.fintry.billing.BillingChargeRepository billingCharges;
 
@@ -58,7 +59,13 @@ public class FinanceService {
     }
   }
 
-  public record PaymentInput(@NotNull LocalDate paymentDate) {}
+  public record PaymentInput(
+      @NotNull LocalDate paymentDate,
+      @DecimalMin("0.01") @Digits(integer = 12, fraction = 2) BigDecimal amount) {
+    public PaymentInput(LocalDate paymentDate) {
+      this(paymentDate, null);
+    }
+  }
 
   public record TransferInput(
       @NotNull UUID sourceId,
@@ -76,6 +83,8 @@ public class FinanceService {
       String category,
       FinancialEntry.Type type,
       BigDecimal amount,
+      BigDecimal receivedAmount,
+      BigDecimal remainingAmount,
       LocalDate dueDate,
       LocalDate paymentDate,
       FinancialEntry.Status status,
@@ -90,12 +99,24 @@ public class FinanceService {
       UUID saleId) {}
 
   public record EntryDetails(
-      EntryView entry, String accountName, LocalDateTime createdAt, LocalDateTime updatedAt) {}
+      EntryView entry,
+      String accountName,
+      LocalDateTime createdAt,
+      LocalDateTime updatedAt,
+      List<PaymentView> payments) {}
+
+  public record PaymentView(UUID id, BigDecimal amount, LocalDate paymentDate) {}
 
   public EntryDetails details(UUID id) {
     var e = entries.findByIdAndCompanyId(id, current.companyId()).orElseThrow(this::missing);
     return new EntryDetails(
-        view(e), account(e.getAccountId()).getName(), e.getCreatedAt(), e.getUpdatedAt());
+        view(e),
+        account(e.getAccountId()).getName(),
+        e.getCreatedAt(),
+        e.getUpdatedAt(),
+        payments.findByEntryIdOrderByPaymentDateAscCreatedAtAscIdAsc(id).stream()
+            .map(p -> new PaymentView(p.getId(), p.getAmount(), p.getPaymentDate()))
+            .toList());
   }
 
   public record EntryPage(
@@ -143,6 +164,8 @@ public class FinanceService {
         e.getCategory(),
         e.getType(),
         e.getAmount(),
+        e.getPaidAmount(),
+        e.getAmount().subtract(e.getPaidAmount()),
         e.getDueDate(),
         e.getPaymentDate(),
         e.getStatus(),
@@ -160,7 +183,7 @@ public class FinanceService {
   public List<AccountView> accounts() {
     var company = current.companyId();
     Map<UUID, BigDecimal> movements = new HashMap<>();
-    for (Object[] row : entries.balances(company)) {
+    for (Object[] row : payments.balances(company)) {
       var amount = (BigDecimal) row[2];
       if (row[1] == EXPENSE) amount = amount.negate();
       movements.merge((UUID) row[0], amount, BigDecimal::add);
@@ -190,6 +213,8 @@ public class FinanceService {
         e.getType(),
         "Valor",
         e.getAmount().stripTrailingZeros().toPlainString(),
+        "Recebido / pago",
+        e.getPaidAmount().stripTrailingZeros().toPlainString(),
         "Vencimento",
         e.getDueDate(),
         "Pagamento",
@@ -236,7 +261,9 @@ public class FinanceService {
     e.setDueDate(input.dueDate());
     e.setStatus(input.paid() ? PAID : PENDING);
     e.setPaymentDate(input.paid() ? input.paymentDate() : null);
-    entries.save(e);
+    e.setPaidAmount(input.paid() ? input.amount() : BigDecimal.ZERO);
+    entries.saveAndFlush(e);
+    if (input.paid()) recordPayment(e, input.amount(), input.paymentDate());
     recordChange("CREATE", e, Map.of());
     return view(e);
   }
@@ -280,6 +307,7 @@ public class FinanceService {
     e.setDescription(input.description().strip());
     e.setType(input.type());
     e.setAmount(input.amount());
+    e.setPaidAmount(BigDecimal.ZERO);
     e.setDueDate(input.dueDate());
     recordChange("UPDATE", e, before);
     return view(e);
@@ -343,12 +371,30 @@ public class FinanceService {
     var e = entries.lock(id, current.companyId()).orElseThrow(this::missing);
     requireBillingEditable(id);
     if (e.getStatus() == CANCELLED) throw invalid("Lançamento cancelado não pode ser pago.");
-    if (e.getStatus() == PAID) return view(e); // retry does not create a second movement
+    if (e.getStatus() == PAID && input.amount() == null) return view(e);
+    if (e.getStatus() == PAID) throw invalid("Este lançamento já foi totalmente pago.");
+    var remaining = e.getAmount().subtract(e.getPaidAmount());
+    var amount = input.amount() == null ? remaining : input.amount();
+    if (amount.signum() <= 0 || amount.compareTo(remaining) > 0)
+      throw invalid("Informe um valor positivo até o saldo restante de " + remaining + ".");
     var before = snapshot(e);
-    e.setStatus(PAID);
-    e.setPaymentDate(input.paymentDate());
-    recordChange("PAY", e, before);
+    e.setPaidAmount(e.getPaidAmount().add(amount));
+    recordPayment(e, amount, input.paymentDate());
+    boolean settled = e.getPaidAmount().compareTo(e.getAmount()) == 0;
+    e.setStatus(settled ? PAID : FinancialEntry.Status.PARTIAL);
+    e.setPaymentDate(settled ? input.paymentDate() : null);
+    recordChange(settled ? "PAY" : "PARTIAL_PAY", e, before);
     return view(e);
+  }
+
+  private void recordPayment(FinancialEntry e, BigDecimal amount, LocalDate paymentDate) {
+    var payment = new EntryPayment();
+    payment.setCompanyId(e.getCompanyId());
+    payment.setEntryId(e.getId());
+    payment.setAccountId(e.getAccountId());
+    payment.setAmount(amount);
+    payment.setPaymentDate(paymentDate);
+    payments.save(payment);
   }
 
   public void requireBillingEditable(UUID id) {
@@ -407,7 +453,9 @@ public class FinanceService {
       e.setPaymentDate(input.date());
       e.setStatus(PAID);
       e.setTransferId(transferId);
-      entries.save(e);
+      e.setPaidAmount(input.amount());
+      entries.saveAndFlush(e);
+      recordPayment(e, input.amount(), input.date());
     }
     audit.change(
         "TRANSFER",
@@ -430,15 +478,15 @@ public class FinanceService {
     var company = current.companyId();
     var start = month.minusMonths(5).atDay(1);
     var end = month.atEndOfMonth();
-    var paid = entries.paidBetween(company, start, end);
+    var paid = payments.settledBetween(company, start, end);
     List<MonthView> flow = new ArrayList<>();
     for (int i = 5; i >= 0; i--) {
       var m = month.minusMonths(i);
       BigDecimal income = BigDecimal.ZERO, expense = BigDecimal.ZERO;
-      for (var e : paid)
-        if (YearMonth.from(e.getPaymentDate()).equals(m)) {
-          if (e.getType() == INCOME) income = income.add(e.getAmount());
-          else expense = expense.add(e.getAmount());
+      for (var payment : paid)
+        if (YearMonth.from((LocalDate) payment[2]).equals(m)) {
+          if (payment[0] == INCOME) income = income.add((BigDecimal) payment[1]);
+          else expense = expense.add((BigDecimal) payment[1]);
         }
       flow.add(new MonthView(m.toString(), income, expense));
     }
@@ -448,9 +496,9 @@ public class FinanceService {
       else pendingExpense = (BigDecimal) row[1];
     }
     var categoryTotals = new HashMap<String, BigDecimal>();
-    for (var e : paid)
-      if (e.getType() == EXPENSE && YearMonth.from(e.getPaymentDate()).equals(month))
-        categoryTotals.merge(e.getCategory(), e.getAmount(), BigDecimal::add);
+    for (var payment : paid)
+      if (payment[0] == EXPENSE && YearMonth.from((LocalDate) payment[2]).equals(month))
+        categoryTotals.merge((String) payment[3], (BigDecimal) payment[1], BigDecimal::add);
     var categories =
         categoryTotals.entrySet().stream()
             .map(e -> new CategoryExpense(e.getKey(), e.getValue()))

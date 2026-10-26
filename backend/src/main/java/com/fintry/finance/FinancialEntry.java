@@ -20,6 +20,7 @@ public class FinancialEntry extends BaseEntity {
 
   public enum Status {
     PENDING,
+    PARTIAL,
     PAID,
     CANCELLED
   }
@@ -42,6 +43,9 @@ public class FinancialEntry extends BaseEntity {
 
   @Column(nullable = false, precision = 14, scale = 2)
   private BigDecimal amount;
+
+  @Column(nullable = false, precision = 14, scale = 2)
+  private BigDecimal paidAmount = BigDecimal.ZERO;
 
   @Column(nullable = false)
   private LocalDate dueDate;
