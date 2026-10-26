@@ -190,6 +190,7 @@ const uxPageNames = {
   team: "Equipe",
   audit: "Histórico",
   security: "Minha segurança",
+  company: "Empresa",
   products: "Produtos",
   services: "Serviços",
   proposals: "Propostas",

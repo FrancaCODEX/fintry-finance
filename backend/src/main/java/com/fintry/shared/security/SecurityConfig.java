@@ -61,6 +61,7 @@ public class SecurityConfig {
                         "/design.css",
                         "/navigation.js",
                         "/dashboard.js",
+                        "/company.js",
                         "/favicon.svg",
                         "/api/v1/app",
                         "/api/v1/auth/csrf",

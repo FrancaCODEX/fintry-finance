@@ -3373,3 +3373,218 @@ body.navigation-open {
     font-size: min(25px, 7cqw);
   }
 }
+
+.dashboard-onboarding {
+  margin: 0 0 20px;
+  padding: 22px 24px 16px;
+}
+.onboarding-heading,
+.onboarding-progress,
+.onboarding-step,
+.onboarding-footer {
+  display: flex;
+}
+.onboarding-heading {
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.onboarding-heading h2,
+.company-profile-card .card-head h2 {
+  margin: 5px 0 7px;
+}
+.onboarding-heading p,
+.company-profile-card .card-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.onboarding-progress {
+  min-width: 145px;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.onboarding-progress strong {
+  color: var(--ink);
+}
+.onboarding-progress progress {
+  width: 100%;
+  height: 8px;
+  accent-color: var(--green);
+}
+.onboarding-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.onboarding-step {
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  color: var(--ink);
+  background: var(--paper);
+  text-align: left;
+  transition:
+    border-color 140ms ease,
+    transform 140ms ease,
+    background 140ms ease;
+}
+.onboarding-step:hover {
+  border-color: var(--green);
+  background: var(--hover-surface);
+  transform: translateY(-1px);
+}
+.onboarding-step > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+.onboarding-step strong {
+  font-size: 12px;
+}
+.onboarding-step small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.onboarding-step > .icon {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  color: var(--green);
+}
+.onboarding-step-number {
+  width: 29px;
+  height: 29px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--green);
+  background: var(--soft);
+  font-size: 12px;
+  font-weight: 750;
+}
+.onboarding-step.is-done {
+  border-color: color-mix(in srgb, var(--green) 24%, var(--line));
+  background: var(--soft);
+}
+.onboarding-footer {
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 11px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.company-profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.8fr);
+  gap: 20px;
+  align-items: start;
+}
+.company-profile-card,
+.company-profile-aside {
+  padding: 24px;
+}
+.company-profile-card form {
+  display: grid;
+  gap: 14px;
+}
+.company-profile-card .form-row {
+  margin: 0;
+}
+.company-profile-card .card-head > .icon {
+  width: 22px;
+  height: 22px;
+  color: var(--green);
+}
+.company-profile-aside {
+  background: linear-gradient(145deg, var(--paper), var(--soft));
+}
+.company-profile-mark {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  margin-top: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  color: var(--green);
+  background: var(--paper);
+}
+.company-profile-mark .icon {
+  width: 25px;
+  height: 25px;
+}
+.company-profile-aside h2 {
+  margin: 17px 0 5px;
+  overflow-wrap: anywhere;
+}
+.company-profile-aside > p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.company-profile-aside dl {
+  display: grid;
+  gap: 12px;
+  padding: 15px 0;
+  margin: 18px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.company-profile-aside dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.company-profile-aside dt {
+  color: var(--muted);
+}
+.company-profile-aside dd {
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 850px) {
+  .company-profile-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 650px) {
+  .dashboard-onboarding {
+    padding: 18px 16px 12px;
+  }
+  .onboarding-heading {
+    align-items: flex-start;
+  }
+  .onboarding-progress {
+    min-width: 75px;
+    max-width: 92px;
+    flex: 0 0 auto;
+  }
+  .onboarding-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .onboarding-step {
+    padding: 11px;
+  }
+  .onboarding-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .company-profile-card,
+  .company-profile-aside {
+    padding: 18px;
+  }
+  .company-profile-card .form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

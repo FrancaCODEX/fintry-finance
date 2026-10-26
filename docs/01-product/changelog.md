@@ -2,6 +2,16 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.22.0] - 2026-10-26
+
+### Primeiros passos e identidade da empresa
+
+- Dashboard de empresas em início de uso apresenta um checklist de conta financeira, categorias e primeiro lançamento, com progresso e acesso direto a cada etapa. O checklist some quando os três cadastros existem.
+- Nova página Empresa permite que Administradores atualizem nome fantasia, razão social, documento, e-mail e telefone. O nome fantasia atualizado aparece imediatamente no cabeçalho da aplicação.
+- Edição usa o endpoint existente, mantém isolamento por empresa, respeita a permissão Administrador e registra as alterações no histórico de auditoria.
+- Orientação para explorar o pacote completo de dados fictícios continua disponível no checklist. A consulta do primeiro lançamento verifica o histórico completo sem carregar transações adicionais.
+- Nenhuma migração ou mudança nas regras financeiras, de acesso comercial ou de cobrança.
+
 ## [0.21.0] - 2026-10-23
 
 ### Visual e experiência
