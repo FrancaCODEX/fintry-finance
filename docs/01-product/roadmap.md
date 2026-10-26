@@ -28,7 +28,11 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.20.1 | Correção do fuso de criação de solicitações e mensalidades na assinatura | Incorporada à main |
 | 0.21.0 | Refinamento do dashboard, consulta acessível dos gráficos, atalhos e organização do front-end | Incorporada à main (PR #24) |
 | 0.22.0 | Perfil da empresa e checklist de primeiros passos integrado ao dashboard | Incorporada à main |
-| 0.23.0 | Fila persistente de webhooks Asaas, tentativas automáticas e painel operacional | Em andamento |
+| 0.23.0 | Fila persistente de webhooks Asaas, tentativas automáticas e painel operacional | Incorporada à main (PR #26) |
+| 0.24.0 | Expansão segura dos exemplos para serviços e propostas comerciais | Em andamento |
+| 0.25.0 | Pagamentos parciais e acompanhamento do saldo restante | Planejada |
+| 0.26.0 | Conciliação agrupada, divergências e tarifas com histórico | Planejada |
+| 0.27.0 | Modelos de recorrência com pausa, retomada e término controlado | Planejada |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
@@ -39,4 +43,4 @@ Por orientação do usuário em 21/10/2026, cobrança integrada foi antecipada �
 Em 20/10/2026, o foco da 0.10.0 passou para front-end/CSS e navegação por solicitação do usuário. A importação CSV continua como próxima funcionalidade, seguida de serviços/propostas.
 
 
-Em 23/10/2026, o usuário confirmou emissão, abertura da fatura e recebimento Sandbox por consulta no seu ambiente. Publicação e recebimento em produção continuam pendentes de validação própria. O dashboard foi refinado na 0.21.0 e a personalização da empresa/primeiro acesso na 0.22.0. A 0.23.0 evolui a operação das notificações Asaas com fila persistente, novas tentativas e painel administrativo. As próximas prioridades são ampliar os dados de exemplo dos módulos recentes e então iniciar gestão avançada: pagamentos parciais, conciliação agrupada e evolução das recorrências. Essas prioridades não alteram o ambiente comercial nem habilitam cobrança real automaticamente.
+Em 23/10/2026, o usuário confirmou emissão, abertura da fatura e recebimento Sandbox por consulta no seu ambiente. Publicação e recebimento em produção continuam pendentes de validação própria. O dashboard foi refinado na 0.21.0 e a personalização da empresa/primeiro acesso na 0.22.0. A 0.23.0 evolui a operação das notificações Asaas com fila persistente, novas tentativas e painel administrativo. A 0.24.0 amplia os exemplos para serviços e propostas, inclusive aprovação ligada a venda e conta a receber, sem regravar o pacote anterior. Depois começa a Gestão Avançada: pagamentos parciais; conciliação agrupada; recorrências com pausa, retomada e término controlado. Cada fase continua exigindo confirmação de ações financeiras e prevenção de duplicidades.

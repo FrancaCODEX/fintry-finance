@@ -370,9 +370,9 @@ class FinanceIntegrationTests {
     }
     @Test void sampleIsExplicitAndCannotBeAddedTwice() throws Exception {
         var b=new Browser().signup();b.request("POST","/finance/sample",null,201);
-        assertEquals(3,b.request("GET","/finance/accounts",null,200).size());
+        assertEquals(4,b.request("GET","/finance/accounts",null,200).size());
         assertTrue(b.summary().get("income").decimalValue().signum()>0);
         b.request("POST","/finance/sample",null,201);
-        assertEquals(3,b.request("GET","/finance/accounts",null,200).size());
+        assertEquals(4,b.request("GET","/finance/accounts",null,200).size());
     }
 }

@@ -32,6 +32,7 @@ public class SampleService {
   private final FinanceService finance;
   private final DirectoryService directory;
   private final CommerceService commerce;
+  private final ProposalService proposals;
   private final SeriesService series;
   private final BudgetService budgets;
   private final AttachmentService attachments;
@@ -126,6 +127,38 @@ public class SampleService {
             sku, name, unit, money(price), money(cost), money(minimum), active, money(quantity)));
   }
 
+  private CommerceService.ProductView service(String sku, String name, String price, String cost) {
+    return commerce.save(
+        null,
+        new CommerceService.ProductInput(
+            sku,
+            name,
+            "UN",
+            money(price),
+            money(cost),
+            BigDecimal.ZERO,
+            true,
+            BigDecimal.ZERO,
+            Product.Kind.SERVICE));
+  }
+
+  private ProposalService.View proposal(
+      String title,
+      UUID customer,
+      LocalDate validUntil,
+      List<CommerceService.LineInput> items) {
+    return proposals
+        .create(
+            new ProposalService.Input(
+                UUID.randomUUID(),
+                title,
+                customer,
+                "Demonstração fictícia · proposta não enviada ao cliente.",
+                validUntil,
+                items))
+        .proposal();
+  }
+
   private CommerceService.SaleView draft(
       UUID customer, String notes, CommerceService.ProductView p, String quantity) {
     return commerce
@@ -146,10 +179,11 @@ public class SampleService {
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empresa não encontrada."));
     var existing = status();
-    if (existing.loaded()) return existing;
+    if (existing.loaded() && existing.packVersion() >= 2) return existing;
     String token = UUID.randomUUID().toString().substring(0, 8), prefix = "[Exemplo] ";
     var today = LocalDate.now(clock.withZone(ZoneId.of("America/Sao_Paulo")));
     var month = YearMonth.from(today);
+    if (!existing.loaded()) {
     var bank =
         finance
             .createAccount(
@@ -396,19 +430,84 @@ public class SampleService {
         "recibo-venda-exemplo.pdf",
         "Venda demonstrativa de cadernos",
         "R$ 69,80");
-    var run = new SampleRun();
+    }
+    addCommercialExamples(prefix, token, today);
+    var run = runs.findById(company).orElseGet(SampleRun::new);
     run.setCompanyId(company);
-    run.setPackVersion(1);
+    run.setPackVersion(2);
     run.setCompletedAt(LocalDateTime.now(clock));
     runs.saveAndFlush(run);
     audit.change(
         "SAMPLE_LOAD",
         "SAMPLE",
         company,
-        "Dados de exemplo · pacote 1",
+        "Dados de exemplo · pacote 2",
         Map.of(),
-        AuditService.fields("Pacote", 1, "Identificador", token));
+        AuditService.fields("Pacote", 2, "Identificador", token));
     return status();
+  }
+
+  private void addCommercialExamples(
+      String prefix, String token, LocalDate today) {
+    UUID account =
+        finance
+            .createAccount(
+                new FinanceService.AccountInput(prefix + "Conta comercial", BigDecimal.ZERO))
+            .id();
+    int contactIndex = Math.abs(UUID.randomUUID().hashCode() % 700) + 200;
+    UUID aurora = contact("Empresa Aurora", Contact.Kind.CUSTOMER, contactIndex, prefix, true);
+    UUID cafe = contact("Mercado Horizonte", Contact.Kind.CUSTOMER, contactIndex + 1, prefix, true);
+    var kit =
+        product(
+            "DEMO-" + token + "-KIT",
+            "Kit de implantação · exemplo",
+            "UN",
+            "89.90",
+            "42",
+            "30",
+            "3",
+            true);
+    var setup = service("DEMO-" + token + "-SET", "Implantação de sistema · exemplo", "1800", "600");
+    var support = service("DEMO-" + token + "-SUP", "Suporte mensal · exemplo", "450", "120");
+    var training = service("DEMO-" + token + "-TRE", "Treinamento da equipe · exemplo", "750", "250");
+    var lines =
+        List.of(
+            new CommerceService.LineInput(setup.id(), money("1"), setup.price()),
+            new CommerceService.LineInput(kit.id(), money("3"), kit.price()));
+    proposal(
+        prefix + "Implantação do financeiro",
+        aurora,
+        today.plusDays(30),
+        lines);
+    var negotiating =
+        proposal(
+            prefix + "Suporte e treinamento",
+            cafe,
+            today.plusDays(20),
+            List.of(
+                new CommerceService.LineInput(support.id(), money("3"), support.price()),
+                new CommerceService.LineInput(training.id(), money("1"), training.price()),
+                new CommerceService.LineInput(kit.id(), money("2"), kit.price())));
+    negotiating =
+        proposals.transition(
+            negotiating.id(),
+            new ProposalService.Transition(negotiating.version(), Proposal.Status.OPEN));
+    var approved =
+        proposal(
+            prefix + "Pacote de organização",
+            aurora,
+            today.plusDays(30),
+            List.of(
+                new CommerceService.LineInput(support.id(), money("1"), support.price()),
+                new CommerceService.LineInput(kit.id(), money("2"), kit.price())));
+    approved =
+        proposals.transition(
+            approved.id(), new ProposalService.Transition(approved.version(), Proposal.Status.OPEN));
+    proposals.approve(
+        approved.id(),
+        new ProposalService.Approval(
+            approved.version(),
+            new CommerceService.ConfirmInput(account, today.plusDays(12), false, null)));
   }
 
   private void proof(UUID entry, String name, String description, String amount) {

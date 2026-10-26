@@ -2,6 +2,16 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.24.0] - 2026-10-26
+
+### Dados de exemplo ampliados
+
+- Pacote 2 acrescenta um kit de produtos, três serviços e propostas com situações de rascunho, negociação e aprovação.
+- A aprovação de exemplo usa os fluxos reais de proposta, venda, estoque e conta a receber; o lançamento fica pendente, sem simular pagamento recebido.
+- Empresas que já carregaram o pacote anterior podem solicitar a expansão. O pacote original, registros criados pela empresa e alterações feitas nos exemplos são preservados.
+- O controle de versão do pacote evita duplicar a expansão em solicitações repetidas ou simultâneas. A atualização permanece explícita e afeta os indicadores.
+- A tela Dados de exemplo informa o conteúdo novo e oferece atualização do pacote existente; os exemplos nunca são carregados automaticamente.
+
 ## [0.23.0] - 2026-10-26
 
 ### Operação das notificações de cobrança

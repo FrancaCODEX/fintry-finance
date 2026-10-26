@@ -100,15 +100,17 @@ function budgetDialog(row = null) {
 }
 function renderExamples() {
   const loaded = planning.sample.loaded;
+  const packVersion = planning.sample.packVersion || 1;
+  const current = loaded && packVersion >= 2;
   return (
     head(
       "Explore o Fintry completo.",
       "Um cenário fictício de uma pequena empresa, com registros relacionados em várias telas.",
     ) +
-    `<section class="card examples-intro"><span class="eyebrow">DADOS FICTÍCIOS · PACOTE 1</span><h2>${loaded ? "Seu ambiente já recebeu este pacote." : "Mais contexto para testar cada fluxo."}</h2><p>Os registros recebem a identificação Exemplo ou DEMO. A inclusão cria dados nesta empresa, afeta os indicadores e mantém os cadastros que você já criou. Não substitui nem apaga registros.</p>${loaded ? '<p class="notice success" role="status">Exemplos adicionados. Repetir a solicitação não duplica o pacote; alterações que você fizer nos exemplos são preservadas.</p>' : canWrite() ? '<button class="btn" data-action="sample">Adicionar dados de exemplo</button>' : '<p class="notice">Um Administrador ou membro do Financeiro pode adicionar os exemplos.</p>'}</section><section class="examples-grid" aria-label="Conteúdo dos exemplos">${[
+    `<section class="card examples-intro"><span class="eyebrow">DADOS FICTÍCIOS · ${current ? "PACOTE 2 ATUALIZADO" : "PACOTE 2 DISPONÍVEL"}</span><h2>${current ? "Seu ambiente está atualizado." : loaded ? "Há novos exemplos para adicionar." : "Mais contexto para testar cada fluxo."}</h2><p>Os registros recebem a identificação Exemplo ou DEMO. A inclusão cria dados nesta empresa, afeta os indicadores e mantém os cadastros que você já criou. Não substitui nem apaga registros.</p>${current ? '<p class="notice success" role="status">Pacote 2 adicionado. Repetir a solicitação não duplica os exemplos; alterações que você fizer neles são preservadas.</p>' : canWrite() ? `<button class="btn" data-action="sample">${loaded ? "Atualizar dados de exemplo" : "Adicionar dados de exemplo"}</button>` : '<p class="notice">Um Administrador ou membro do Financeiro pode adicionar os exemplos.</p>'}</section><section class="examples-grid" aria-label="Conteúdo dos exemplos">${[
       [
         "Financeiro",
-        "3 contas, seis meses de receitas/despesas, transferências e compromissos de hoje até os próximos meses.",
+        "4 contas, seis meses de receitas/despesas, transferências e compromissos de hoje até os próximos meses.",
         "dashboard",
         "Explorar dashboard",
       ],
@@ -120,7 +122,7 @@ function renderExamples() {
       ],
       [
         "Clientes e fornecedores",
-        "6 contatos com tipo, documento, e-mail, telefone e observações fictícios; um cadastro arquivado.",
+        "8 contatos com tipo, documento, e-mail, telefone e observações fictícios; um cadastro arquivado.",
         "contacts",
         "Ver contatos",
       ],
@@ -132,13 +134,13 @@ function renderExamples() {
       ],
       [
         "Produtos e estoque",
-        "6 produtos, unidades diferentes, estoque baixo/zerado, produto inativo e movimentos com motivo.",
+        "10 produtos e serviços, com estoque baixo/zerado, item inativo, preços/custos e movimentos com motivo.",
         "products",
         "Ver produtos",
       ],
       [
         "Vendas e comprovantes",
-        "Rascunho, venda a receber, recebida e cancelada; dois PDFs marcados como exemplo e histórico real da inclusão.",
+        "Vendas em diferentes situações, propostas em rascunho/negociação/aprovadas e comprovantes PDF fictícios.",
         "sales",
         "Ver vendas",
       ],
@@ -153,16 +155,21 @@ function renderExamples() {
   );
 }
 function sampleDialog() {
+  const upgrading = planning.sample.loaded;
   showDialog(
-    "Adicionar dados de exemplo?",
+    upgrading ? "Atualizar dados de exemplo?" : "Adicionar dados de exemplo?",
     "Registros fictícios para explorar os módulos do Fintry.",
-    '<p class="notice">Serão adicionadas contas, categorias, contatos, lançamentos, séries, produtos, vendas, orçamentos e comprovantes nesta empresa. Os totais do dashboard e dos relatórios incluirão esses valores.</p><p>Seus registros atuais são preservados. O pacote é incluído uma única vez e não pode ser recarregado para desfazer edições nos exemplos.</p>',
+    `<p class="notice">${upgrading ? "Serão acrescentados serviços, produtos e propostas comerciais, incluindo uma proposta aprovada com venda e conta a receber. Seus exemplos atuais serão preservados." : "Serão adicionadas contas, categorias, contatos, lançamentos, séries, produtos, serviços, vendas, propostas, orçamentos e comprovantes fictícios nesta empresa."} Os novos valores entram no dashboard e nos relatórios.</p><p>Seus registros e alterações atuais serão preservados. A atualização é incluída uma vez e pode ser solicitada em uma empresa que já recebeu o pacote anterior.</p>`,
     async () => {
       await send("/finance/sample");
       state.page = "examples";
-      toast("Ambiente preenchido com dados de exemplo.");
+      toast(
+        upgrading
+          ? "Exemplos atualizados."
+          : "Ambiente preenchido com dados de exemplo.",
+      );
     },
-    "Adicionar exemplos",
+    upgrading ? "Atualizar exemplos" : "Adicionar exemplos",
   );
 }
 async function planningAction(btn) {
