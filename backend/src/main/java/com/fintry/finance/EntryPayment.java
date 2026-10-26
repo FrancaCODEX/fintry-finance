@@ -30,6 +30,8 @@ public class EntryPayment extends BaseEntity {
   @Column(nullable = false)
   private LocalDate paymentDate;
 
+  private UUID reconciliationBatchId;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "entry_id", nullable = false)
   private FinancialEntry entry;

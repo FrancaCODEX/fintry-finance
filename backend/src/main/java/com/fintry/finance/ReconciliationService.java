@@ -6,6 +6,7 @@ import com.fintry.audit.AuditService;
 import com.fintry.auth.CurrentUser;
 import com.fintry.company.repository.CompanyRepository;
 import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.*;
@@ -27,6 +28,7 @@ public class ReconciliationService {
   private final EntryRepository entries;
   private final StatementSourceRepository sources;
   private final StatementLineRepository lines;
+  private final ReconciliationBatchRepository batches;
   private final FinanceService finance;
   private final AuditService audit;
 
@@ -83,6 +85,8 @@ public class ReconciliationService {
       StatementLine.Status status,
       UUID entryId,
       String reason,
+      UUID batchId,
+      int batchMovements,
       long revision,
       FinanceService.EntryView entry,
       List<Candidate> suggestions) {}
@@ -95,6 +99,18 @@ public class ReconciliationService {
       long open,
       long linked,
       long ignored) {}
+
+  public record GroupInput(
+      @NotNull UUID accountId,
+      @NotEmpty @Size(min = 2, max = 50) List<@NotNull UUID> movementIds,
+      @NotNull UUID entryId,
+      @NotBlank @Size(max = 255) String reason) {}
+
+  public record GroupCandidatesInput(
+      @NotNull UUID accountId, @NotEmpty @Size(min = 2, max = 50) List<@NotNull UUID> movementIds) {}
+
+  public record BatchView(
+      UUID id, UUID entryId, BigDecimal amount, LocalDate paymentDate, String reason, int movements) {}
 
   private ResponseStatusException missing() {
     return new ResponseStatusException(HttpStatus.NOT_FOUND, "Registro não encontrado.");
@@ -251,6 +267,8 @@ public class ReconciliationService {
         l.getStatus(),
         "Lançamento vinculado",
         l.getEntryId(),
+        "Grupo de conciliação",
+        l.getReconciliationBatchId(),
         "Motivo",
         l.getReason());
   }
@@ -366,6 +384,8 @@ public class ReconciliationService {
         l.getStatus(),
         l.getEntryId(),
         l.getReason(),
+        l.getReconciliationBatchId(),
+        l.getReconciliationBatchId() == null ? 0 : (int) lines.countByReconciliationBatchId(l.getReconciliationBatchId()),
         l.getRevision(),
         entry,
         candidates(l, true, null));
@@ -375,6 +395,89 @@ public class ReconciliationService {
     if (search != null && search.length() > 120)
       throw OfxParser.invalid("Use até 120 caracteres na busca.");
     return candidates(line(id), false, search);
+  }
+
+  public List<FinanceService.EntryView> groupCandidates(GroupCandidatesInput input) {
+    account(input.accountId());
+    var ids = new LinkedHashSet<>(input.movementIds());
+    if (ids.size() != input.movementIds().size()) throw OfxParser.invalid("A seleção contém movimentos repetidos.");
+    var selected = ids.stream().map(this::line).toList();
+    if (selected.stream().anyMatch(m -> !m.getAccountId().equals(input.accountId()) || m.getStatus() != StatementLine.Status.OPEN))
+      throw conflict("Atualize a conciliação: há movimentos que não estão mais em revisão.");
+    int direction = selected.get(0).getAmount().signum();
+    if (selected.stream().anyMatch(m -> m.getAmount().signum() != direction)) return List.of();
+    var total = selected.stream().map(StatementLine::getAmount).map(java.math.BigDecimal::abs)
+        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+    var candidates = entries.findAll(
+        (root, q, cb) -> cb.and(
+            cb.equal(root.get("companyId"), current.companyId()),
+            cb.equal(root.get("accountId"), input.accountId()),
+            cb.equal(root.get("type"), direction > 0 ? FinancialEntry.Type.INCOME : FinancialEntry.Type.EXPENSE),
+            cb.or(cb.equal(root.get("status"), FinancialEntry.Status.PENDING), cb.equal(root.get("status"), FinancialEntry.Status.PARTIAL))),
+        PageRequest.of(0, 100, Sort.by(Sort.Order.asc("dueDate"), Sort.Order.asc("id"))));
+    return candidates.getContent().stream()
+        .filter(e -> e.getAmount().subtract(e.getPaidAmount()).compareTo(total) >= 0)
+        .limit(50)
+        .map(finance::view)
+        .toList();
+  }
+
+  @Transactional
+  public BatchView group(GroupInput input) {
+    lockCompany();
+    account(input.accountId());
+    var ids = new LinkedHashSet<>(input.movementIds());
+    if (ids.size() != input.movementIds().size())
+      throw OfxParser.invalid("A seleção contém movimentos repetidos.");
+    var selected = new ArrayList<StatementLine>();
+    for (var id : ids) {
+      var movement = line(id);
+      if (!movement.getAccountId().equals(input.accountId())
+          || movement.getStatus() != StatementLine.Status.OPEN)
+        throw conflict("Um movimento mudou ou não está mais disponível. Atualize a conciliação.");
+      selected.add(movement);
+    }
+    int direction = selected.get(0).getAmount().signum();
+    if (selected.stream().anyMatch(m -> m.getAmount().signum() != direction))
+      throw OfxParser.invalid("Agrupe entradas com entradas ou saídas com saídas.");
+    var e = entries.lock(input.entryId(), current.companyId()).orElseThrow(this::missing);
+    if (!e.getAccountId().equals(input.accountId())
+        || e.getType() != (direction > 0 ? FinancialEntry.Type.INCOME : FinancialEntry.Type.EXPENSE)
+        || e.getStatus() == FinancialEntry.Status.CANCELLED)
+      throw conflict("O lançamento não corresponde à conta e ao tipo dos movimentos.");
+    finance.requireBillingEditable(e.getId());
+    var total = selected.stream().map(StatementLine::getAmount).map(java.math.BigDecimal::abs)
+        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+    var remaining = e.getAmount().subtract(e.getPaidAmount());
+    if (total.signum() <= 0 || total.compareTo(remaining) > 0)
+      throw conflict("O total selecionado excede o saldo restante do lançamento.");
+    var paymentDate = selected.stream().map(StatementLine::getPostedDate).max(LocalDate::compareTo).orElseThrow();
+    selected.sort(
+        Comparator.comparing(StatementLine::getPostedDate).thenComparing(StatementLine::getId));
+    var batch = new ReconciliationBatch();
+    batch.setCompanyId(current.companyId());
+    batch.setAccountId(input.accountId());
+    batch.setEntryId(e.getId());
+    batch.setAmount(total);
+    batch.setPaymentDate(paymentDate);
+    batch.setReason(input.reason().strip());
+    batches.save(batch);
+    for (var movement : selected) {
+      var before = snapshot(movement);
+      finance.payFromReconciliation(e.getId(), movement.getPostedDate(),
+          movement.getAmount().abs(), batch.getId());
+      movement.setEntryId(e.getId());
+      movement.setReconciliationBatchId(batch.getId());
+      movement.setStatus(StatementLine.Status.LINKED);
+      movement.setReason(input.reason().strip());
+      movement.setRevision(movement.getRevision() + 1);
+      lines.save(movement);
+      audit.change("RECONCILE_GROUP", "RECONCILIATION", movement.getId(), movement.getDescription(), before, snapshot(movement));
+    }
+    audit.change("RECONCILE_GROUP", "RECONCILIATION_BATCH", batch.getId(), input.reason().strip(),
+        Map.of(), fields("Lançamento", e.getDescription(), "Valor", total, "Data", paymentDate,
+            "Movimentos", selected.size(), "Motivo", input.reason().strip()));
+    return new BatchView(batch.getId(), e.getId(), total, paymentDate, batch.getReason(), selected.size());
   }
 
   public Result list(UUID accountId, StatementLine.Status status, int page, int size) {

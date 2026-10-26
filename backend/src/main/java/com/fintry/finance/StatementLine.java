@@ -49,6 +49,8 @@ public class StatementLine extends BaseEntity {
 
   private UUID entryId;
 
+  private UUID reconciliationBatchId;
+
   @Column(length = 255)
   private String reason;
 

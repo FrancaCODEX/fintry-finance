@@ -3646,3 +3646,38 @@ body.navigation-open {
 .payment-history h3{margin:0 0 .65rem;font-size:.95rem}
 .payment-history ul{list-style:none;margin:0;padding:0;display:grid;gap:.45rem}
 .payment-history li{display:flex;justify-content:space-between;gap:1rem;padding:.45rem 0;border-top:1px solid var(--line)}
+
+.rec-group-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 16px 20px;
+}
+.rec-group-control > div {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+}
+.rec-group-control small,
+.rec-group-check {
+  color: var(--muted);
+}
+.rec-group-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .rec-group-control {
+    flex-wrap: wrap;
+  }
+  .rec-group-control > div {
+    flex-basis: 100%;
+  }
+  .rec-group-control button {
+    flex: 1;
+  }
+}

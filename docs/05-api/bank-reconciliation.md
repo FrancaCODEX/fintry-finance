@@ -15,9 +15,11 @@ Base: `/api/v1/finance/reconciliation`.
 | GET | `?accountId=…&status=OPEN&page=0&size=25` | Movimentos persistidos, até 50 por página, ordenados por data/criação/ID. Status opcional OPEN/LINKED/IGNORED; contagens globais da conta. |
 | GET | `/{id}/candidates?search=…` | Até 100 lançamentos disponíveis de mesmo valor, tipo e conta; busca por descrição até 120 caracteres. Realizados exigem mesma data. |
 | POST | `/{id}/resolve` | `{revision, action, entryId?, category?, categoryId?, reason?}` → movimento atualizado. |
+| POST | `/group/candidates` | `{accountId, movementIds:[…]}` → até 50 lançamentos pendentes/parciais da mesma conta, direção e com saldo suficiente. |
+| POST | `/group` | `{accountId, movementIds:[…], entryId, reason}` → grupo conciliado. Aceita de 2 a 50 movimentos abertos de mesma direção; cada valor é baixado separadamente na data do movimento. |
 | GET | `/example` | Download de OFX fictício com dois movimentos do dia para conta de avaliação. |
 
-Cada movimento retorna ID, FITID, descrição, data, valor assinado como string decimal, situação, revisão, motivo, lançamento vinculado e até três sugestões. A busca manual não limita a data de vencimento dos pendentes. Sugestões consideram pendentes com vencimento em ±7 dias ou realizados com a mesma data, com prioridade para descrição normalizada e proximidade; são limitadas a uma amostra de dez candidatos. Não são aprovação automática e não garantem correspondência.
+Cada movimento retorna ID, FITID, descrição, data, valor assinado como string decimal, situação, revisão, motivo, lançamento vinculado, identificador do grupo (quando houver), quantidade de movimentos do grupo e até três sugestões. A busca manual não limita a data de vencimento dos pendentes. Sugestões consideram pendentes com vencimento em ±7 dias ou realizados com a mesma data, com prioridade para descrição normalizada e proximidade; são limitadas a uma amostra de dez candidatos. Não são aprovação automática e não garantem correspondência.
 
 ## Decisões
 
@@ -26,7 +28,7 @@ Cada movimento retorna ID, FITID, descrição, data, valor assinado como string 
 - `IGNORE`: exige motivo de até 255 caracteres e mantém o movimento consultável, sem efeito financeiro.
 - `REOPEN`: exige motivo e remove decisão/vínculo. **Não desfaz pagamento nem exclui o lançamento criado.** Corrija o financeiro pelas ações existentes e então revise a conciliação novamente. Cancelar lançamento/venda vinculado exige primeiro reabrir a conciliação.
 
-A revisão aumenta a cada decisão. Enviar uma revisão antiga retorna 409 sem nova baixa/criação; atualize a lista antes de tentar novamente. Importações e decisões da mesma empresa são serializadas e a restrição única por lançamento impede vínculos duplos.
+A revisão individual aumenta a cada decisão. A criação do grupo bloqueia a empresa, revalida que todos os movimentos continuam abertos e valida o saldo restante antes de qualquer baixa; a transação inteira é revertida se uma baixa falhar. As baixas parciais criadas ficam no histórico normal de pagamentos e no lote.
 
 ## Formato, limites e preservação
 
@@ -38,6 +40,6 @@ BANKID/BRANCHID/ACCTID/ACCTTYPE identificam a origem por hash SHA-256 com compon
 
 FITID distingue movimentos na mesma origem. Reimportar o mesmo ID/conteúdo é ignorado, mesmo se o movimento foi ignorado ou reaberto; alterar data, valor ou descrição sob o mesmo ID gera conflito na prévia. Repetições dentro do arquivo são sinalizadas e apenas a primeira ocorrência válida pode ser importada. Não se deve presumir duplicidade apenas porque dois movimentos possuem mesmo valor/data/descrição e FITIDs diferentes.
 
-São persistidos os movimentos, identificadores bancários, hash da origem, banco, final mascarado da conta e decisões auditadas. O arquivo original e os números completos de agência/conta não são armazenados. Dados financeiros antigos e migrações publicadas são preservados. A conciliação desta versão é individual e exata: sem pagamentos parciais, agrupamentos, ajustes automáticos de saldo, tarifas embutidas ou conexão bancária direta.
+São persistidos os movimentos, identificadores bancários, hash da origem, banco, final mascarado da conta e decisões auditadas. O arquivo original e os números completos de agência/conta não são armazenados. Dados financeiros antigos e migrações publicadas são preservados. O grupo exige uma única direção e um único lançamento; as tarifas devem ser lançadas e conciliadas à parte. Não há compensação automática de sinais, rateio de um movimento por vários lançamentos, ajuste de saldo nem conexão bancária direta.
 
 Referência do formato: [OFX Banking 2.3, FDX](https://financialdataexchange.org/common/Uploaded%20files/OFX%20files/OFX%20Banking%20Specification%20v2.3.pdf).

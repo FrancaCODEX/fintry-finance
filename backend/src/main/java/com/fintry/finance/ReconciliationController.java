@@ -69,4 +69,16 @@ public class ReconciliationController {
       @PathVariable UUID id, @Valid @RequestBody ReconciliationService.Resolution input) {
     return service.resolve(id, input);
   }
+
+  @PostMapping("/group")
+  public ReconciliationService.BatchView group(
+      @Valid @RequestBody ReconciliationService.GroupInput input) {
+    return service.group(input);
+  }
+
+  @PostMapping("/group/candidates")
+  public List<FinanceService.EntryView> groupCandidates(
+      @Valid @RequestBody ReconciliationService.GroupCandidatesInput input) {
+    return service.groupCandidates(input);
+  }
 }

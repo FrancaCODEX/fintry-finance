@@ -2,6 +2,18 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.26.0] - 2026-10-26
+
+### Conciliação agrupada
+
+- Administradores e Financeiro podem selecionar de 2 a 50 movimentos em revisão da mesma conta e direção e conciliá-los contra um lançamento pendente ou parcial.
+- O grupo aplica as baixas pelo valor de cada movimento e na respectiva data bancária; total acima do saldo restante, movimentos já decididos, direção divergente e lançamentos gerenciados por cobrança são rejeitados.
+- Cada movimento mantém sua referência ao lançamento e ao grupo; o lote registra valor, data, quantidade e motivo. Auditoria registra cada decisão e o resumo do lote.
+- A tela exibe a seleção, saldo restante elegível, confirmação, motivo e identificação dos movimentos agrupados. Reimportação continua protegida pelo FITID e importação não altera saldo.
+- Tarifas e divergências de sinal devem ser registradas como lançamentos de despesa próprios e conciliadas separadamente. Não há compensação líquida ou criação automática de tarifa.
+- Migração aditiva V21 remove a unicidade de movimento por lançamento e acrescenta o vínculo ao lote e ao histórico de baixas; dados existentes são preservados.
+
+
 ## [0.25.0] - 2026-10-26
 
 ### Pagamentos parciais

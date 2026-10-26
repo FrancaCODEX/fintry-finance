@@ -13,4 +13,6 @@ public interface StatementLineRepository
 
   long countByCompanyIdAndAccountIdAndStatus(
       UUID companyId, UUID accountId, StatementLine.Status status);
+
+  long countByReconciliationBatchId(UUID batchId);
 }
