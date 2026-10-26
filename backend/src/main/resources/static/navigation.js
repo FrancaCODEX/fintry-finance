@@ -45,6 +45,7 @@ function navigationGroups() {
       [
         ...(isAdmin()
           ? [
+              ["company", "Empresa", "company"],
               ["team", "Equipe", "users"],
               ["audit", "Histórico", "history"],
               ["operations", "Ambiente", "shield"],

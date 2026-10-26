@@ -42,6 +42,31 @@ function dashboardShortcuts() {
   ];
   return `<nav class="dashboard-shortcuts" aria-label="Atalhos do financeiro">${actions.map(([action, title, text, ic, nav]) => `<button type="button" ${nav ? "data-nav" : "data-action"}="${action}"><span class="shortcut-icon">${icon(ic)}</span><span><strong>${title}</strong><small>${text}</small></span><span class="shortcut-arrow" aria-hidden="true">↗</span></button>`).join("")}</nav>`;
 }
+function dashboardOnboarding() {
+  const steps = [
+    {
+      done: state.accounts.length > 0,
+      title: "Cadastre uma conta",
+      description: "Banco, carteira ou caixa da empresa.",
+      page: "accounts",
+    },
+    {
+      done: state.categories.length > 0,
+      title: "Organize as categorias",
+      description: "Separe receitas e despesas por assunto.",
+      page: "categories",
+    },
+    {
+      done: Number(state.onboardingEntries?.totalElements) > 0,
+      title: "Registre um lançamento",
+      description: "Comece a acompanhar o movimento financeiro.",
+      page: "entries",
+    },
+  ];
+  const completed = steps.filter((step) => step.done).length;
+  if (completed === steps.length) return "";
+  return `<section class="card dashboard-onboarding" aria-labelledby="onboarding-title"><div class="onboarding-heading"><div><span class="eyebrow">PRIMEIROS PASSOS</span><h2 id="onboarding-title">Prepare seu espaço financeiro</h2><p>Conclua estas etapas para começar a acompanhar sua empresa.</p></div><div class="onboarding-progress"><strong>${completed} de ${steps.length}</strong><progress max="${steps.length}" value="${completed}" aria-label="${completed} de ${steps.length} etapas concluídas"></progress></div></div><div class="onboarding-steps">${steps.map((step, index) => `<button class="onboarding-step ${step.done ? "is-done" : ""}" data-nav="${step.page}" ${step.done ? 'aria-label="Concluído: ' + e(step.title) + '"' : ""}><span class="onboarding-step-number">${step.done ? "✓" : index + 1}</span><span><strong>${e(step.title)}</strong><small>${e(step.description)}</small></span>${icon("income")}</button>`).join("")}</div><div class="onboarding-footer"><span>Já tem planilhas ou quer explorar tudo de uma vez?</span><button class="btn text small" data-nav="examples">Conhecer dados de exemplo →</button></div></section>`;
+}
 function dashboardAttention() {
   const p = state.dashboardPending;
   if (!p) return "";
@@ -88,6 +113,7 @@ function renderDashboard() {
         `<button class="btn secondary" data-dashboard-today>Ir para mês atual</button>`,
     ) +
     `<div class="dashboard-overview"><article class="card dashboard-balance"><div class="balance-heading"><span class="eyebrow">SALDO DISPONÍVEL</span><span class="balance-symbol">${icon("wallet")}</span></div><strong class="balance-number ${money(s.balance).length > 18 ? "balance-long" : ""}">${money(s.balance)}</strong><p>Saldo atual de todas as contas.<br>Inclui saldos iniciais e movimentos realizados.</p><button class="balance-link" data-nav="accounts">Consultar contas ${icon("income")}</button><span class="balance-scope">Agora · independente do mês selecionado</span></article><section class="dashboard-monthly" aria-label="Indicadores do mês selecionado"><div class="dashboard-period"><span class="eyebrow">MÊS EM ANÁLISE</span><strong>${e(dashboardMonth(state.month))}</strong><span>Valores realizados pela data do pagamento ou recebimento</span></div><div class="metrics">${metric("Receitas realizadas", s.income, dashboardComparison(s.income, s.previousIncome), "income", "dashboard-income")}${metric("Despesas realizadas", s.expense, dashboardComparison(s.expense, s.previousExpense), "expense", "dashboard-expense")}${metric("Resultado de caixa", s.result, dashboardComparison(s.result, s.previousResult), "trend")}</div><p class="dashboard-result-note">Resultado de caixa = receitas menos despesas realizadas. Não representa lucro contábil.</p></section></div>` +
+    dashboardOnboarding() +
     dashboardShortcuts() +
     dashboardAttention() +
     `<section class="grid-two dashboard-main-grid">${dashboardChart(s)}<article class="card dashboard-radar"><div class="card-head"><div><span class="eyebrow">PREVISÕES DO MÊS</span><h2>No seu radar</h2><p>Pendentes por vencimento · ${e(dashboardMonth(state.month))}</p></div></div><div class="pending"><div class="pending-row"><span class="radar-icon income">${icon("income")}</span><div><p>A receber</p><small>Entradas previstas</small></div><strong class="positive">${money(s.pendingIncome)}</strong></div><div class="pending-row"><span class="radar-icon">${icon("expense")}</span><div><p>A pagar</p><small>Compromissos do período</small></div><strong>${money(s.pendingExpense)}</strong></div></div><div class="radar-bottom"><p>Pendências só alteram o saldo quando você registra a baixa.</p><button class="btn soft" data-nav="forecast">Ver fluxo projetado ${icon("income")}</button></div></article></section>` +

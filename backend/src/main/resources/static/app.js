@@ -21,6 +21,8 @@ const state = {
   forecast: null,
   forecastFilters: { days: "90", includeOverdue: "false" },
   version: "",
+  company: null,
+  onboardingEntries: null,
   series: null,
   seriesPage: 0,
   page: "dashboard",
@@ -999,6 +1001,20 @@ async function loadData(id) {
   if (id !== requestId || !state.user) return;
   state.subscriptionAccess = access;
   if (!root.querySelector(".shell")) shell();
+  if (state.page === "company") {
+    if (!isAdmin()) {
+      state.page = "dashboard";
+      return load();
+    }
+    state.company = await api("/companies/me");
+    if (id !== requestId || !state.user) return;
+    shell();
+    document.querySelector("#page-content").innerHTML = renderCompany(
+      state.company,
+    );
+    bindCompany();
+    return;
+  }
   if (["services", "proposals"].includes(state.page)) return loadCommercial(id);
   if (state.page === "imports") return loadImports(id);
   if (state.page === "subscription") return loadSubscription(id);
@@ -1054,6 +1070,7 @@ async function loadData(id) {
     report,
     forecast,
     dashboardPending,
+    onboardingEntries,
   ] = await Promise.all([
     api("/finance/accounts"),
     api("/finance/entries?" + query),
@@ -1087,6 +1104,9 @@ async function loadData(id) {
     state.page === "dashboard"
       ? api("/finance/pending?group=UPCOMING&size=5")
       : Promise.resolve(null),
+    state.page === "dashboard"
+      ? api("/finance/entries?size=1&page=0")
+      : Promise.resolve(null),
   ]);
   if (id !== requestId || !state.user) return;
   if (
@@ -1098,6 +1118,7 @@ async function loadData(id) {
     return load();
   }
   state.dashboardPending = dashboardPending;
+  state.onboardingEntries = onboardingEntries;
   state.accounts = accounts;
   state.entries = entries;
   state.summary = summary;
