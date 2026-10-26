@@ -316,11 +316,11 @@ FROM saas_plan_requests WHERE id='{pending["id"]}';""")
             subscription_ops.sql(compose, statement)
             assert request("GET", "/api/v1/subscription")["paidUntil"] == activated["paidUntil"]
 
-            # Add demo business data, including PDFs in bytea, before the backup round-trip.
-            request("POST", "/api/v1/finance/sample", {}, 201)
-            # Usage may increase after requesting a downgrade; activation must recheck it under lock.
+            # Request the downgrade before adding demo data, then verify activation rechecks limits.
             current = request("GET", "/api/v1/subscription")
             requested = request("POST", "/api/v1/subscription/requests", {"plan": "ESSENTIAL", "revision": current["revision"]})
+            # Add demo business data, including PDFs in bytea, before the backup round-trip.
+            request("POST", "/api/v1/finance/sample", {}, 201)
             request("POST", "/api/v1/finance/accounts", {"name": "Conta para validar capacidade", "initialBalance": 0}, 201)
             pending = requested["requests"][0]
             try:
