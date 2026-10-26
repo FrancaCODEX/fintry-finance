@@ -36,10 +36,13 @@ public class SampleService {
   private final SeriesService series;
   private final BudgetService budgets;
   private final AttachmentService attachments;
+  private final ReconciliationService reconciliation;
   private final AuditService audit;
   private final Clock clock;
 
   public record Status(boolean loaded, int packVersion, LocalDateTime completedAt) {}
+
+  private record DemoMovement(String code, LocalDate date, String amount, String description) {}
 
   public Status status() {
     return runs.findById(current.companyId())
@@ -179,7 +182,7 @@ public class SampleService {
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empresa não encontrada."));
     var existing = status();
-    if (existing.loaded() && existing.packVersion() >= 2) return existing;
+    if (existing.loaded() && existing.packVersion() >= 3) return existing;
     String token = UUID.randomUUID().toString().substring(0, 8), prefix = "[Exemplo] ";
     var today = LocalDate.now(clock.withZone(ZoneId.of("America/Sao_Paulo")));
     var month = YearMonth.from(today);
@@ -431,20 +434,170 @@ public class SampleService {
         "Venda demonstrativa de cadernos",
         "R$ 69,80");
     }
-    addCommercialExamples(prefix, token, today);
+    if (!existing.loaded() || existing.packVersion() < 2)
+      addCommercialExamples(prefix, token, today);
+    addPresentationExamples(prefix, token, today);
     var run = runs.findById(company).orElseGet(SampleRun::new);
     run.setCompanyId(company);
-    run.setPackVersion(2);
+    run.setPackVersion(3);
     run.setCompletedAt(LocalDateTime.now(clock));
     runs.saveAndFlush(run);
     audit.change(
         "SAMPLE_LOAD",
         "SAMPLE",
         company,
-        "Dados de exemplo · pacote 2",
+        "Dados de exemplo · pacote 3",
         Map.of(),
-        AuditService.fields("Pacote", 2, "Identificador", token));
+        AuditService.fields("Pacote", 3, "Identificador", token));
     return status();
+  }
+
+  private LocalDate recentDate(LocalDate today, int daysAgo) {
+    return today.minusDays(Math.min(daysAgo, today.getDayOfMonth() - 1L));
+  }
+
+  private void addPresentationExamples(String prefix, String token, LocalDate today) {
+    String label = prefix + "Apresentação · ";
+    var account =
+        finance.accounts().stream()
+            .filter(a -> a.name().equals(prefix + "Banco principal"))
+            .findFirst()
+            .map(FinanceService.AccountView::id)
+            .orElseGet(
+                () ->
+                    finance
+                        .createAccount(
+                            new FinanceService.AccountInput(
+                                prefix + "Banco de apresentação", BigDecimal.ZERO))
+                        .id());
+    int contactIndex = Math.abs(UUID.randomUUID().hashCode() % 98) + 901;
+    UUID customer = contact("Aurora Design", Contact.Kind.CUSTOMER, contactIndex, prefix, true);
+    UUID supplier =
+        contact("Banco de demonstração", Contact.Kind.SUPPLIER, contactIndex + 1, prefix, true);
+    UUID incomeCategory = category("Projetos especiais", FinancialCategory.Kind.INCOME, prefix);
+    UUID expenseCategory =
+        category("Tarifas bancárias", FinancialCategory.Kind.EXPENSE, prefix);
+
+    var groupedEntry =
+        entry(
+            account,
+            label + "Projeto de identidade visual · baixa em etapas",
+            FinancialEntry.Type.INCOME,
+            "3000.00",
+            today.plusDays(10),
+            false,
+            incomeCategory,
+            customer);
+    finance.pay(
+        groupedEntry,
+        new FinanceService.PaymentInput(recentDate(today, 3), money("300.00")));
+    finance.pay(
+        groupedEntry,
+        new FinanceService.PaymentInput(recentDate(today, 1), money("450.00")));
+
+    var partialExpense =
+        entry(
+            account,
+            label + "Equipamentos · pagamento parcial",
+            FinancialEntry.Type.EXPENSE,
+            "1600.00",
+            today.plusDays(8),
+            false,
+            expenseCategory,
+            supplier);
+    finance.pay(
+        partialExpense,
+        new FinanceService.PaymentInput(recentDate(today, 2), money("350.00")));
+
+    var linkedIncome =
+        entry(
+            account,
+            label + "Consultoria · recebimento conciliado",
+            FinancialEntry.Type.INCOME,
+            "880.00",
+            today,
+            false,
+            incomeCategory,
+            customer);
+    var linkedExpense =
+        entry(
+            account,
+            label + "Tarifa de processamento",
+            FinancialEntry.Type.EXPENSE,
+            "28.90",
+            today,
+            false,
+            expenseCategory,
+            supplier);
+
+    var movements =
+        List.of(
+            new DemoMovement("GROUP-1", recentDate(today, 2), "700.00", "PIX PROJETO AURORA 1/2"),
+            new DemoMovement("GROUP-2", recentDate(today, 1), "800.00", "PIX PROJETO AURORA 2/2"),
+            new DemoMovement("LINK-IN", today, "880.00", "PIX CONSULTORIA AURORA"),
+            new DemoMovement("LINK-OUT", today, "-28.90", "TARIFA PROCESSAMENTO"),
+            new DemoMovement("OPEN", today, "-312.55", "COMPRA SEM LANCAMENTO PARA REVISAR"));
+    reconciliation.importStatement(
+        new ReconciliationService.ImportInput(
+            account,
+            presentationOfx(token, movements),
+            java.util.stream.IntStream.rangeClosed(1, movements.size()).boxed().toList()));
+    var lines =
+        reconciliation.list(account, null, 0, 50).content().stream()
+            .collect(
+                java.util.stream.Collectors.toMap(
+                    ReconciliationService.LineView::fitId, line -> line));
+    var groupLines =
+        List.of(
+            lines.get("FINTRY-PRESENTATION-" + token + "-GROUP-1"),
+            lines.get("FINTRY-PRESENTATION-" + token + "-GROUP-2"));
+    reconciliation.group(
+        new ReconciliationService.GroupInput(
+            account,
+            groupLines.stream().map(ReconciliationService.LineView::id).toList(),
+            groupedEntry,
+            "Demonstração: dois créditos bancários conciliados com um recebimento parcial."));
+    linkDemoMovement(
+        lines.get("FINTRY-PRESENTATION-" + token + "-LINK-IN"),
+        linkedIncome,
+        "Recebimento demonstrativo vinculado ao lançamento correspondente.");
+    linkDemoMovement(
+        lines.get("FINTRY-PRESENTATION-" + token + "-LINK-OUT"),
+        linkedExpense,
+        "Tarifa demonstrativa vinculada à despesa correspondente.");
+  }
+
+  private void linkDemoMovement(
+      ReconciliationService.LineView movement, UUID entryId, String reason) {
+    reconciliation.resolve(
+        movement.id(),
+        new ReconciliationService.Resolution(
+            movement.revision(), ReconciliationService.Action.LINK, entryId, null, null, reason));
+  }
+
+  private String presentationOfx(String token, List<DemoMovement> movements) {
+    String rows =
+        movements.stream()
+            .map(
+                movement ->
+                    "<STMTTRN><TRNTYPE>OTHER<DTPOSTED>"
+                        + movement.date().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE)
+                        + "<TRNAMT>"
+                        + movement.amount()
+                        + "<FITID>FINTRY-PRESENTATION-"
+                        + token
+                        + "-"
+                        + movement.code()
+                        + "<NAME>"
+                        + movement.description()
+                        + "</STMTTRN>")
+            .collect(java.util.stream.Collectors.joining());
+    return "OFXHEADER:100\nDATA:OFXSGML\nVERSION:102\nSECURITY:NONE\nENCODING:UTF-8\nCHARSET:NONE\n\n"
+        + "<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><CURDEF>BRL<BANKACCTFROM><BANKID>999<BRANCHID>0001<ACCTID>DEMO-"
+        + token
+        + "<ACCTTYPE>CHECKING</BANKACCTFROM><BANKTRANLIST>"
+        + rows
+        + "</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>";
   }
 
   private void addCommercialExamples(
