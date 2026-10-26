@@ -931,6 +931,205 @@ body.navigation-open {
     transition: none !important;
   }
 }
+
+/* 0.31 — Fintry's cash-flow signature: a clear value paired with its rhythm. */
+.dashboard-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 13px;
+}
+.dashboard-kpi {
+  --kpi-accent: #16845d;
+  --kpi-wash: #eaf5ed;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 174px;
+  display: flex;
+  flex-direction: column;
+  padding: 17px 17px 31px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(155deg, var(--paper), color-mix(in srgb, var(--kpi-wash) 25%, var(--paper)) 120%);
+  box-shadow: 0 5px 18px #173d2e07;
+}
+.dashboard-kpi.expense {
+  --kpi-accent: #b56a4b;
+  --kpi-wash: #f8eee8;
+}
+.dashboard-kpi.result {
+  --kpi-accent: #5977a6;
+  --kpi-wash: #edf1f8;
+}
+:root[data-theme="dark"] .dashboard-kpi {
+  --kpi-accent: #9cddb5;
+  --kpi-wash: #254632;
+}
+:root[data-theme="dark"] .dashboard-kpi.expense {
+  --kpi-accent: #e6a98d;
+  --kpi-wash: #4a302b;
+}
+:root[data-theme="dark"] .dashboard-kpi.result {
+  --kpi-accent: #a7bee5;
+  --kpi-wash: #29394f;
+}
+.dashboard-kpi-top {
+  min-height: 29px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 620;
+  line-height: 1.4;
+}
+.dashboard-kpi-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--kpi-wash);
+  color: var(--kpi-accent);
+}
+.dashboard-kpi-icon .icon {
+  width: 15px;
+  height: 15px;
+}
+.dashboard-kpi-value {
+  display: block;
+  margin: 12px 0 8px;
+  color: var(--ink);
+  font-size: clamp(19px, 1.65vw, 26px);
+  font-weight: 740;
+  letter-spacing: -1.2px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dashboard-kpi-value.money-long {
+  font-size: clamp(16px, 1.25vw, 20px);
+  letter-spacing: -0.8px;
+}
+.dashboard-kpi-bottom {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 4px;
+  margin-top: auto;
+  padding-right: 26px;
+}
+.dashboard-kpi-comparison {
+  color: var(--kpi-accent);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+.dashboard-kpi-note {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.4;
+}
+.dashboard-sparkline {
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  bottom: 0;
+  width: 57%;
+  height: 54px;
+  overflow: visible;
+  opacity: 0.58;
+}
+.sparkline-area {
+  fill: var(--kpi-wash);
+  opacity: 0.75;
+}
+.sparkline-line {
+  fill: none;
+  stroke: var(--kpi-accent);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.sparkline-dot {
+  fill: var(--paper);
+  stroke: var(--kpi-accent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.dashboard-period {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 11px;
+  margin-bottom: 16px;
+}
+.dashboard-period .eyebrow {
+  flex-basis: 100%;
+}
+.dashboard-period > strong {
+  font-size: 24px;
+  letter-spacing: -0.85px;
+}
+.dashboard-period > span:last-child {
+  font-size: 10px;
+}
+.dashboard-monthly {
+  padding-top: 2px;
+}
+.dashboard-result-note {
+  font-size: 10px;
+}
+.page-head h1 {
+  position: relative;
+}
+.dashboard-page > .page-head h1::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin: 0 0 2px 9px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 12%, transparent);
+}
+.dashboard-page > .page-head p {
+  font-size: 13px;
+}
+@media (max-width: 1200px) {
+  .dashboard-kpi {
+    padding: 15px 13px 29px;
+  }
+  .dashboard-kpi-value {
+    font-size: clamp(17px, 2vw, 23px);
+  }
+  .dashboard-kpi-value.money-long {
+    font-size: clamp(15px, 1.65vw, 19px);
+  }
+}
+@media (max-width: 600px) {
+  .dashboard-kpis {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+  .dashboard-kpi {
+    min-height: 118px;
+    padding: 15px 17px 20px;
+  }
+  .dashboard-kpi-value {
+    margin: 8px 0 6px;
+    font-size: 23px;
+  }
+  .dashboard-sparkline {
+    width: 48%;
+    height: 49px;
+  }
+}
 @media (forced-colors: active) {
   .nav-btn.active {
     border: 2px solid Highlight;
