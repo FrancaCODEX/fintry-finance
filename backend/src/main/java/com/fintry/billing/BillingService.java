@@ -15,6 +15,7 @@ import java.time.*;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -31,6 +32,7 @@ public class BillingService {
   private final ContactRepository contacts;
   private final BillingConnectionRepository connections;
   private final BillingChargeRepository charges;
+  private final BillingWebhookEventRepository webhookEvents;
   private final BillingSecrets secrets;
   private final AsaasClient client;
   private final AuditService audit;
@@ -67,6 +69,18 @@ public class BillingService {
   public record PageView(List<View> content, int number, int totalPages, long totalElements) {}
 
   public record Pix(String payload) {}
+
+  public record WebhookEventView(
+      UUID id,
+      BillingWebhookEvent.Status status,
+      int attempts,
+      LocalDateTime receivedAt,
+      LocalDateTime updatedAt,
+      LocalDateTime processedAt,
+      String message) {}
+
+  public record WebhookOperations(
+      long pending, long processing, long failed, List<WebhookEventView> recent) {}
 
   private <T> T tx(java.util.function.Supplier<T> task) {
     return new TransactionTemplate(transactions).execute(s -> task.get());
@@ -387,7 +401,7 @@ public class BillingService {
         });
   }
 
-  public void webhook(UUID connectionId, String token, String providerId) {
+  public void webhook(UUID connectionId, String token, String eventId, String providerId) {
     var c =
         tx(
             () ->
@@ -405,16 +419,148 @@ public class BillingService {
                 .getBytes(StandardCharsets.UTF_8),
             token.getBytes(StandardCharsets.UTF_8)))
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Webhook inválido.");
-    // Never trust event status/value. Fetch the resource using this company's own API key.
-    var id =
-        tx(
-            () ->
-                charges
-                    .findByConnectionIdAndProviderId(c.getId(), providerId)
-                    .map(BillingCharge::getId)
-                    .orElse(null));
-    if (id != null) synchronize(id, c.getCompanyId(), false);
-    // Unknown events (including create racing reservation) are reconciled by explicit refresh.
+    if (eventId == null || !eventId.matches("[A-Za-z0-9_-]{1,100}")
+        || providerId == null || !providerId.matches("pay_[A-Za-z0-9_-]{1,90}"))
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Evento inválido.");
+    if (webhookEvents.existsByConnectionIdAndProviderEventId(connectionId, eventId)) return;
+    try {
+      tx(
+          () -> {
+            if (webhookEvents.existsByConnectionIdAndProviderEventId(connectionId, eventId))
+              return true;
+            var event = new BillingWebhookEvent();
+            event.setConnectionId(connectionId);
+            event.setProviderEventId(eventId);
+            event.setProviderPaymentId(providerId);
+            event.setStatus(BillingWebhookEvent.Status.PENDING);
+            event.setAttempts(0);
+            event.setNextAttemptAt(LocalDateTime.now());
+            webhookEvents.save(event);
+            return true;
+          });
+    } catch (DataIntegrityViolationException duplicate) {
+      // Asaas can retry the same event while two application instances receive it.
+      if (!webhookEvents.existsByConnectionIdAndProviderEventId(connectionId, eventId))
+        throw duplicate;
+    }
+  }
+
+  public WebhookOperations webhookOperations() {
+    current.requireAdmin();
+    return tx(
+        () ->
+            new WebhookOperations(
+                webhookEvents.countByStatus(BillingWebhookEvent.Status.PENDING),
+                webhookEvents.countByStatus(BillingWebhookEvent.Status.PROCESSING),
+                webhookEvents.countByStatus(BillingWebhookEvent.Status.FAILED),
+                webhookEvents.findTop50ByOrderByCreatedAtDesc().stream()
+                    .map(
+                        event ->
+                            new WebhookEventView(
+                                event.getId(),
+                                event.getStatus(),
+                                event.getAttempts(),
+                                event.getCreatedAt(),
+                                event.getUpdatedAt(),
+                                event.getProcessedAt(),
+                                event.getLastError()))
+                    .toList()));
+  }
+
+  public void retryWebhook(UUID id) {
+    current.requireAdmin();
+    tx(
+        () -> {
+          var event = webhookEvents.lockById(id).orElseThrow(this::missing);
+          var connection = connections.findById(event.getConnectionId()).orElseThrow(this::missing);
+          if (!connection.getCompanyId().equals(current.companyId())) throw this.missing();
+          if (event.getStatus() != BillingWebhookEvent.Status.FAILED)
+            throw invalid("Somente notificações encerradas com falha podem ser reprocessadas.");
+          event.setStatus(BillingWebhookEvent.Status.PENDING);
+          event.setAttempts(0);
+          event.setLastError(null);
+          event.setNextAttemptAt(LocalDateTime.now());
+          return true;
+        });
+  }
+
+  public void processWebhookQueue() {
+    LocalDateTime now = LocalDateTime.now();
+    tx(
+        () -> {
+          webhookEvents
+              .findTop50ByStatusAndUpdatedAtBefore(
+                  BillingWebhookEvent.Status.PROCESSING, now.minusMinutes(10))
+              .forEach(
+                  event -> {
+                    event.setStatus(BillingWebhookEvent.Status.PENDING);
+                    event.setNextAttemptAt(now);
+                  });
+          return true;
+        });
+    for (var candidate :
+        webhookEvents.findTop50ByStatusAndNextAttemptAtLessThanEqualOrderByCreatedAtAsc(
+            BillingWebhookEvent.Status.PENDING, now)) {
+      if (!claimWebhook(candidate.getId(), now)) continue;
+      processWebhook(candidate.getId());
+    }
+  }
+
+  private boolean claimWebhook(UUID id, LocalDateTime now) {
+    return tx(
+        () -> {
+          var event = webhookEvents.lockById(id).orElse(null);
+          if (event == null
+              || event.getStatus() != BillingWebhookEvent.Status.PENDING
+              || event.getNextAttemptAt().isAfter(now)) return false;
+          event.setStatus(BillingWebhookEvent.Status.PROCESSING);
+          event.setAttempts(event.getAttempts() + 1);
+          return true;
+        });
+  }
+
+  private void processWebhook(UUID eventId) {
+    try {
+      var event = tx(() -> webhookEvents.findById(eventId).orElseThrow(this::missing));
+      var connection =
+          tx(() -> connections.findById(event.getConnectionId()).orElseThrow(this::missing));
+      var chargeId =
+          tx(
+              () ->
+                  charges
+                      .findByConnectionIdAndProviderId(
+                          event.getConnectionId(), event.getProviderPaymentId())
+                      .map(BillingCharge::getId)
+                      .orElse(null));
+      if (chargeId == null)
+        throw new IllegalStateException("Cobrança ainda não vinculada ao evento.");
+      synchronize(chargeId, connection.getCompanyId(), false);
+      tx(
+          () -> {
+            var completed = webhookEvents.lockById(eventId).orElseThrow(this::missing);
+            completed.setStatus(BillingWebhookEvent.Status.PROCESSED);
+            completed.setProcessedAt(LocalDateTime.now());
+            completed.setLastError(null);
+            return true;
+          });
+    } catch (RuntimeException failure) {
+      tx(
+          () -> {
+            var failed = webhookEvents.lockById(eventId).orElse(null);
+            if (failed == null || failed.getStatus() != BillingWebhookEvent.Status.PROCESSING)
+              return false;
+            if (failed.getAttempts() >= 8) {
+              failed.setStatus(BillingWebhookEvent.Status.FAILED);
+              failed.setLastError("Não foi possível confirmar com o Asaas após 8 tentativas.");
+            } else {
+              failed.setStatus(BillingWebhookEvent.Status.PENDING);
+              long delayMinutes = Math.min(60, 1L << Math.min(6, failed.getAttempts() - 1));
+              failed.setNextAttemptAt(LocalDateTime.now().plusMinutes(delayMinutes));
+              failed.setLastError("Falha temporária ao consultar o Asaas. Nova tentativa agendada.");
+            }
+            return true;
+          });
+    }
   }
 
   private JsonNode call(BillingConnection c, String method, String path, Object input) {

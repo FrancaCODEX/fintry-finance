@@ -2174,6 +2174,53 @@ body.navigation-open {
 .billing-register {
   padding: 24px;
 }
+.billing-ops {
+  padding: 24px;
+}
+.billing-ops-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0;
+}
+.billing-ops-counts span {
+  padding: 9px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+.billing-ops-counts strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.billing-ops-counts .has-failures,
+.billing-ops-counts .has-failures strong {
+  color: var(--danger);
+}
+.billing-ops-list {
+  display: grid;
+  gap: 8px;
+}
+.billing-ops-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+}
+.billing-ops-row > div {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+.billing-ops-row small,
+.billing-ops-row p {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: 0;
+}
 .billing-register-head {
   display: flex;
   justify-content: space-between;
@@ -2305,6 +2352,9 @@ body.navigation-open {
   .billing-register {
     padding: 16px;
   }
+  .billing-ops {
+    padding: 16px;
+  }
   .billing-register-head {
     align-items: flex-start;
     flex-wrap: wrap;
@@ -2315,6 +2365,10 @@ body.navigation-open {
   }
   .billing-item-value {
     align-items: flex-start;
+  }
+  .billing-ops-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
   .billing-facts {
     padding: 16px;
