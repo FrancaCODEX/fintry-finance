@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.26.0**
+**Versão atual: 0.27.0**
 
 Dashboard com saldo atual em destaque, indicadores realizados por mês, atalhos e gráfico consultável com mouse, toque e teclado. Veja a [visão geral](docs/01-product/dashboard.md).
 
@@ -169,7 +169,7 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 - Contas financeiras com saldo inicial e saldo calculado.
 - Receitas e despesas com valor, categoria, conta e vencimento.
 - Parcelamentos mensais e recorrências de valor fixo, com 2 a 120 ocorrências.
-- Prévia de datas/valores, acompanhamento e cancelamento de pendências de séries.
+- Prévia de datas/valores, acompanhamento, pausa/retomada de recorrências e encerramento controlado.
 - Lançamentos pendentes e realizados; baixa com data de pagamento.
 - Edição de lançamentos pendentes, sem alterar saldos realizados.
 - Cancelamento preservando o histórico; para corrigir um registro realizado, cancele e cadastre novamente.
@@ -268,7 +268,7 @@ No formulário **Novo lançamento**, escolha o formato:
 
 Confira a prévia antes de registrar. Vencimento em 31 de janeiro resulta em 28/29 de fevereiro e 31 de março. A opção de pagamento inicial vale somente para a primeira ocorrência; as demais ficam pendentes. As baixas continuam individuais em **Lançamentos**, selecionando o mês do vencimento.
 
-O menu **Parcelas e recorrências** mostra o progresso e todos os vencimentos. **Cancelar pendências** cancela todas as ocorrências pendentes da série, inclusive vencidas, preservando as realizadas. Não há edição individual de ocorrências de série; para ajustar, cancele as pendências e crie uma nova série. Lançamentos únicos pendentes continuam editáveis.
+O menu **Parcelas e recorrências** mostra o progresso e todos os vencimentos. Uma recorrência pode ser pausada: somente ocorrências futuras pendentes são suspensas; vencidas e parcialmente pagas continuam ativas. Ao retomar, as ocorrências suspensas voltam com as datas originais. Encerrar é definitivo e cancela as pendências, inclusive vencidas, preservando pagamentos realizados e parciais. Parcelamentos não podem ser pausados. Não há edição individual de ocorrências de série; para ajustar, encerre/cancele as pendências e crie uma nova série. Lançamentos únicos pendentes continuam editáveis.
 
 A atualização é incremental e preserva contas, contatos, categorias e lançamentos. O JAR passa a ter nome estável: `backend/target/fintry.jar`. Para executar o pacote sem Docker: `java -jar backend/target/fintry.jar --spring.profiles.active=demo`.
 

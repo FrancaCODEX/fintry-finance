@@ -46,7 +46,9 @@ public class SeriesService {
       int paid,
       int partial,
       int pending,
+      int pausedOccurrences,
       int cancelled,
+      boolean paused,
       boolean stopped) {}
 
   public record PageView(List<View> content, long totalElements, int totalPages, int number) {}
@@ -201,8 +203,12 @@ public class SeriesService {
   }
 
   private View view(FinancialSeries s, List<FinancialEntry> items) {
-    int paid = 0, partial = 0, pending = 0, cancelled = 0;
+    int paid = 0, partial = 0, pending = 0, paused = 0, cancelled = 0;
     for (var e : items) {
+      if (e.isSeriesPaused()) {
+        paused++;
+        continue;
+      }
       switch (e.getStatus()) {
         case PAID -> paid++;
         case PARTIAL -> partial++;
@@ -222,7 +228,9 @@ public class SeriesService {
         paid,
         partial,
         pending,
+        paused,
         cancelled,
+        s.isPaused(),
         s.isStopped());
   }
 
@@ -252,14 +260,19 @@ public class SeriesService {
     var s = series.lock(id, company).orElseThrow(this::missing);
     // Same entry locks as payment/cancellation: never revert a payment that won the race.
     var items = entries.lockSeries(id, company);
+    if (s.isStopped()) return view(s, items);
     var before = com.fintry.audit.AuditService.fields("Encerrada", s.isStopped());
     for (var e : items)
       if (e.getStatus() == FinancialEntry.Status.PENDING) {
         finance.requireUnreconciled(e.getId());
         var old = finance.snapshot(e);
         e.setStatus(FinancialEntry.Status.CANCELLED);
+        e.setSeriesPaused(false);
         finance.recordChange("CANCEL", e, old);
+      } else if (e.isSeriesPaused()) {
+        e.setSeriesPaused(false);
       }
+    s.setPaused(false);
     s.setStopped(true);
     audit.change(
         "SERIES_STOP",
@@ -268,6 +281,62 @@ public class SeriesService {
         s.getDescription(),
         before,
         com.fintry.audit.AuditService.fields("Encerrada", true));
+    return view(s, items);
+  }
+
+  @Transactional
+  public View pause(UUID id) {
+    var company = current.companyId();
+    var s = series.lock(id, company).orElseThrow(this::missing);
+    var items = entries.lockSeries(id, company);
+    if (s.getKind() != FinancialSeries.Kind.RECURRING)
+      throw invalid("Somente recorrências mensais podem ser pausadas.");
+    if (s.isStopped()) throw new ResponseStatusException(HttpStatus.CONFLICT, "A recorrência já foi encerrada.");
+    if (s.isPaused()) return view(s, items);
+    var before = com.fintry.audit.AuditService.fields("Pausada", false);
+    var today = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+    for (var e : items)
+      if (e.getStatus() == FinancialEntry.Status.PENDING && e.getDueDate().isAfter(today)) {
+        finance.requireUnreconciled(e.getId());
+        var old = finance.snapshot(e);
+        e.setStatus(FinancialEntry.Status.CANCELLED);
+        e.setSeriesPaused(true);
+        finance.recordChange("PAUSE_SERIES_OCCURRENCE", e, old);
+      }
+    s.setPaused(true);
+    audit.change(
+        "SERIES_PAUSE",
+        "SERIES",
+        s.getId(),
+        s.getDescription(),
+        before,
+        com.fintry.audit.AuditService.fields("Pausada", true, "Pendências futuras suspensas", items.stream().filter(FinancialEntry::isSeriesPaused).count()));
+    return view(s, items);
+  }
+
+  @Transactional
+  public View resume(UUID id) {
+    var company = current.companyId();
+    var s = series.lock(id, company).orElseThrow(this::missing);
+    var items = entries.lockSeries(id, company);
+    if (s.isStopped()) throw new ResponseStatusException(HttpStatus.CONFLICT, "A recorrência encerrada não pode ser retomada.");
+    if (!s.isPaused()) return view(s, items);
+    var before = com.fintry.audit.AuditService.fields("Pausada", true);
+    for (var e : items)
+      if (e.isSeriesPaused() && e.getStatus() == FinancialEntry.Status.CANCELLED) {
+        var old = finance.snapshot(e);
+        e.setStatus(FinancialEntry.Status.PENDING);
+        e.setSeriesPaused(false);
+        finance.recordChange("RESUME_SERIES_OCCURRENCE", e, old);
+      }
+    s.setPaused(false);
+    audit.change(
+        "SERIES_RESUME",
+        "SERIES",
+        s.getId(),
+        s.getDescription(),
+        before,
+        com.fintry.audit.AuditService.fields("Pausada", false));
     return view(s, items);
   }
 }

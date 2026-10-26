@@ -359,6 +359,8 @@ function applyPermissions(scope = document) {
     "cancel",
     "edit-entry",
     "stop-series",
+    "pause-series",
+    "resume-series",
     "contact",
     "category",
     "edit-contact",
@@ -462,6 +464,10 @@ const auditActions = {
   RECONCILE_CREATE: "Criou lançamento do extrato",
   RECONCILE_IGNORE: "Ignorou movimento bancário",
   RECONCILE_REOPEN: "Reabriu conciliação",
+  SERIES_PAUSE: "Pausou recorrência",
+  SERIES_RESUME: "Retomou recorrência",
+  PAUSE_SERIES_OCCURRENCE: "Suspendeu ocorrência",
+  RESUME_SERIES_OCCURRENCE: "Reativou ocorrência",
   PROPOSAL_CREATE: "Criou proposta",
   PROPOSAL_UPDATE: "Editou proposta",
   PROPOSAL_STATUS: "Atualizou negociação",
@@ -757,7 +763,9 @@ function entryStatus(row, today = localDate()) {
     cancelled = row.status === "CANCELLED",
     overdue = !paid && !partial && !cancelled && row.dueDate < today;
   return {
-    label: cancelled
+    label: row.seriesPaused
+      ? "Pausado"
+      : cancelled
       ? "Cancelado"
       : partial
         ? "Parcial"
@@ -770,7 +778,9 @@ function entryStatus(row, today = localDate()) {
           : row.dueDate === today
             ? "Vence hoje"
             : "Pendente",
-    className: cancelled
+    className: row.seriesPaused
+      ? "pending"
+      : cancelled
       ? "cancelled"
       : partial
         ? "pending"
@@ -1307,15 +1317,41 @@ function monthlyPlan(kind, count, value, first) {
     };
   });
 }
+function seriesStatus(item) {
+  if (item.stopped) return ["Encerrada", "cancelled"];
+  if (item.paused) return ["Pausada", "pending"];
+  if (item.pending || item.partial) return ["Em andamento", "pending"];
+  if (item.paid === item.occurrences) return ["Concluída", ""];
+  if (item.cancelled === item.occurrences) return ["Cancelada", "cancelled"];
+  return ["Encerrada", "cancelled"];
+}
+function seriesActions(item) {
+  const actions = [`<button class="btn secondary small" data-action="series-items" data-id="${item.id}">Ver lançamentos</button>`];
+  if (item.kind === "RECURRING" && !item.stopped) {
+    if (item.paused) {
+      actions.push(`<button class="btn soft small" data-action="resume-series" data-id="${item.id}">Retomar</button>`);
+    } else if (item.pending && item.lastDueDate > localDate()) {
+      actions.push(`<button class="btn text small" data-action="pause-series" data-id="${item.id}">Pausar</button>`);
+    }
+    if (item.pending || item.paused || item.partial)
+      actions.push(`<button class="btn text small" data-action="stop-series" data-id="${item.id}">Encerrar</button>`);
+  } else if (item.kind === "INSTALLMENT" && item.pending) {
+    actions.push(`<button class="btn text small" data-action="stop-series" data-id="${item.id}">Cancelar pendências</button>`);
+  }
+  return `<div class="row-actions">${actions.join("")}</div>`;
+}
 function renderSeries() {
   const result = state.series;
   return (
     head(
       "Organize os próximos meses.",
-      "Parcelamentos e repetições mensais com quantidade definida.",
+      "Acompanhe parcelamentos e controle pausas e encerramentos das recorrências.",
       `<button class="btn" data-action="entry">${icon("plus")}Nova série ou lançamento</button>`,
     ) +
-    `<section class="card">${result.content.length ? `<div class="table-wrap"><table><thead><tr><th>SÉRIE</th><th>PERÍODO</th><th>VALOR TOTAL</th><th>ACOMPANHAMENTO</th><th>AÇÕES</th></tr></thead><tbody>${result.content.map((item) => `<tr><td class="description"><strong>${e(item.description)}</strong><small>${item.kind === "INSTALLMENT" ? "Parcelamento" : "Recorrência mensal"} · ${item.occurrences} ocorrências</small></td><td>${dateLabel(item.firstDueDate)}<br><small class="muted">até ${dateLabel(item.lastDueDate)}</small></td><td><strong>${money(item.totalAmount)}</strong></td><td class="description"><span class="badge ${item.stopped ? "cancelled" : item.pending || item.partial ? "pending" : ""}">${item.stopped ? "Encerrada" : item.pending || item.partial ? "Em andamento" : item.paid === item.occurrences ? "Concluída" : item.cancelled === item.occurrences ? "Cancelada" : "Encerrada"}</span><br><small>${item.paid} realizadas · ${item.partial} parciais · ${item.pending} pendentes · ${item.cancelled} canceladas</small></td><td><div class="row-actions"><button class="btn secondary small" data-action="series-items" data-id="${item.id}">Ver lançamentos</button>${item.pending ? `<button class="btn text small" data-action="stop-series" data-id="${item.id}">Cancelar pendências</button>` : ""}</div></td></tr>`).join("")}</tbody></table></div>` : `<div class="empty"><h3>Planeje seus próximos vencimentos</h3><p>Divida um valor total em parcelas ou repita um valor mensalmente. Confira a prévia antes de registrar.</p><button class="btn" data-action="entry">Criar primeira série</button></div>`}<div class="pagination"><span>${result.totalElements} série(s)</span><div class="row-actions"><button class="btn secondary small" data-action="series-prev" ${state.seriesPage === 0 ? "disabled" : ""}>Anterior</button><span>${state.seriesPage + 1} / ${Math.max(1, result.totalPages)}</span><button class="btn secondary small" data-action="series-next" ${state.seriesPage + 1 >= result.totalPages ? "disabled" : ""}>Próxima</button></div></div></section><p class="notice">Os valores entram no saldo ao registrar cada baixa. Cancelar pendências da série preserva pagamentos e recebimentos realizados. Recorrências desta versão têm prazo definido, sem renovação automática.</p>`
+    `<section class="card">${result.content.length ? `<div class="table-wrap"><table><thead><tr><th>SÉRIE</th><th>PERÍODO</th><th>VALOR TOTAL</th><th>ACOMPANHAMENTO</th><th>AÇÕES</th></tr></thead><tbody>${result.content.map((item) => {
+      const [label, badge] = seriesStatus(item);
+      return `<tr><td class="description"><strong>${e(item.description)}</strong><small>${item.kind === "INSTALLMENT" ? "Parcelamento" : "Recorrência mensal"} · ${item.occurrences} ocorrências</small></td><td>${dateLabel(item.firstDueDate)}<br><small class="muted">até ${dateLabel(item.lastDueDate)}</small></td><td><strong>${money(item.totalAmount)}</strong></td><td class="description"><span class="badge ${badge}">${label}</span><br><small>${item.paid} realizadas · ${item.partial} parciais · ${item.pending} pendentes · ${item.pausedOccurrences} pausadas · ${item.cancelled} canceladas</small></td><td>${seriesActions(item)}</td></tr>`;
+    }).join("")}</tbody></table></div>` : `<div class="empty"><h3>Planeje seus próximos vencimentos</h3><p>Divida um valor total em parcelas ou repita um valor mensalmente. Confira a prévia antes de registrar.</p><button class="btn" data-action="entry">Criar primeira série</button></div>`}<div class="pagination"><span>${result.totalElements} série(s)</span><div class="row-actions"><button class="btn secondary small" data-action="series-prev" ${state.seriesPage === 0 ? "disabled" : ""}>Anterior</button><span>${state.seriesPage + 1} / ${Math.max(1, result.totalPages)}</span><button class="btn secondary small" data-action="series-next" ${state.seriesPage + 1 >= result.totalPages ? "disabled" : ""}>Próxima</button></div></div></section><p class="notice">Pausar uma recorrência suspende somente ocorrências futuras ainda pendentes. Vencidas e parcialmente pagas continuam ativas. Retomar restaura apenas as ocorrências pausadas; encerrar é definitivo. As ocorrências pausadas não são recriadas e não alteram pagamentos já registrados.</p>`
   );
 }
 async function showSeriesItems(id) {
@@ -1339,7 +1375,7 @@ async function showSeriesItems(id) {
       .flatMap((part) => part.content)
       .sort((a, b) => a.sequenceNumber - b.sequenceNumber);
     form.querySelector(".series-items-content").innerHTML =
-      `<div class="schedule-rows">${rows.map((item) => `<div><span>${item.sequenceNumber}/${item.seriesCount} · ${dateLabel(item.dueDate)}<br><small>${item.status === "PAID" ? "Realizado" : item.status === "PARTIAL" ? "Parcial" : item.status === "CANCELLED" ? "Cancelado" : "Pendente"}</small></span><strong>${money(item.amount)}</strong></div>`).join("")}</div><p class="notice">Para registrar uma baixa, abra Lançamentos e selecione o mês do vencimento.</p>`;
+      `<div class="schedule-rows">${rows.map((item) => `<div><span>${item.sequenceNumber}/${item.seriesCount} · ${dateLabel(item.dueDate)}<br><small>${item.seriesPaused ? "Pausado" : item.status === "PAID" ? "Realizado" : item.status === "PARTIAL" ? "Parcial" : item.status === "CANCELLED" ? "Cancelado" : "Pendente"}</small></span><strong>${money(item.amount)}</strong></div>`).join("")}</div><p class="notice">Ocorrências pausadas podem ser retomadas pela série. Para registrar uma baixa, abra Lançamentos e selecione o mês do vencimento.</p>`;
   } catch (err) {
     if (form.isConnected)
       form.querySelector(".series-items-content").textContent = err.message;
@@ -1784,6 +1820,8 @@ async function act(btn) {
       "cancel",
       "edit-entry",
       "stop-series",
+      "pause-series",
+      "resume-series",
       "contact",
       "category",
       "edit-contact",
@@ -1815,16 +1853,44 @@ async function act(btn) {
     }
     return;
   }
-  if (action === "stop-series") {
+  if (action === "pause-series") {
     showDialog(
-      "Cancelar pendências da série?",
-      "Os pagamentos e recebimentos realizados serão mantidos.",
-      '<p class="notice">Todas as ocorrências ainda pendentes desta série serão canceladas, inclusive vencidas. O histórico será preservado.</p>',
+      "Pausar recorrência?",
+      "As ocorrências futuras ainda pendentes ficarão suspensas.",
+      '<p class="notice">Ocorrências vencidas e parcialmente pagas continuam ativas. Retomar restaura apenas as ocorrências suspensas, sem duplicar lançamentos ou alterar pagamentos registrados.</p>',
+      async () => {
+        await send(`/finance/series/${btn.dataset.id}/pause`);
+        toast("Recorrência pausada.");
+      },
+      "Pausar recorrência",
+    );
+    return;
+  }
+  if (action === "resume-series") {
+    showDialog(
+      "Retomar recorrência?",
+      "As ocorrências suspensas voltarão à lista de pendências.",
+      '<p class="notice">Os vencimentos originais serão mantidos. Se alguma data já passou, a ocorrência voltará como vencida; nenhuma nova ocorrência será criada.</p>',
+      async () => {
+        await send(`/finance/series/${btn.dataset.id}/resume`);
+        toast("Recorrência retomada.");
+      },
+      "Retomar recorrência",
+    );
+    return;
+  }
+  if (action === "stop-series") {
+    const item = state.series?.content.find((series) => series.id === btn.dataset.id);
+    const recurring = item?.kind === "RECURRING";
+    showDialog(
+      recurring ? "Encerrar recorrência?" : "Cancelar pendências da série?",
+      "Essa ação é definitiva para novas pendências.",
+      `<p class="notice">${recurring ? "Todas as ocorrências ainda pendentes serão canceladas, inclusive as vencidas. Pagamentos e baixas parciais serão preservados. Uma recorrência encerrada não pode ser retomada." : "Todas as ocorrências ainda pendentes serão canceladas, inclusive vencidas. Pagamentos e recebimentos realizados serão mantidos."}</p>`,
       async () => {
         await send("/finance/series/" + btn.dataset.id + "/stop");
-        toast("Pendências canceladas. Registros realizados preservados.");
+        toast(recurring ? "Recorrência encerrada." : "Pendências canceladas. Registros realizados preservados.");
       },
-      "Confirmar cancelamento",
+      recurring ? "Encerrar recorrência" : "Confirmar cancelamento",
     );
     return;
   }
@@ -2000,17 +2066,19 @@ function renderDetails() {
   const data = detailData,
     row = data.entry;
   const status =
-    row.status === "PAID"
-      ? row.type === "INCOME"
-        ? "Recebido"
-        : "Pago"
-      : row.status === "CANCELLED"
-        ? "Cancelado"
-        : row.status === "PARTIAL"
-          ? "Pagamento parcial"
-        : row.dueDate < localDate()
-          ? "Em atraso"
-          : "Pendente";
+    row.seriesPaused
+      ? "Pausado"
+      : row.status === "PAID"
+        ? row.type === "INCOME"
+          ? "Recebido"
+          : "Pago"
+        : row.status === "CANCELLED"
+          ? "Cancelado"
+          : row.status === "PARTIAL"
+            ? "Pagamento parcial"
+            : row.dueDate < localDate()
+              ? "Em atraso"
+              : "Pendente";
   const item = (label, value) =>
     `<div><dt>${label}</dt><dd>${e(value || "—")}</dd></div>`;
   drawer.innerHTML = `<div class="drawer-header"><div><span class="eyebrow">${row.transferId ? "Transferência entre contas" : row.type === "INCOME" ? "Receita" : "Despesa"}</span><h2 id="drawer-title" tabindex="-1">${e(row.description)}</h2></div><button class="close" data-action="drawer-close" aria-label="Fechar detalhes">×</button></div><div class="drawer-amount ${row.type === "INCOME" ? "positive" : "negative"}">${money(row.amount)}</div><span class="badge ${["PENDING", "PARTIAL"].includes(row.status) ? "pending" : row.status === "CANCELLED" ? "cancelled" : ""}">${status}</span><dl class="detail-grid">${item("Conta", data.accountName)}${item("Categoria", row.category)}${item("Cliente / fornecedor", row.contactName)}${item("Valor original", money(row.amount))}${item("Recebido / pago", money(row.receivedAmount))}${item("Saldo restante", money(row.remainingAmount))}${item("Vencimento", dateLabel(row.dueDate))}${item("Baixa final", dateLabel(row.paymentDate))}${item("Registrado em", dateLabel(data.createdAt?.slice(0, 10)))}${item("Última alteração", dateLabel(data.updatedAt?.slice(0, 10)))}${row.seriesId ? item(row.seriesKind === "INSTALLMENT" ? "Parcela" : "Repetição mensal", row.sequenceNumber + " de " + row.seriesCount) : ""}</dl><section class="payment-history"><h3>Pagamentos registrados</h3>${data.payments.length ? `<ul>${data.payments.map((p) => `<li><span>${dateLabel(p.paymentDate)}</span><strong>${money(p.amount)}</strong></li>`).join("")}</ul>` : '<p class="muted">Nenhum pagamento registrado.</p>'}</section><div class="drawer-actions">${["PENDING", "PARTIAL"].includes(row.status) ? `<button class="btn" data-action="pay" data-id="${row.id}">${row.type === "INCOME" ? (row.status === "PARTIAL" ? "Registrar recebimento" : "Receber") : (row.status === "PARTIAL" ? "Registrar pagamento" : "Pagar")}</button>${row.status === "PENDING" && !row.seriesId && !row.transferId && !row.saleId ? `<button class="btn secondary" data-action="edit-entry" data-id="${row.id}">Editar lançamento</button>` : ""}` : ""}${row.status !== "CANCELLED" && !row.transferId && !row.saleId ? `<button class="btn text" data-action="cancel" data-id="${row.id}">Cancelar lançamento</button>` : ""}</div>${row.saleId ? `<p class="notice">Receita vinculada a uma venda. Para devolver itens e estornar a receita, cancele pela página Vendas.</p><button class="btn secondary" data-action="sale-details" data-id="${row.saleId}">Abrir venda vinculada</button>` : ""}<section class="attachments-section" aria-labelledby="attachments-title"><div class="card-head"><div><h3 id="attachments-title">Comprovantes</h3><p>${detailFiles.length} de 10 arquivos · PDF, PNG ou JPEG</p></div></div><p class="muted attachment-hint">Os arquivos ficam vinculados somente a este lançamento, inclusive após a baixa ou o cancelamento.</p><div class="attachment-list">${detailFiles.length ? detailFiles.map((file) => `<article class="attachment-item"><div class="attachment-type" aria-hidden="true">${file.contentType === "application/pdf" ? "PDF" : "IMG"}</div><div class="attachment-info"><strong>${e(file.filename)}</strong><small>${fileSize(file.byteCount)} · ${dateLabel(file.createdAt?.slice(0, 10))}<br>Enviado por ${e(file.uploadedByName)}</small></div><div class="attachment-actions"><button class="btn secondary small" data-action="attachment-download" data-file="${file.id}" aria-label="Baixar ${e(file.filename)}">Baixar</button><button class="btn text small" data-action="attachment-remove" data-file="${file.id}" aria-label="Remover ${e(file.filename)}">Remover</button></div>${removalId === file.id ? `<div class="remove-confirm" role="alert"><p>Remover este comprovante? O arquivo será excluído. O lançamento será preservado.</p><button class="btn danger small" data-action="attachment-confirm" data-file="${file.id}">Confirmar remoção</button><button class="btn secondary small" data-action="attachment-keep">Manter arquivo</button></div>` : ""}</article>`).join("") : '<div class="attachment-empty">Nenhum comprovante anexado. Adicione notas, recibos ou comprovantes de pagamento.</div>'}</div>${detailFiles.length < 10 ? `<form id="attachment-form"><label class="field">Adicionar comprovante<input name="file" type="file" required accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg" aria-describedby="attachment-help"></label><p id="attachment-help" class="muted attachment-hint">Até 5 MB por arquivo e 10 arquivos por lançamento.</p><p id="attachment-error" class="form-error" role="alert"></p><button type="submit" class="btn">Anexar comprovante</button></form>` : '<p class="notice">Limite de 10 comprovantes atingido. Remova um arquivo para anexar outro.</p>'}</section><div class="drawer-footer">${themeToggle()}<button class="btn secondary" data-action="drawer-close">Fechar detalhes</button></div>`;

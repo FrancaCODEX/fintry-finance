@@ -95,6 +95,7 @@ public class FinanceService {
       UUID seriesId,
       Integer sequenceNumber,
       Integer seriesCount,
+      boolean seriesPaused,
       FinancialSeries.Kind seriesKind,
       UUID saleId) {}
 
@@ -176,6 +177,7 @@ public class FinanceService {
         e.getSeriesId(),
         e.getSequenceNumber(),
         e.getSeriesCount(),
+        e.isSeriesPaused(),
         e.getSeriesKind(),
         e.getSaleId());
   }
@@ -219,6 +221,8 @@ public class FinanceService {
         e.getDueDate(),
         "Pagamento",
         e.getPaymentDate(),
+        "Ocorrência pausada",
+        e.isSeriesPaused(),
         "Situação",
         e.getStatus());
   }

@@ -38,12 +38,14 @@ Lançamentos aceitam `categoryId` e `contactId` opcionais. Com categoryId, a cat
 ## Séries mensais — 0.3.0
 
 - `POST /finance/series`: requestId (UUID estável para repetir a mesma solicitação), kind (INSTALLMENT/RECURRING), occurrences (2–120) e entry (payload normal de lançamento). Em INSTALLMENT, entry.amount é o total; em RECURRING, é o valor de cada ocorrência. entry.paid/paymentDate afetam apenas a primeira. Retorna 201 na criação, 200 na repetição idêntica e 409 se requestId for reutilizado com outros dados.
-- `GET /finance/series?page=0&size=20`: lista paginada, máximo 50 séries por página, com contagens de paid/pending/cancelled.
-- `POST /finance/series/{id}/stop`: cancela pendências sob bloqueio e preserva realizados; repetir a operação é seguro.
+- `GET /finance/series?page=0&size=20`: lista paginada, máximo 50 séries por página, com contagens de paid/partial/pending/pausedOccurrences/cancelled e flags paused/stopped.
+- `POST /finance/series/{id}/pause`: apenas para RECURRING; cancela somente ocorrências PENDING futuras e marca-as para retomada. Vencidas, parciais e pagas não são alteradas. Repetir é seguro.
+- `POST /finance/series/{id}/resume`: restaura somente ocorrências canceladas pela pausa, preservando vencimentos originais; série encerrada retorna 409. Repetir é seguro.
+- `POST /finance/series/{id}/stop`: encerramento definitivo; cancela PENDING, inclusive vencidas, preserva pagamentos/baixas parciais e remove marcadores de pausa. Repetir é seguro. INSTALLMENT não pode ser pausada/retomada.
 - `GET /finance/entries?seriesId={id}`: consulta ocorrências da série com os filtros e a paginação existentes. A resposta inclui seriesId, seriesKind, sequenceNumber e seriesCount.
 - `GET /app`: nome e versão da aplicação; público.
 
-Criação de série é atômica. A mesma chave requestId fica isolada por empresa e é serializada pelo bloqueio da empresa. Contatos/categorias/contas são validados pelo fluxo financeiro existente. As séries são finitas, mensais, sem scheduler ou renovação automática. Ocorrências de série não aceitam edição individual; baixa e cancelamento individual continuam disponíveis.
+Criação de série é atômica. A mesma chave requestId fica isolada por empresa e é serializada pelo bloqueio da empresa. Contatos/categorias/contas são validados pelo fluxo financeiro existente. As séries são finitas, mensais, sem scheduler ou renovação automática. Ocorrências de série não aceitam edição individual; baixa e cancelamento individual continuam disponíveis. As datas são mantidas ao pausar e retomar; ocorrências que vencerem durante a pausa voltam como pendentes vencidas.
 
 ## Relatórios e projeções — 0.4.0
 
