@@ -26,6 +26,23 @@ function dashboardComparison(value, previous) {
   }
   return comparison(value, previous);
 }
+function dashboardSparkline(values, label) {
+  const points = values.map(Number);
+  const low = Math.min(0, ...points), high = Math.max(1, ...points);
+  const spread = high - low || 1;
+  const coords = points.map((value, index) => ({
+    x: points.length <= 1 ? 50 : (index / (points.length - 1)) * 100,
+    y: 26 - ((value - low) / spread) * 20,
+  }));
+  const line = coords.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
+  const area = `${line} L100,30 L0,30 Z`;
+  return `<svg class="dashboard-sparkline" viewBox="0 0 100 32" preserveAspectRatio="none" role="img" aria-label="${e(label)}"><path class="sparkline-area" d="${area}"/><path class="sparkline-line" d="${line}"/>${coords.length ? `<circle class="sparkline-dot" cx="${coords.at(-1).x}" cy="${coords.at(-1).y}" r="2.3"/>` : ""}</svg>`;
+}
+function dashboardKpi(title, value, previous, series, iconName, tone, explanation) {
+  const formatted = money(value);
+  const label = `${title} nos últimos seis meses`;
+  return `<article class="dashboard-kpi ${tone}"><div class="dashboard-kpi-top"><span>${e(title)}</span><span class="dashboard-kpi-icon">${icon(iconName)}</span></div><strong class="dashboard-kpi-value ${formatted.length > 15 ? "money-long" : ""}">${formatted}</strong><div class="dashboard-kpi-bottom"><span class="dashboard-kpi-comparison">${dashboardComparison(value, previous)}</span><span class="dashboard-kpi-note">${explanation}</span></div>${dashboardSparkline(series, label)}</article>`;
+}
 function dashboardShortcuts() {
   const actions = [
     ...(canWrite()
@@ -112,7 +129,7 @@ function renderDashboard() {
       monthInput() +
         `<button class="btn secondary" data-dashboard-today>Ir para mês atual</button>`,
     ) +
-    `<div class="dashboard-overview"><article class="card dashboard-balance"><div class="balance-heading"><span class="eyebrow">SALDO DISPONÍVEL</span><span class="balance-symbol">${icon("wallet")}</span></div><strong class="balance-number ${money(s.balance).length > 18 ? "balance-long" : ""}">${money(s.balance)}</strong><p>Saldo atual de todas as contas.<br>Inclui saldos iniciais e movimentos realizados.</p><button class="balance-link" data-nav="accounts">Consultar contas ${icon("income")}</button><span class="balance-scope">Agora · independente do mês selecionado</span></article><section class="dashboard-monthly" aria-label="Indicadores do mês selecionado"><div class="dashboard-period"><span class="eyebrow">MÊS EM ANÁLISE</span><strong>${e(dashboardMonth(state.month))}</strong><span>Valores realizados pela data do pagamento ou recebimento</span></div><div class="metrics">${metric("Receitas realizadas", s.income, dashboardComparison(s.income, s.previousIncome), "income", "dashboard-income")}${metric("Despesas realizadas", s.expense, dashboardComparison(s.expense, s.previousExpense), "expense", "dashboard-expense")}${metric("Resultado de caixa", s.result, dashboardComparison(s.result, s.previousResult), "trend")}</div><p class="dashboard-result-note">Resultado de caixa = receitas menos despesas realizadas. Não representa lucro contábil.</p></section></div>` +
+    `<div class="dashboard-overview"><article class="card dashboard-balance"><div class="balance-heading"><span class="eyebrow">SALDO DISPONÍVEL</span><span class="balance-symbol">${icon("wallet")}</span></div><strong class="balance-number ${money(s.balance).length > 18 ? "balance-long" : ""}">${money(s.balance)}</strong><p>Saldo atual de todas as contas.<br>Inclui saldos iniciais e movimentos realizados.</p><button class="balance-link" data-nav="accounts">Consultar contas ${icon("income")}</button><span class="balance-scope">Agora · independente do mês selecionado</span></article><section class="dashboard-monthly" aria-label="Indicadores do mês selecionado"><div class="dashboard-period"><span class="eyebrow">MÊS EM ANÁLISE</span><strong>${e(dashboardMonth(state.month))}</strong><span>Valores realizados pela data do pagamento ou recebimento</span></div><div class="dashboard-kpis">${dashboardKpi("Receitas realizadas", s.income, s.previousIncome, s.flow.map((m) => m.income), "income", "income", "Entradas confirmadas")}${dashboardKpi("Despesas realizadas", s.expense, s.previousExpense, s.flow.map((m) => m.expense), "expense", "expense", "Saídas confirmadas")}${dashboardKpi("Resultado de caixa", s.result, s.previousResult, s.flow.map((m) => Number(m.income) - Number(m.expense)), "trend", "result", "Receitas menos despesas")}</div><p class="dashboard-result-note">Valores pela data da baixa. O resultado de caixa não representa lucro contábil.</p></section></div>` +
     dashboardOnboarding() +
     dashboardPresentationTour() +
     dashboardShortcuts() +
