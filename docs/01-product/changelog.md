@@ -1,5 +1,14 @@
 # Changelog do Fintry
 
+## [0.32.0] - 2026-10-26
+
+### Gráficos interativos do dashboard
+
+- Permite alternar entre barras e linhas, períodos de 3 ou 6 meses e as séries de receitas, despesas e resultado.
+- Adiciona visualizações nomeadas que podem ser criadas, selecionadas, ajustadas e excluídas, com preferências preservadas por usuário no navegador.
+- Mantém seleção mensal acessível por mouse, toque e teclado e atualiza junto os detalhes e a tabela dos dados exibidos.
+- Preserva os lançamentos financeiros: as personalizações alteram somente a forma de explorar os indicadores.
+
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
 ## [0.31.0] - 2026-10-26
