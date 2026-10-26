@@ -2,6 +2,14 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.31.0] - 2026-10-26
+
+### Dashboard analítico
+
+- Substitui os indicadores mensais genéricos por cartões de receita, despesa e resultado com minigráficos baseados nos seis meses exibidos no histórico.
+- Diferencia as séries por cor e mantém valores, comparação com o mês anterior e explicação textual para leitura rápida.
+- Torna cada minigráfico acessível por leitor de tela e mantém a leitura dos valores independente da visualização gráfica.
+
 ## [0.30.0] - 2026-10-26
 
 ### Refinamento visual do produto
