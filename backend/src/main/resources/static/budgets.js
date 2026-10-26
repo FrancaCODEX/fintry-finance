@@ -101,75 +101,42 @@ function budgetDialog(row = null) {
 function renderExamples() {
   const loaded = planning.sample.loaded;
   const packVersion = planning.sample.packVersion || 1;
-  const current = loaded && packVersion >= 2;
+  const current = loaded && packVersion >= 3;
+  const areas = [
+    ["Financeiro", "4 contas, seis meses de receitas/despesas, transferências e compromissos de hoje até os próximos meses.", "dashboard", "Explorar dashboard"],
+    ["Pendências e séries", "Atrasados, vencimentos próximos, recorrência mensal e compra parcelada.", "pending", "Ver pendências"],
+    ["Clientes e fornecedores", "Contatos de exemplo, cadastros ativos e um registro arquivado.", "contacts", "Ver contatos"],
+    ["Categorias e orçamentos", "Limites mensais com situações dentro do limite, em atenção e excedidas.", "budgets", "Ver orçamentos"],
+    ["Produtos, estoque e vendas", "Estoque baixo/zerado, vendas em situações diferentes e propostas comerciais.", "sales", "Ver vendas"],
+    ["Pagamentos parciais", "Recebimentos e pagamentos em etapas, saldo restante e histórico de baixas.", "entries", "Ver lançamentos"],
+    ["Conciliação bancária", "Extrato OFX fictício, dois movimentos agrupados, vínculos individuais e uma linha em revisão.", "reconciliation", "Explorar conciliação"],
+    ["Relatórios", "Pagamentos parciais discriminados pelas datas e valores efetivamente recebidos ou pagos.", "reports", "Abrir relatórios"],
+  ];
   return (
     head(
       "Explore o Fintry completo.",
-      "Um cenário fictício de uma pequena empresa, com registros relacionados em várias telas.",
+      "Um cenário de demonstração que percorre o financeiro da previsão à conciliação.",
     ) +
-    `<section class="card examples-intro"><span class="eyebrow">DADOS FICTÍCIOS · ${current ? "PACOTE 2 ATUALIZADO" : "PACOTE 2 DISPONÍVEL"}</span><h2>${current ? "Seu ambiente está atualizado." : loaded ? "Há novos exemplos para adicionar." : "Mais contexto para testar cada fluxo."}</h2><p>Os registros recebem a identificação Exemplo ou DEMO. A inclusão cria dados nesta empresa, afeta os indicadores e mantém os cadastros que você já criou. Não substitui nem apaga registros.</p>${current ? '<p class="notice success" role="status">Pacote 2 adicionado. Repetir a solicitação não duplica os exemplos; alterações que você fizer neles são preservadas.</p>' : canWrite() ? `<button class="btn" data-action="sample">${loaded ? "Atualizar dados de exemplo" : "Adicionar dados de exemplo"}</button>` : '<p class="notice">Um Administrador ou membro do Financeiro pode adicionar os exemplos.</p>'}</section><section class="examples-grid" aria-label="Conteúdo dos exemplos">${[
-      [
-        "Financeiro",
-        "4 contas, seis meses de receitas/despesas, transferências e compromissos de hoje até os próximos meses.",
-        "dashboard",
-        "Explorar dashboard",
-      ],
-      [
-        "Pendências e séries",
-        "Atrasados, vencendo hoje, próximos vencimentos, recorrência mensal e compra parcelada.",
-        "pending",
-        "Ver pendências",
-      ],
-      [
-        "Clientes e fornecedores",
-        "8 contatos com tipo, documento, e-mail, telefone e observações fictícios; um cadastro arquivado.",
-        "contacts",
-        "Ver contatos",
-      ],
-      [
-        "Categorias e orçamentos",
-        "8 categorias cadastradas; limites de dois meses com situações dentro do limite, em atenção e excedidas.",
-        "budgets",
-        "Ver orçamentos",
-      ],
-      [
-        "Produtos e estoque",
-        "10 produtos e serviços, com estoque baixo/zerado, item inativo, preços/custos e movimentos com motivo.",
-        "products",
-        "Ver produtos",
-      ],
-      [
-        "Vendas e comprovantes",
-        "Vendas em diferentes situações, propostas em rascunho/negociação/aprovadas e comprovantes PDF fictícios.",
-        "sales",
-        "Ver vendas",
-      ],
-    ]
-      .map(
-        ([title, text, page, label]) =>
-          `<article class="card"><h2>${title}</h2><p>${text}</p><button class="btn text" data-nav="${page}">${label} →</button></article>`,
-      )
-      .join(
-        "",
-      )}</section><p class="notice">O pacote é adicionado somente quando você solicita, uma vez por empresa. Não cria usuários, senhas ou convites. Os comprovantes não têm validade fiscal ou bancária.</p>`
+    `<section class="card examples-intro"><span class="eyebrow">DADOS FICTÍCIOS · ${current ? "PACOTE 3 ATUALIZADO" : "PACOTE 3 DISPONÍVEL"}</span><h2>${current ? "Seu ambiente de apresentação está pronto." : loaded ? "Complete os exemplos para apresentar o fluxo." : "Explore o Fintry com um cenário completo."}</h2><p>Os registros recebem a identificação Exemplo ou DEMO. A inclusão afeta dashboard e relatórios e preserva seus cadastros, exemplos e alterações atuais.</p>${current ? '<p class="notice success" role="status">Pacote 3 adicionado. As baixas e a conciliação são fictícias; nenhum banco real é acessado. Repetir a solicitação não duplica os registros.</p>' : canWrite() ? `<button class="btn" data-action="sample">${loaded ? "Adicionar exemplos de apresentação" : "Preparar ambiente de apresentação"}</button>` : '<p class="notice">Um Administrador ou membro do Financeiro pode preparar os exemplos.</p>'}</section><section class="examples-grid" aria-label="Conteúdo dos exemplos">${areas.map(([title, text, page, label]) => `<article class="card"><h2>${title}</h2><p>${text}</p><button class="btn text" data-nav="${page}">${label} →</button></article>`).join("")}</section><p class="notice">O pacote é adicionado somente quando você solicita, uma vez por empresa. Extratos, pagamentos e comprovantes são fictícios; nenhuma instituição financeira é acessada. Não cria usuários, senhas ou convites.</p>`
   );
 }
 function sampleDialog() {
   const upgrading = planning.sample.loaded;
+  const current = upgrading && planning.sample.packVersion >= 3;
   showDialog(
-    upgrading ? "Atualizar dados de exemplo?" : "Adicionar dados de exemplo?",
-    "Registros fictícios para explorar os módulos do Fintry.",
-    `<p class="notice">${upgrading ? "Serão acrescentados serviços, produtos e propostas comerciais, incluindo uma proposta aprovada com venda e conta a receber. Seus exemplos atuais serão preservados." : "Serão adicionadas contas, categorias, contatos, lançamentos, séries, produtos, serviços, vendas, propostas, orçamentos e comprovantes fictícios nesta empresa."} Os novos valores entram no dashboard e nos relatórios.</p><p>Seus registros e alterações atuais serão preservados. A atualização é incluída uma vez e pode ser solicitada em uma empresa que já recebeu o pacote anterior.</p>`,
+    upgrading ? "Preparar exemplos de apresentação?" : "Preparar ambiente de apresentação?",
+    "Registros fictícios para percorrer os principais fluxos do Fintry.",
+    `<p class="notice">${current ? "O pacote de apresentação já está completo." : upgrading ? "Serão acrescentados lançamentos com baixas parciais e uma conciliação OFX fictícia: dois movimentos agrupados, dois vínculos individuais e um movimento em revisão. Seus dados atuais serão preservados; nenhum banco real será acessado." : "Serão adicionadas contas, categorias, contatos, lançamentos, séries, produtos, serviços, vendas, propostas, orçamentos, comprovantes e um extrato OFX fictícios."} Os valores recebidos/pagos aparecem no dashboard e nos relatórios.</p><p>A inclusão é feita uma única vez. Seus registros e alterações atuais serão preservados.</p>`,
     async () => {
       await send("/finance/sample");
       state.page = "examples";
       toast(
         upgrading
-          ? "Exemplos atualizados."
+          ? "Exemplos de apresentação adicionados."
           : "Ambiente preenchido com dados de exemplo.",
       );
     },
-    upgrading ? "Atualizar exemplos" : "Adicionar exemplos",
+    upgrading ? "Adicionar exemplos de apresentação" : "Preparar exemplos",
   );
 }
 async function planningAction(btn) {

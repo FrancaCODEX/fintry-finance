@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.27.0**
+**Versão atual: 0.28.0**
 
 Dashboard com saldo atual em destaque, indicadores realizados por mês, atalhos e gráfico consultável com mouse, toque e teclado. Veja a [visão geral](docs/01-product/dashboard.md).
 
@@ -53,7 +53,7 @@ docker compose up --build -d
 
 Abra **http://localhost:8080**, clique em **Criar conta** e preencha seu nome, empresa, CNPJ com 14 dígitos, e-mail e uma senha com pelo menos 10 caracteres. Para uma avaliação, use dados fictícios.
 
-Abra **Dados de exemplo** no menu (ou **Explorar com dados de exemplo** no primeiro acesso) e confirme **Adicionar exemplos**. O pacote opcional inclui contas, contatos, categorias, seis meses de financeiro, séries, produtos/estoque, vendas, serviços, propostas em diferentes situações, orçamentos e comprovantes fictícios. Empresas que já receberam o pacote anterior podem adicionar a expansão: seus cadastros e alterações são preservados, sem duplicação ao repetir. Os valores entram nos indicadores da empresa; use uma empresa de avaliação para explorar sem misturar com dados reais. Nada é carregado automaticamente.
+Abra **Dados de exemplo** no menu (ou **Explorar com dados de exemplo** no primeiro acesso) e confirme **Adicionar exemplos**. O pacote opcional inclui contas, contatos, categorias, seis meses de financeiro, séries, pagamentos parciais, conciliação OFX com movimentos agrupados e em revisão, produtos/estoque, vendas, serviços, propostas, orçamentos e comprovantes fictícios. Empresas que já receberam pacotes anteriores podem adicionar a expansão: seus cadastros e alterações são preservados, sem duplicação ao repetir. Nenhum banco real é acessado. Os valores entram nos indicadores da empresa; use uma empresa de avaliação para explorar sem misturar com dados reais. Nada é carregado automaticamente.
 
 O primeiro build baixa as dependências Java. Para acompanhar a inicialização:
 
@@ -170,6 +170,7 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 - Receitas e despesas com valor, categoria, conta e vencimento.
 - Parcelamentos mensais e recorrências de valor fixo, com 2 a 120 ocorrências.
 - Prévia de datas/valores, acompanhamento, pausa/retomada de recorrências e encerramento controlado.
+- Pagamentos parciais e conciliação bancária demonstrados no pacote fictício de apresentação.
 - Lançamentos pendentes e realizados; baixa com data de pagamento.
 - Edição de lançamentos pendentes, sem alterar saldos realizados.
 - Cancelamento preservando o histórico; para corrigir um registro realizado, cancele e cadastre novamente.

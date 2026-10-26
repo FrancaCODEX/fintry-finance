@@ -434,7 +434,7 @@ class PlanningIntegrationTests {
             .asText()
             .contains("Despesa de teste"));
     var contacts = b.request("GET", "/contacts?active=true", null, 200);
-    assertEquals(7, contacts.get("totalElements").asInt());
+    assertEquals(9, contacts.get("totalElements").asInt());
     assertTrue(contacts.get("content").get(0).get("email").asText().endsWith("@example.invalid"));
     assertFalse(contacts.get("content").get(0).get("phone").asText().isBlank());
     assertEquals(10, b.request("GET", "/products?size=100", null, 200).get("totalElements").asInt());
@@ -494,7 +494,58 @@ class PlanningIntegrationTests {
     assertTrue(budgets.get("exceededCount").asInt() > 0);
     var before = b.request("GET", "/finance/summary?month=2026-10", null, 200);
     var status = b.request("GET", "/finance/sample", null, 200);
-    assertEquals(2, status.get("packVersion").asInt());
+    assertEquals(3, status.get("packVersion").asInt());
+    var demoAccounts = b.request("GET", "/finance/accounts", null, 200);
+    String demoBank = null;
+    for (var account : demoAccounts)
+      if (account.get("name").asText().equals("[Exemplo] Banco principal"))
+        demoBank = account.get("id").asText();
+    assertNotNull(demoBank);
+    var reconciliation =
+        b.request(
+            "GET", "/finance/reconciliation?accountId=" + demoBank + "&size=50", null, 200);
+    assertEquals(5, reconciliation.get("totalElements").asInt());
+    assertEquals(1, reconciliation.get("open").asInt());
+    assertEquals(4, reconciliation.get("linked").asInt());
+    assertTrue(
+        java.util.stream.StreamSupport.stream(
+                reconciliation.get("content").spliterator(), false)
+            .anyMatch(row -> row.get("batchMovements").asInt() == 2));
+    var showcaseEntries =
+        b.request("GET", "/finance/entries?search=Apresentação&size=100", null, 200);
+    var groupedEntry =
+        java.util.stream.StreamSupport.stream(showcaseEntries.get("content").spliterator(), false)
+            .filter(row -> row.get("description").asText().contains("identidade visual"))
+            .findFirst()
+            .orElseThrow();
+    assertEquals("PARTIAL", groupedEntry.get("status").asText());
+    amount("2250.00", groupedEntry.get("receivedAmount"));
+    amount("750.00", groupedEntry.get("remainingAmount"));
+    var groupedDetails =
+        b.request(
+            "GET", "/finance/entries/" + groupedEntry.get("id").asText(), null, 200);
+    assertEquals(4, groupedDetails.get("payments").size());
+    var partialExpense =
+        java.util.stream.StreamSupport.stream(showcaseEntries.get("content").spliterator(), false)
+            .filter(row -> row.get("description").asText().contains("Equipamentos"))
+            .findFirst()
+            .orElseThrow();
+    assertEquals("PARTIAL", partialExpense.get("status").asText());
+    amount("350.00", partialExpense.get("receivedAmount"));
+    var partialReport =
+        b.request(
+            "GET",
+            "/reports?start=2026-10-01&end=2026-10-31&basis=PAYMENT&size=100",
+            null,
+            200);
+    assertTrue(
+        java.util.stream.StreamSupport.stream(
+                partialReport.get("content").spliterator(), false)
+            .anyMatch(
+                row ->
+                    row.get("description").asText().contains("identidade visual")
+                        && new java.math.BigDecimal(row.get("amount").asText())
+                            .compareTo(new java.math.BigDecimal("300.00")) == 0));
     b.request("POST", "/finance/sample", null, 201);
     assertEquals(5, b.request("GET", "/finance/accounts", null, 200).size());
     assertEquals(10, b.request("GET", "/products?size=100", null, 200).get("totalElements").asInt());
@@ -521,7 +572,7 @@ class PlanningIntegrationTests {
     sampleRuns.saveAndFlush(oldRun);
 
     b.request("POST", "/finance/sample", null, 201);
-    assertEquals(2, b.request("GET", "/finance/accounts", null, 200).size());
+    assertEquals(3, b.request("GET", "/finance/accounts", null, 200).size());
     assertTrue(
         b.request("GET", "/finance/accounts", null, 200).toString().contains(oldAccount));
     assertEquals(4, b.request("GET", "/products?size=100", null, 200).get("totalElements").asInt());

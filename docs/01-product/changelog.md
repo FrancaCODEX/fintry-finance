@@ -2,6 +2,16 @@
 
 As versões seguem `MAJOR.MINOR.PATCH`. Funcionalidades e melhorias recebem versão menor; correções isoladas recebem versão de correção. Antes de 1.0, mudanças incompatíveis também incrementam a versão menor. A versão da aplicação é definida em `backend/pom.xml`.
 
+## [0.28.0] - 2026-10-26
+
+### Versão de apresentação
+
+- Pacote de exemplos v3 acrescenta pagamentos parciais de receitas e despesas, com histórico de baixas e saldo restante.
+- Extrato OFX inteiramente fictício demonstra dois movimentos agrupados em uma baixa parcial, dois vínculos individuais e uma linha aberta para revisão.
+- Baixas de exemplo entram no dashboard e nos relatórios por pagamento; os dados permanecem identificados como exemplos.
+- A tela Dados de exemplo organiza atalhos para dashboard, lançamentos, relatórios e conciliação, com confirmação clara de que nenhum banco real é acessado.
+- Pacote aditivo e idempotente: os dados e alterações já existentes são preservados; empresa precisa solicitar a inclusão.
+
 ## [0.27.0] - 2026-10-26
 
 ### Controle de recorrências

@@ -32,8 +32,9 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.24.0 | Expansão segura dos exemplos para serviços e propostas comerciais | Incorporada à main (PR #27) |
 | 0.25.0 | Pagamentos parciais e acompanhamento do saldo restante | Incorporada à main (PR #28) |
 | 0.26.0 | Conciliação agrupada, divergências e tarifas com histórico | Incorporada à main (PR #29) |
-| 0.27.0 | Modelos de recorrência com pausa, retomada e término controlado | Em andamento |
-| 0.28.0 | Rodada dedicada a UX e interface: limpeza visual, identidade, acessibilidade e usabilidade móvel | Próxima |
+| 0.27.0 | Modelos de recorrência com pausa, retomada e término controlado | Incorporada à main (PR #30) |
+| 0.28.0 | Preparação da versão de apresentação com exemplos de pagamentos parciais, relatórios e conciliação | Em andamento |
+| 0.29.0 | Rodada dedicada a UX e interface: limpeza visual, identidade, acessibilidade e usabilidade móvel | Próxima |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
@@ -51,3 +52,6 @@ Em 26/10/2026, a 0.25.0 foi incorporada à main. A 0.26.0 permite agrupar movime
 
 
 Em 26/10/2026, após a v0.26.0 incorporada na PR #29, a v0.27.0 implementa pausa, retomada e encerramento controlado de recorrências. A etapa seguinte fica dedicada a uma rodada de UX e interface, priorizando uma apresentação mais limpa, original, bonita e utilizável para demonstrar o projeto no LinkedIn.
+
+
+Em 26/10/2026, a v0.27.0 foi incorporada à main pela PR #30. A v0.28.0 prepara o percurso de demonstração com exemplos diversos e relacionados. Na sequência, a v0.29.0 fica dedicada à rodada de UX e interface para tornar a apresentação do projeto mais clara, original e agradável de usar.
