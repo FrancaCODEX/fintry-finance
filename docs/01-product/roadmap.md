@@ -36,7 +36,8 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.28.0 | Preparação da versão de apresentação com exemplos de pagamentos parciais, relatórios e conciliação | Incorporada à main (PR #31) |
 | 0.29.0 | Roteiro de apresentação contextual no dashboard e organização da página de exemplos | Incorporada à main (PR #32) |
 | 0.30.0 | Refinamento visual amplo do front-end: superfícies, hierarquia, navegação, componentes e telas móveis | Incorporada à main (PR #33) |
-| 0.31.0 | Indicadores analíticos com minigráficos acessíveis no dashboard | Em andamento |
+| 0.31.0 | Indicadores analíticos com minigráficos acessíveis no dashboard | Incorporada à main (PR #34) |
+| 0.32.0 | Estúdio de gráficos interativo com séries, períodos e visualizações personalizadas | Em andamento |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
@@ -57,3 +58,6 @@ Em 26/10/2026, após a v0.26.0 incorporada na PR #29, a v0.27.0 implementa pausa
 
 
 Em 26/10/2026, a v0.27.0 foi incorporada à main pela PR #30. A v0.28.0 prepara o percurso de demonstração com exemplos diversos e relacionados; a v0.29.0 organiza a exploração desses fluxos; e a v0.30.0 renova os estilos compartilhados. A v0.31.0 dá uma leitura própria aos indicadores do dashboard com minigráficos acessíveis.
+
+
+Em 26/10/2026, a v0.32.0 aprofunda a rodada de UX ao tornar os gráficos do dashboard exploráveis e personalizáveis: escolha de séries e formato, filtros de período, visualizações salvas por usuário e leitura em tabela. A rodada visual continua com foco em interações úteis e uma interface autoral e acessível.
