@@ -520,6 +520,9 @@ public class ReconciliationService {
       throw conflict("Este movimento foi alterado. Atualize a conciliação antes de continuar.");
     var before = snapshot(l);
     if (input.action() == Action.REOPEN) {
+      if (l.getReconciliationBatchId() != null)
+        throw conflict(
+            "Este movimento pertence a um grupo. Não reabra apenas uma parte da baixa agrupada.");
       if (l.getStatus() == StatementLine.Status.OPEN)
         throw conflict("Este movimento já está em revisão.");
       if (input.reason() == null || input.reason().isBlank())

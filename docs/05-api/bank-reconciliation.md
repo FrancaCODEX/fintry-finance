@@ -28,7 +28,7 @@ Cada movimento retorna ID, FITID, descrição, data, valor assinado como string 
 - `IGNORE`: exige motivo de até 255 caracteres e mantém o movimento consultável, sem efeito financeiro.
 - `REOPEN`: exige motivo e remove decisão/vínculo. **Não desfaz pagamento nem exclui o lançamento criado.** Corrija o financeiro pelas ações existentes e então revise a conciliação novamente. Cancelar lançamento/venda vinculado exige primeiro reabrir a conciliação.
 
-A revisão individual aumenta a cada decisão. A criação do grupo bloqueia a empresa, revalida que todos os movimentos continuam abertos e valida o saldo restante antes de qualquer baixa; a transação inteira é revertida se uma baixa falhar. As baixas parciais criadas ficam no histórico normal de pagamentos e no lote.
+A revisão individual aumenta a cada decisão. A criação do grupo bloqueia a empresa, revalida que todos os movimentos continuam abertos e valida o saldo restante antes de qualquer baixa; a transação inteira é revertida se uma baixa falhar. As baixas parciais criadas ficam no histórico normal de pagamentos e no lote. Movimentos de um grupo não podem ser reabertos individualmente; isso evita desassociar só parte de pagamentos já registrados.
 
 ## Formato, limites e preservação
 
