@@ -114,6 +114,7 @@ function renderDashboard() {
     ) +
     `<div class="dashboard-overview"><article class="card dashboard-balance"><div class="balance-heading"><span class="eyebrow">SALDO DISPONÍVEL</span><span class="balance-symbol">${icon("wallet")}</span></div><strong class="balance-number ${money(s.balance).length > 18 ? "balance-long" : ""}">${money(s.balance)}</strong><p>Saldo atual de todas as contas.<br>Inclui saldos iniciais e movimentos realizados.</p><button class="balance-link" data-nav="accounts">Consultar contas ${icon("income")}</button><span class="balance-scope">Agora · independente do mês selecionado</span></article><section class="dashboard-monthly" aria-label="Indicadores do mês selecionado"><div class="dashboard-period"><span class="eyebrow">MÊS EM ANÁLISE</span><strong>${e(dashboardMonth(state.month))}</strong><span>Valores realizados pela data do pagamento ou recebimento</span></div><div class="metrics">${metric("Receitas realizadas", s.income, dashboardComparison(s.income, s.previousIncome), "income", "dashboard-income")}${metric("Despesas realizadas", s.expense, dashboardComparison(s.expense, s.previousExpense), "expense", "dashboard-expense")}${metric("Resultado de caixa", s.result, dashboardComparison(s.result, s.previousResult), "trend")}</div><p class="dashboard-result-note">Resultado de caixa = receitas menos despesas realizadas. Não representa lucro contábil.</p></section></div>` +
     dashboardOnboarding() +
+    dashboardPresentationTour() +
     dashboardShortcuts() +
     dashboardAttention() +
     `<section class="grid-two dashboard-main-grid">${dashboardChart(s)}<article class="card dashboard-radar"><div class="card-head"><div><span class="eyebrow">PREVISÕES DO MÊS</span><h2>No seu radar</h2><p>Pendentes por vencimento · ${e(dashboardMonth(state.month))}</p></div></div><div class="pending"><div class="pending-row"><span class="radar-icon income">${icon("income")}</span><div><p>A receber</p><small>Entradas previstas</small></div><strong class="positive">${money(s.pendingIncome)}</strong></div><div class="pending-row"><span class="radar-icon">${icon("expense")}</span><div><p>A pagar</p><small>Compromissos do período</small></div><strong>${money(s.pendingExpense)}</strong></div></div><div class="radar-bottom"><p>Pendências só alteram o saldo quando você registra a baixa.</p><button class="btn soft" data-nav="forecast">Ver fluxo projetado ${icon("income")}</button></div></article></section>` +
@@ -121,6 +122,15 @@ function renderDashboard() {
     pendingDashboard() +
     `<section class="card dashboard-transactions"><div class="card-head"><div><span class="eyebrow">LANÇAMENTOS</span><h2>Movimentações do período</h2><p>Até 5 lançamentos · pela data de vencimento</p></div><button class="btn text small" data-nav="entries">Ver todas →</button></div>${state.accounts.length ? entriesTable(state.entries.content.slice(0, 5)) : empty("Vamos organizar seu financeiro?", "Comece cadastrando uma conta ou explore um exemplo com dados fictícios.", "account", "Criar primeira conta")}</section></div>`
   );
+}
+function dashboardPresentationTour() {
+  if (!state.demoPack?.loaded || Number(state.demoPack.packVersion) < 3) return "";
+  const steps = [
+    ["01", "Lançamentos", "Veja recebimentos e pagamentos feitos em etapas.", "entries"],
+    ["02", "Relatórios", "Acompanhe cada baixa pela data e pelo valor realizado.", "reports"],
+    ["03", "Conciliação", "Confira vínculos, agrupamento e um movimento em revisão.", "reconciliation"],
+  ];
+  return `<section class="dashboard-tour" aria-labelledby="dashboard-tour-title"><div class="dashboard-tour-heading"><div><span class="eyebrow">ROTEIRO DE APRESENTAÇÃO</span><h2 id="dashboard-tour-title">Veja o fluxo completo do Fintry</h2><p>Um percurso curto pelos dados de demonstração.</p></div><span class="demo-label">${icon("sparkles")} Dados fictícios</span></div><div class="dashboard-tour-steps">${steps.map(([number, title, description, page]) => `<button class="dashboard-tour-step" data-nav="${page}"><span class="tour-number">${number}</span><span class="tour-copy"><strong>${title}</strong><small>${description}</small></span><span class="tour-arrow" aria-hidden="true">→</span></button>`).join("")}</div><button class="dashboard-tour-all" data-nav="examples">Ver todos os exemplos →</button></section>`;
 }
 function bindDashboard() {
   const page = document.querySelector(".dashboard-page");
