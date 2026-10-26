@@ -114,7 +114,7 @@ public class FinanceService {
         account(e.getAccountId()).getName(),
         e.getCreatedAt(),
         e.getUpdatedAt(),
-        payments.findByEntryIdOrderByPaymentDateAscCreatedAtAscIdAsc(id).stream()
+        payments.findByEntry_IdOrderByPaymentDateAscCreatedAtAscIdAsc(id).stream()
             .map(p -> new PaymentView(p.getId(), p.getAmount(), p.getPaymentDate()))
             .toList());
   }
@@ -390,7 +390,7 @@ public class FinanceService {
   private void recordPayment(FinancialEntry e, BigDecimal amount, LocalDate paymentDate) {
     var payment = new EntryPayment();
     payment.setCompanyId(e.getCompanyId());
-    payment.setEntryId(e.getId());
+    payment.setEntry(e);
     payment.setAccountId(e.getAccountId());
     payment.setAmount(amount);
     payment.setPaymentDate(paymentDate);

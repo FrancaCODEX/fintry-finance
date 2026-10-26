@@ -11,9 +11,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface EntryPaymentRepository
     extends JpaRepository<EntryPayment, UUID>, JpaSpecificationExecutor<EntryPayment> {
-  List<EntryPayment> findByEntryIdOrderByPaymentDateAscCreatedAtAscIdAsc(UUID entryId);
+  List<EntryPayment> findByEntry_IdOrderByPaymentDateAscCreatedAtAscIdAsc(UUID entryId);
 
-  @Query("select coalesce(sum(p.amount),0) from EntryPayment p where p.entryId=:entry")
+  @Query("select coalesce(sum(p.amount),0) from EntryPayment p where p.entry.id=:entry")
   BigDecimal totalForEntry(@Param("entry") UUID entryId);
 
   @Query(

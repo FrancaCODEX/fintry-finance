@@ -739,7 +739,7 @@ public class BillingService {
   private void savePayment(FinancialEntry entry, BigDecimal amount, LocalDate date) {
     var payment = new EntryPayment();
     payment.setCompanyId(entry.getCompanyId());
-    payment.setEntryId(entry.getId());
+    payment.setEntry(entry);
     payment.setAccountId(entry.getAccountId());
     payment.setAmount(amount);
     payment.setPaymentDate(date);

@@ -22,9 +22,6 @@ public class EntryPayment extends BaseEntity {
   private UUID companyId;
 
   @Column(nullable = false)
-  private UUID entryId;
-
-  @Column(nullable = false)
   private UUID accountId;
 
   @Column(nullable = false, precision = 14, scale = 2)
@@ -34,6 +31,6 @@ public class EntryPayment extends BaseEntity {
   private LocalDate paymentDate;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "entry_id", insertable = false, updatable = false)
+  @JoinColumn(name = "entry_id", nullable = false)
   private FinancialEntry entry;
 }
