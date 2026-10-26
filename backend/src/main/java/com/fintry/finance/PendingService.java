@@ -96,7 +96,8 @@ public class PendingService {
     var groups = List.of(Group.ALL, Group.OVERDUE, Group.TODAY, Group.NEXT7, Group.NEXT30);
     for (var group : groups) {
       Predicate range = window(group, root, cb, today);
-      Predicate outstanding = cb.greaterThan(root.<BigDecimal>get("amount").subtract(root.<BigDecimal>get("paidAmount")), BigDecimal.ZERO);
+      var remaining = cb.diff(root.<BigDecimal>get("amount"), root.<BigDecimal>get("paidAmount"));
+      Predicate outstanding = cb.greaterThan(remaining, BigDecimal.ZERO);
       columns.add(cb.coalesce(cb.sum(cb.<Long>selectCase().when(cb.and(range, outstanding), 1L).otherwise(0L)), 0L));
       for (var type : List.of(FinancialEntry.Type.INCOME, FinancialEntry.Type.EXPENSE))
         columns.add(
@@ -105,7 +106,7 @@ public class PendingService {
                     cb.<BigDecimal>selectCase()
                         .when(
                             cb.and(range, cb.equal(root.get("type"), type)),
-                            root.<BigDecimal>get("amount").subtract(root.<BigDecimal>get("paidAmount")))
+                            remaining)
                         .otherwise(BigDecimal.ZERO)),
                 BigDecimal.ZERO));
     }

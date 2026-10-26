@@ -138,7 +138,7 @@ public class ReportService {
     }
     public Export export(Filters f) {
         validate(f);
-        if(f.basis()==Basis.PAYMENT){var spec=paymentFilter(f);var result=payments.findAll(spec,PageRequest.of(0,5001,Sort.by(Sort.Order.asc("paymentDate"),Sort.Order.asc("createdAt"),Sort.Order.asc("id"))));if(result.getTotalElements()>5000)throw invalid("A exportação permite até 5.000 pagamentos. Reduza o período ou refine os filtros.");var names=accountNames();return new Export(companyName(),f,paymentTotals(spec),paymentCategories(spec),result.stream().map(p->paymentRow(p,names)).toList(),f.accountId()==null?"Todas as contas":names.get(f.accountId()));}
+        if(f.basis()==Basis.PAYMENT){var spec=paymentFilter(f);var result=payments.findAll(spec,PageRequest.of(0,5001,Sort.by(Sort.Order.asc("paymentDate"),Sort.Order.asc("createdAt"),Sort.Order.asc("id"))));if(result.getTotalElements()>5000)throw invalid("A exportação permite até 5.000 pagamentos. Reduza o período ou refine os filtros.");var names=accountNames();return new Export(companyName(),f,paymentTotals(spec),result.stream().map(p->paymentRow(p,names)).toList(),f.accountId()==null?"Todas as contas":names.get(f.accountId()));}
         var spec=filter(f);var result=entries.findAll(spec,PageRequest.of(0,5001,sort(f)));
         if(result.getTotalElements()>5000)throw invalid("A exportação permite até 5.000 lançamentos. Reduza o período ou refine os filtros.");
         var names=accountNames();return new Export(companyName(),f,totals(spec),result.stream().map(e->row(e,names)).toList(),f.accountId()==null?"Todas as contas":names.get(f.accountId()));
