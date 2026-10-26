@@ -379,7 +379,7 @@ public class FinanceService {
       throw invalid("Informe um valor positivo até o saldo restante de " + remaining + ".");
     var before = snapshot(e);
     e.setPaidAmount(e.getPaidAmount().add(amount));
-    recordPayment(e, amount, input.paymentDate());
+    recordPayment(e, amount, input.paymentDate(), null);
     boolean settled = e.getPaidAmount().compareTo(e.getAmount()) == 0;
     e.setStatus(settled ? PAID : FinancialEntry.Status.PARTIAL);
     e.setPaymentDate(settled ? input.paymentDate() : null);
@@ -387,13 +387,37 @@ public class FinanceService {
     return view(e);
   }
 
+  @Transactional
+  public EntryView payFromReconciliation(UUID id, LocalDate paymentDate, BigDecimal amount, UUID batchId) {
+    validPaymentDate(paymentDate);
+    var e = entries.lock(id, current.companyId()).orElseThrow(this::missing);
+    requireBillingEditable(id);
+    if (e.getStatus() == CANCELLED) throw invalid("Lançamento cancelado não pode ser pago.");
+    var remaining = e.getAmount().subtract(e.getPaidAmount());
+    if (amount.signum() <= 0 || amount.compareTo(remaining) > 0)
+      throw invalid("O total dos movimentos excede o saldo restante do lançamento.");
+    var before = snapshot(e);
+    e.setPaidAmount(e.getPaidAmount().add(amount));
+    recordPayment(e, amount, paymentDate, batchId);
+    boolean settled = e.getPaidAmount().compareTo(e.getAmount()) == 0;
+    e.setStatus(settled ? PAID : FinancialEntry.Status.PARTIAL);
+    e.setPaymentDate(settled ? paymentDate : null);
+    recordChange(settled ? "PAY" : "PARTIAL_PAY", e, before);
+    return view(e);
+  }
+
   private void recordPayment(FinancialEntry e, BigDecimal amount, LocalDate paymentDate) {
+    recordPayment(e, amount, paymentDate, null);
+  }
+
+  private void recordPayment(FinancialEntry e, BigDecimal amount, LocalDate paymentDate, UUID batchId) {
     var payment = new EntryPayment();
     payment.setCompanyId(e.getCompanyId());
     payment.setEntry(e);
     payment.setAccountId(e.getAccountId());
     payment.setAmount(amount);
     payment.setPaymentDate(paymentDate);
+    payment.setReconciliationBatchId(batchId);
     payments.save(payment);
   }
 

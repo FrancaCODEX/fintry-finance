@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.25.0**
+**Versão atual: 0.26.0**
 
 Dashboard com saldo atual em destaque, indicadores realizados por mês, atalhos e gráfico consultável com mouse, toque e teclado. Veja a [visão geral](docs/01-product/dashboard.md).
 
@@ -37,7 +37,7 @@ Em **Conciliação**, escolha uma conta, importe um extrato OFX e confira banco,
 - **Ignorar:** registre um motivo; o movimento continua consultável.
 - **Reabrir revisão:** remove a decisão/vínculo, preservando o pagamento. Correções financeiras são feitas pelas ações existentes depois da reabertura.
 
-Administradores e Financeiro podem importar e decidir; Consulta pode acompanhar as revisões. A tela oferece um OFX fictício para contas de avaliação. Use até 1 MB/500 movimentos por arquivo, de uma conta bancária em BRL, em UTF-8 ou Windows-1252. Cartões, investimentos, correções OFX e conciliação de valores parciais/agrupados ficam fora desta versão. A integração é por arquivo; não há conexão automática com bancos. [Detalhes e API](docs/05-api/bank-reconciliation.md).
+Administradores e Financeiro podem importar e decidir; Consulta pode acompanhar as revisões. A tela oferece um OFX fictício para contas de avaliação. Use até 1 MB/500 movimentos por arquivo, de uma conta bancária em BRL, em UTF-8 ou Windows-1252. Cartões, investimentos, correções OFX e a conciliação agrupada permite baixar vários movimentos de uma só vez contra o saldo de um lançamento; tarifas continuam registradas como despesas separadas. A integração é por arquivo; não há conexão automática com bancos. [Detalhes e API](docs/05-api/bank-reconciliation.md).
 
 ## Rodar com Docker (recomendado)
 

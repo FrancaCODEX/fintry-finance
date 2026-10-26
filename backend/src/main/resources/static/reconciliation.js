@@ -10,6 +10,7 @@ const reconciliation = {
   filename: "",
   preview: null,
   selected: new Set(),
+  groupSelection: new Set(),
   error: "",
   notice: "",
   busy: false,
@@ -27,6 +28,7 @@ function resetReconciliation() {
     filename: "",
     preview: null,
     selected: new Set(),
+    groupSelection: new Set(),
     error: "",
     notice: "",
     busy: false,
@@ -67,7 +69,7 @@ const recLabel = (status) =>
   ({ OPEN: "Em revisão", LINKED: "Conciliado", IGNORED: "Ignorado" })[status];
 function recCard(r) {
   const income = !r.amount.startsWith("-");
-  return `<article class="card rec-movement" data-rec-id="${r.id}"><div class="rec-movement-top"><span class="badge ${r.status === "LINKED" ? "paid" : "pending"}">${recLabel(r.status)}</span><time datetime="${r.date}">${dateLabel(r.date)}</time></div><div class="rec-movement-main"><div class="rec-direction ${income ? "rec-income" : "rec-expense"}" aria-label="${income ? "Entrada" : "Saída"}">${income ? "↙" : "↗"}</div><div><h2>${e(r.description)}</h2><small>Identificador bancário: ${e(r.fitId)}</small></div><strong class="rec-value">${income ? "+" : "−"} ${recMoney(r.amount)}</strong></div>${r.status === "OPEN" ? `<div class="rec-suggestion"><strong>${r.suggestions.length ? `${r.suggestions.length} sugestão(ões) para revisar` : "Nenhuma sugestão próxima"}</strong><p>${r.suggestions.length ? e(r.suggestions[0].entry.description) + " · " + recMoney(r.suggestions[0].entry.amount) : "Busque lançamentos com o mesmo valor ou crie um novo após conferir o financeiro."}</p><small>Sugestões por valor, tipo e datas próximas. A decisão é sua.</small></div>` : r.entry ? `<div class="rec-suggestion"><strong>Vinculado a ${e(r.entry.description)}</strong><p>${e(r.entry.category)} · Pagamento em ${dateLabel(r.entry.paymentDate)}</p></div>` : ""}${r.reason ? `<p class="rec-reason">${e(r.reason)}</p>` : ""}<div class="rec-card-actions">${r.entryId ? `<button class="btn text small" data-action="details" data-id="${r.entryId}">Ver lançamento →</button>` : ""}${canWrite() ? (r.status === "OPEN" ? `<button class="btn secondary small" data-action="rec-match" data-id="${r.id}">Buscar correspondência</button><button class="btn small" data-action="rec-create" data-id="${r.id}">Criar lançamento</button><button class="btn text small" data-action="rec-ignore" data-id="${r.id}">Ignorar</button>` : `<button class="btn secondary small" data-action="rec-reopen" data-id="${r.id}">Reabrir revisão</button>`) : ""}</div></article>`;
+  return `<article class="card rec-movement" data-rec-id="${r.id}"><div class="rec-movement-top">${canWrite() && r.status === "OPEN" ? `<label class="rec-group-check"><input type="checkbox" data-rec-group-select="${r.id}" ${reconciliation.groupSelection.has(r.id) ? "checked" : ""}> Agrupar</label>` : ""}<span class="badge ${r.status === "LINKED" ? "paid" : "pending"}">${recLabel(r.status)}</span><time datetime="${r.date}">${dateLabel(r.date)}</time></div><div class="rec-movement-main"><div class="rec-direction ${income ? "rec-income" : "rec-expense"}" aria-label="${income ? "Entrada" : "Saída"}">${income ? "↙" : "↗"}</div><div><h2>${e(r.description)}</h2><small>Identificador bancário: ${e(r.fitId)}</small></div><strong class="rec-value">${income ? "+" : "−"} ${recMoney(r.amount)}</strong></div>${r.status === "OPEN" ? `<div class="rec-suggestion"><strong>${r.suggestions.length ? `${r.suggestions.length} sugestão(ões) para revisar` : "Nenhuma sugestão próxima"}</strong><p>${r.suggestions.length ? e(r.suggestions[0].entry.description) + " · " + recMoney(r.suggestions[0].entry.amount) : "Busque lançamentos com o mesmo valor ou crie um novo após conferir o financeiro."}</p><small>Sugestões por valor, tipo e datas próximas. A decisão é sua.</small></div>` : r.entry ? `<div class="rec-suggestion"><strong>${r.batchId ? `Grupo conciliado · ${r.batchMovements} movimentos` : `Vinculado a ${e(r.entry.description)}`}</strong><p>${e(r.entry.category)} · Movimento em ${dateLabel(r.date)}</p></div>` : ""}${r.reason ? `<p class="rec-reason">${e(r.reason)}</p>` : ""}<div class="rec-card-actions">${r.entryId ? `<button class="btn text small" data-action="details" data-id="${r.entryId}">Ver lançamento →</button>` : ""}${canWrite() ? (r.status === "OPEN" ? `<button class="btn secondary small" data-action="rec-match" data-id="${r.id}">Buscar correspondência</button><button class="btn small" data-action="rec-create" data-id="${r.id}">Criar lançamento</button><button class="btn text small" data-action="rec-ignore" data-id="${r.id}">Ignorar</button>` : r.batchId ? "" : `<button class="btn secondary small" data-action="rec-reopen" data-id="${r.id}">Reabrir revisão</button>`) : ""}</div></article>`;
 }
 function recUpload() {
   const p = reconciliation.preview;
@@ -107,9 +109,15 @@ function renderReconciliation() {
             )
             .join(
               "",
-            )}</div><div class="rec-list-heading"><div><h2>${recLabel(reconciliation.status) || "Todos os movimentos"}</h2><p>${d?.totalElements || 0} movimento(s) neste filtro</p></div><button class="btn text small" data-action="rec-status" data-status="" aria-pressed="${reconciliation.status === ""}">Ver todos</button><button class="btn secondary small" data-action="rec-refresh">Atualizar</button></div><div class="rec-grid">${d?.content.map(recCard).join("") || '<section class="card empty"><div class="empty-icon">' + icon("wallet") + "</div><h2>Nenhum movimento neste filtro.</h2><p>Importe um extrato OFX ou consulte outra situação.</p></section>"}</div>${d && d.totalPages > 1 ? `<div class="rec-pagination"><button class="btn secondary" data-action="rec-page" data-page="${d.number - 1}" ${d.number === 0 ? "disabled" : ""}>Anterior</button><span>Página ${d.number + 1} de ${d.totalPages}</span><button class="btn secondary" data-action="rec-page" data-page="${d.number + 1}" ${d.number + 1 >= d.totalPages ? "disabled" : ""}>Próxima</button></div>` : ""}`
+            )}</div>${canWrite() ? recGroupControl() : ""}<div class="rec-list-heading"><div><h2>${recLabel(reconciliation.status) || "Todos os movimentos"}</h2><p>${d?.totalElements || 0} movimento(s) neste filtro</p></div><button class="btn text small" data-action="rec-status" data-status="" aria-pressed="${reconciliation.status === ""}">Ver todos</button><button class="btn secondary small" data-action="rec-refresh">Atualizar</button></div><div class="rec-grid">${d?.content.map(recCard).join("") || '<section class="card empty"><div class="empty-icon">' + icon("wallet") + "</div><h2>Nenhum movimento neste filtro.</h2><p>Importe um extrato OFX ou consulte outra situação.</p></section>"}</div>${d && d.totalPages > 1 ? `<div class="rec-pagination"><button class="btn secondary" data-action="rec-page" data-page="${d.number - 1}" ${d.number === 0 ? "disabled" : ""}>Anterior</button><span>Página ${d.number + 1} de ${d.totalPages}</span><button class="btn secondary" data-action="rec-page" data-page="${d.number + 1}" ${d.number + 1 >= d.totalPages ? "disabled" : ""}>Próxima</button></div>` : ""}`
     }`
   );
+}
+function recGroupControl() {
+  const ids = [...reconciliation.groupSelection];
+  return ids.length >= 2
+    ? `<section class="card rec-group-control"><div><strong>${ids.length} movimentos selecionados</strong><small>Selecione movimentos do mesmo tipo e com saldo suficiente no lançamento.</small></div><button class="btn" data-action="rec-group">Conciliar em grupo</button><button class="btn text small" data-action="rec-group-clear">Limpar seleção</button></section>`
+    : "";
 }
 function mountReconciliation() {
   if (state.page !== "reconciliation" || !state.user) return;
@@ -118,6 +126,7 @@ function mountReconciliation() {
     .querySelector("#rec-account")
     ?.addEventListener("change", async (ev) => {
       reconciliation.accountId = ev.target.value;
+      reconciliation.groupSelection.clear();
       reconciliation.page = 0;
       reconciliation.preview = null;
       reconciliation.selected.clear();
@@ -129,6 +138,14 @@ function mountReconciliation() {
   document
     .querySelector("#rec-file")
     ?.addEventListener("change", recFileChanged);
+  document.querySelectorAll("[data-rec-group-select]").forEach((input) =>
+    input.addEventListener("change", () => {
+      const id = input.dataset.recGroupSelect;
+      if (input.checked) reconciliation.groupSelection.add(id);
+      else reconciliation.groupSelection.delete(id);
+      mountReconciliation();
+    }),
+  );
   document.querySelectorAll("[data-rec-row]").forEach((input) =>
     input.addEventListener("change", () => {
       const n = Number(input.dataset.recRow);
@@ -177,13 +194,70 @@ async function reconciliationAction(btn) {
   const action = btn.dataset.action;
   if (!action?.startsWith("rec-")) return false;
   if (reconciliation.busy) return true;
+  if (action === "rec-group-clear") {
+    reconciliation.groupSelection.clear();
+    mountReconciliation();
+    return true;
+  }
+  if (action === "rec-group") {
+    if (!canWrite()) return true;
+    const ids = [...reconciliation.groupSelection];
+    const generation = reconciliation.generation;
+    btn.disabled = true;
+    try {
+      const candidates = await send(
+        "/finance/reconciliation/group/candidates",
+        {
+          accountId: reconciliation.accountId,
+          movementIds: ids,
+        },
+      );
+      if (generation !== reconciliation.generation || !state.user || modal.open)
+        return true;
+      const selected =
+        reconciliation.data?.content.filter((r) => ids.includes(r.id)) || [];
+      const total = selected.reduce(
+        (sum, r) => sum + Number(String(r.amount).replace(",", ".")),
+        0,
+      );
+      const kind = total < 0 ? "Saídas" : "Entradas";
+      showDialog(
+        "Conciliar movimentos em grupo",
+        "As baixas serão registradas separadamente, cada uma na data do extrato.",
+        `<p class="notice">${ids.length} ${kind.toLowerCase()} selecionadas · Total ${recMoney(total.toFixed(2))}. O grupo não pode exceder o saldo restante do lançamento.</p><label class="field">Lançamento de destino<select name="entryId" required><option value="">Escolha um lançamento</option>${candidates.map((r) => `<option value="${r.id}">${e(r.description)} · ${e(r.status === "PARTIAL" ? "Parcial" : "Pendente")} · restante ${recMoney(r.remainingAmount)}</option>`).join("")}</select></label><label class="field">Motivo e detalhes de divergência<input name="reason" required maxlength="255" placeholder="Ex.: repasse dividido em vários movimentos"></label><p class="muted">Tarifas são conciliadas como despesas separadas. O motivo fica registrado no histórico de cada movimento e do grupo.</p>`,
+        async (data) => {
+          if (!data.entryId) throw new Error("Escolha um lançamento.");
+          await send("/finance/reconciliation/group", {
+            accountId: reconciliation.accountId,
+            movementIds: ids,
+            entryId: data.entryId,
+            reason: data.reason,
+          });
+          reconciliation.groupSelection.clear();
+          reconciliation.notice =
+            "Grupo conciliado. Cada movimento foi registrado no histórico de pagamentos.";
+          reconciliation.status = "OPEN";
+          reconciliation.page = 0;
+        },
+        "Confirmar grupo",
+      );
+    } catch (err) {
+      reconciliation.error = err.message;
+      mountReconciliation();
+    } finally {
+      btn.disabled = false;
+    }
+    return true;
+  }
   if (action === "rec-status") {
+    reconciliation.groupSelection.clear();
     reconciliation.status = btn.dataset.status;
     reconciliation.page = 0;
     await safeLoad();
     return true;
   }
   if (action === "rec-page") {
+    reconciliation.groupSelection.clear();
     reconciliation.page = Number(btn.dataset.page);
     await safeLoad();
     return true;
