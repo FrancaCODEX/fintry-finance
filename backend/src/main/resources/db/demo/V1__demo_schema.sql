@@ -44,7 +44,7 @@ CREATE TABLE financial_entries (
     amount DECIMAL(14,2) NOT NULL CHECK (amount > 0),
     due_date DATE NOT NULL,
     payment_date DATE,
-    status VARCHAR(10) NOT NULL CHECK (status IN ('PENDING','PAID','CANCELLED')),
+    status VARCHAR(10) NOT NULL CONSTRAINT financial_entries_status_check CHECK (status IN ('PENDING','PAID','CANCELLED')),
     transfer_id UUID,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
