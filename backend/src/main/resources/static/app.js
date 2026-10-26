@@ -722,15 +722,6 @@ function queryParams(values) {
     ),
   );
 }
-function comparison(value, previous) {
-  if (Number(previous) === 0)
-    return Number(value) === 0
-      ? "Sem movimentação no mês anterior"
-      : "Sem base de comparação anterior";
-  const delta =
-    ((Number(value) - Number(previous)) / Math.abs(Number(previous))) * 100;
-  return `${delta > 0 ? "+" : ""}${delta.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% vs. mês anterior`;
-}
 function categoryBreakdown(categories, total) {
   if (!categories.length)
     return '<p class="chart-caption">Nenhuma despesa realizada para os filtros selecionados.</p>';
@@ -756,31 +747,6 @@ function metric(title, value, foot, ic, cls = "") {
 }
 function empty(title, text, action = "entry", button = "Novo lançamento") {
   return `<div class="empty"><div class="empty-icon">${icon("wallet")}</div><h3>${title}</h3><p>${text}</p><div class="actions"><button class="btn" data-action="${action}">${icon("plus")}${button}</button>${!state.accounts.length ? '<button class="btn secondary" data-action="sample">Explorar com dados de exemplo</button>' : ""}</div></div>`;
-}
-function chart(flow) {
-  const max = Math.max(
-    1,
-    ...flow.flatMap((m) => [Number(m.income), Number(m.expense)]),
-  );
-  const compact = (v) =>
-    Number(v).toLocaleString("pt-BR", {
-      notation: "compact",
-      maximumFractionDigits: 1,
-    });
-  return `<div class="chart"><svg role="img" aria-label="Receitas e despesas pagas nos últimos seis meses. Os valores também aparecem nas descrições das barras." viewBox="0 0 600 210">${[0, 1, 2, 3].map((i) => `<line x1="48" x2="588" y1="${20 + i * 47}" y2="${20 + i * 47}" stroke="var(--line)"/><text x="0" y="${24 + i * 47}">${compact(max * (1 - i / 3))}</text>`).join("")}${flow
-    .map((m, i) => {
-      const x = 62 + i * 88,
-        hi = (Number(m.income) / max) * 141,
-        he = (Number(m.expense) / max) * 141;
-      const label = new Intl.DateTimeFormat("pt-BR", {
-        month: "short",
-        timeZone: "UTC",
-      })
-        .format(new Date(m.month + "-15T12:00:00Z"))
-        .replace(".", "");
-      return `<g><title>${label}: receitas ${money(m.income)}, despesas ${money(m.expense)}</title><rect x="${x}" y="${161 - hi}" width="23" height="${hi}" rx="4" fill="var(--green)"/><rect x="${x + 28}" y="${161 - he}" width="23" height="${he}" rx="4" fill="#b8c6b0"/><text x="${x + 25}" y="188" text-anchor="middle">${label}</text></g>`;
-    })
-    .join("")}</svg></div>`;
 }
 function entryStatus(row, today = localDate()) {
   const paid = row.status === "PAID",
@@ -845,22 +811,6 @@ function entriesTable(rows, options = {}) {
       return `<article class="entry-card" role="listitem"><div class="entry-card-head"><span class="entry-direction ${income ? "positive" : "negative"}">${icon(income ? "income" : "expense")}${income ? "Receita" : "Despesa"}</span><span class="badge ${status.className}">${status.label}</span></div><h3>${e(row.description)}</h3><p>${e(row.category)}${row.contactName ? " · " + e(row.contactName) : ""}</p>${entryOrigin(row)}<strong class="entry-card-amount ${income ? "positive" : "negative"}">${income ? "+" : "−"} ${money(row.amount)}</strong><dl><div><dt>Vencimento</dt><dd>${dateLabel(row.dueDate)}</dd></div><div><dt>Conta</dt><dd>${e(names.get(row.accountId) || "Conta")}</dd></div>${row.paymentDate ? `<div><dt>Baixa</dt><dd>${dateLabel(row.paymentDate)}</dd></div>` : ""}</dl>${entryActions(row)}</article>`;
     })
     .join("")}</div>`;
-}
-function renderDashboard() {
-  const s = state.summary;
-  return (
-    head(
-      `Seu negócio, em perspectiva.`,
-      `Olá, ${e(state.user.name.split(" ")[0])}. Acompanhe o que movimenta sua empresa.`,
-      monthInput() +
-        `<button class="btn" data-action="entry">${icon("plus")}Novo lançamento</button>`,
-    ) +
-    `<section class="metrics" aria-label="Indicadores financeiros">${metric("Saldo disponível", s.balance, "Saldo atual de todas as contas", "wallet", "primary")}${metric("Receitas do mês", s.income, comparison(s.income, s.previousIncome), "income")}${metric("Despesas do mês", s.expense, comparison(s.expense, s.previousExpense), "expense")}${metric("Resultado de caixa", s.result, comparison(s.result, s.previousResult), "trend")}</section>` +
-    `<section class="grid-two"><article class="card"><div class="card-head"><div><h2>O ritmo do seu caixa</h2><p>Receitas e despesas realizadas · últimos 6 meses</p></div><div class="legend"><span><i class="dot"></i>Receitas</span><span><i class="dot expense"></i>Despesas</span></div></div>${chart(s.flow)}<div class="chart-caption">Valores em reais. Transferências entre contas não entram no resultado.</div></article><article class="card"><div class="card-head"><div><h2>No seu radar</h2><p>Vencimentos pendentes no mês selecionado</p></div>${icon("entries")}</div><div class="pending"><div class="pending-row"><div><p>A receber</p><small>Entradas previstas</small></div><strong class="positive">${money(s.pendingIncome)}</strong></div><div class="pending-row"><div><p>A pagar</p><small>Compromissos do período</small></div><strong>${money(s.pendingExpense)}</strong></div></div><div class="callout">Pendências entram no saldo quando você registra o pagamento ou recebimento.</div></article></section>` +
-    pendingDashboard() +
-    `<section class="card"><div class="card-head"><div><h2>Movimentações do período</h2><p>Organizadas pela data de vencimento</p></div><button class="btn text small" data-nav="entries">Ver todas →</button></div>${state.accounts.length ? entriesTable(state.entries.content.slice(0, 5)) : empty("Vamos organizar seu financeiro?", "Comece cadastrando uma conta ou explore um exemplo com dados fictícios.", "account", "Criar primeira conta")}</section>` +
-    `<section class="grid-two dashboard-analysis"><article class="card"><div class="card-head"><div><h2>Maiores despesas por categoria</h2><p>Até 5 categorias · pagamentos do mês selecionado</p></div></div>${categoryBreakdown(s.categories || [], s.expense)}</article><article class="card"><div class="card-head"><div><h2>Olhe para os próximos meses</h2><p>Saldo atual e vencimentos cadastrados</p></div></div><div class="analysis-copy"><p>Explore o saldo estimado com os valores a receber e a pagar. Escolha a conta e como considerar as pendências vencidas.</p><button class="btn soft" data-nav="forecast">Ver fluxo projetado →</button><button class="btn text" data-nav="reports">Abrir relatórios</button></div></article></section>`
-  );
 }
 function renderEntries() {
   const f = state.filters;
@@ -1174,6 +1124,7 @@ async function loadData(id) {
                   ? renderCategories()
                   : renderAccounts();
   applyPermissions(root);
+  if (state.page === "dashboard") bindDashboard();
   document
     .querySelector("#directory-filter")
     ?.addEventListener("submit", async (ev) => {

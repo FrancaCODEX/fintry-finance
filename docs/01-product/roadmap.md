@@ -25,7 +25,8 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.18.0 | Geração recorrente autorizada de mensalidades, controle por ciclo e painel de renovação | Incorporada à main; sem débito automático, homologação real pendente |
 | 0.19.0 | Primeiro acesso com apresentação dos planos e continuidade do teste padrão | Incorporada à main |
 | 0.20.0 | Diagnóstico de disponibilidade de cobrança, preços pendentes e clareza entre teste e contratação | Incorporada à main; homologação real continua pendente |
-| 0.20.1 | Correção do fuso de criação de solicitações e mensalidades na assinatura | Entrega atual |
+| 0.20.1 | Correção do fuso de criação de solicitações e mensalidades na assinatura | Incorporada à main |
+| 0.21.0 | Refinamento do dashboard, consulta acessível dos gráficos, atalhos e organização do front-end | Entrega atual |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
@@ -34,3 +35,6 @@ Depois da base: importações/conciliação, integrações bancárias, cobranç
 Por orientação do usuário em 21/10/2026, cobrança integrada foi antecipada à publicação real. A base Asaas é entregue na 0.15.0. Próximas prioridades: homologar o provedor real e validar a instalação (servidor, domínio, SMTP e cópia externa); a base de planos/assinaturas é entregue na 0.16.0 com ativação manual. Próximas etapas comerciais: definir preços/termos, homologar a conta recebedora do Fintry e homologar as mensalidades integradas entregues na 0.17.0, mantendo-as separadas das cobranças dos clientes. Geração recorrente autorizada é entregue na 0.18.0; débito automático, nota fiscal e avisos de inadimplência permanecem nas próximas etapas. Rotação de credenciais, reemissão, estornos assistidos, fila de webhooks e conciliação agrupada continuam como evoluções de cobrança. OFX e conciliação por movimento são entregues na 0.13.0; conexão bancária automática, valores parciais/agrupados e regras avançadas ficam para evolução. Evolução dos dados de exemplo para os novos módulos e personalização da empresa continuam no backlog. As entregas seguintes continuam incluindo melhorias de uso e visual.
 
 Em 20/10/2026, o foco da 0.10.0 passou para front-end/CSS e navegação por solicitação do usuário. A importação CSV continua como próxima funcionalidade, seguida de serviços/propostas.
+
+
+Em 23/10/2026, o usuário confirmou emissão, abertura da fatura e recebimento Sandbox por consulta no seu ambiente. Entrega automática do webhook, publicação e recebimento em produção continuam pendentes de validação própria. A evolução segue com refinamento visual na 0.21.0; próximas prioridades de produto: personalização da empresa/primeiro acesso e exemplos dos módulos recentes, depois operação das notificações de cobrança. Essas prioridades não alteram o ambiente comercial nem habilitam cobrança real automaticamente.
