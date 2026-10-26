@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.29.0**
+**Versão atual: 0.30.0**
 
 Dashboard com saldo atual em destaque, indicadores realizados por mês, atalhos e gráfico consultável com mouse, toque e teclado. Veja a [visão geral](docs/01-product/dashboard.md).
 
@@ -171,6 +171,7 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 - Parcelamentos mensais e recorrências de valor fixo, com 2 a 120 ocorrências.
 - Prévia de datas/valores, acompanhamento, pausa/retomada de recorrências e encerramento controlado.
 - Pagamentos parciais e conciliação bancária demonstrados no pacote fictício de apresentação.
+- Interface refinada com superfícies mais claras, navegação consistente e componentes responsivos.
 - Lançamentos pendentes e realizados; baixa com data de pagamento.
 - Edição de lançamentos pendentes, sem alterar saldos realizados.
 - Cancelamento preservando o histórico; para corrigir um registro realizado, cancele e cadastre novamente.
