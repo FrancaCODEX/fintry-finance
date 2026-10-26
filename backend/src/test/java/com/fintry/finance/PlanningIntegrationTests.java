@@ -450,7 +450,9 @@ class PlanningIntegrationTests {
       proposalStates.add(proposal.get("status").asText());
       if (proposal.get("status").asText().equals("APPROVED")) {
         approvedProposalHasSale = !proposal.get("saleId").isNull();
-        assertFalse(proposal.get("items").isEmpty());
+        var details =
+            b.request("GET", "/proposals/" + proposal.get("id").asText(), null, 200);
+        assertFalse(details.get("items").isEmpty());
       }
     }
     assertEquals(Set.of("DRAFT", "OPEN", "APPROVED"), proposalStates);
