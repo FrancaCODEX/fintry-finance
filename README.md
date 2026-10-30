@@ -2,9 +2,9 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.31.0**
+**Versão atual: 0.32.0**
 
-Dashboard com saldo atual em destaque, indicadores realizados por mês, atalhos e gráfico consultável com mouse, toque e teclado. Veja a [visão geral](docs/01-product/dashboard.md).
+Dashboard com saldo atual, indicadores analíticos e um estúdio de gráficos interativo: ajuste período, formato e séries, salve visualizações e consulte os valores em tabela. Veja a [visão geral](docs/01-product/dashboard.md).
 
 Novo cadastro abre a comparação de planos, com Profissional em teste de 14 dias no modo comercial e opção de começar sem contratar. Veja [primeiro acesso](docs/01-product/first-access.md).
 
