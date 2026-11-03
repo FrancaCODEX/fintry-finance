@@ -1,5 +1,11 @@
 # Changelog do Fintry
 
+## [0.32.2] - 2026-11-03
+
+### Documentação de apresentação
+
+- Remove links e artefatos de vídeo das páginas versionadas do projeto.
+
 ## [0.32.1] - 2026-11-03
 
 ### Documentação e apresentação
