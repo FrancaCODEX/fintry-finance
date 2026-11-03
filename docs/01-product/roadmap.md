@@ -38,7 +38,8 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.30.0 | Refinamento visual amplo do front-end: superfícies, hierarquia, navegação, componentes e telas móveis | Incorporada à main (PR #33) |
 | 0.31.0 | Indicadores analíticos com minigráficos acessíveis no dashboard | Incorporada à main (PR #34) |
 | 0.32.0 | Estúdio de gráficos interativo com séries, períodos e visualizações personalizadas | Incorporada à main (PR #35) |
-| 0.32.1 | Documentação do dashboard e README alinhados para demonstração | Material preparado para demonstração |
+| 0.32.1 | Documentação do dashboard e README alinhados para demonstração | Incorporada à main (PR #36) |
+| 0.32.2 | Documentação de apresentação alinhada sem roteiro de vídeo versionado | Em preparação |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
