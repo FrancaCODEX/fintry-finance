@@ -6,7 +6,7 @@
 
 - Atualiza README e roadmap para refletir a v0.32.0 entregue, corrige instruções de atualização antigas e identifica o Fintry como projeto pessoal em desenvolvimento.
 - Documenta configuração, persistência local e limites dos gráficos interativos do dashboard.
-- Acrescenta roteiro de 90 segundos com cenas e textos para demonstrar o fluxo financeiro usando apenas exemplos fictícios.
+- Alinha o material de apresentação ao fluxo financeiro demonstrável com exemplos fictícios.
 
 ## [0.32.0] - 2026-10-26
 
