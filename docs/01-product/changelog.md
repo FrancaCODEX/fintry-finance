@@ -1,5 +1,11 @@
 # Changelog do Fintry
 
+## [0.32.4] - 2026-11-03
+
+### Ajuste na seleção do gráfico
+
+- Mantém a linha e o ponto do mês visíveis sobre o realce de seleção e remove a tooltip que cobria os dados.
+
 ## [0.32.3] - 2026-11-03
 
 ### Correção visual do dashboard
