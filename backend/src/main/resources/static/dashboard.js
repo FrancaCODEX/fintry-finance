@@ -160,14 +160,14 @@ function chart(flow, config) {
   return `<div class="chart dashboard-chart" tabindex="0" role="region" aria-label="Gráfico interativo. Use as setas para percorrer os meses; selecione um mês para consultar os valores."><svg role="group" aria-label="${config.type === "line" ? "Linhas" : "Barras"} de ${series.map((key) => dashboardChartSeries[key].label.toLowerCase()).join(", ")} nos últimos ${flow.length} meses." viewBox="0 0 640 235">${[0,1,2,3].map((i) => {
     const value = max - (span * i / 3), yy = y(value);
     return `<line x1="54" x2="626" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-dasharray="3 5"/><text x="0" y="${yy + 4}">${compact(value)}</text>`;
-  }).join("")}<line class="chart-zero-line" x1="54" x2="626" y1="${zero}" y2="${zero}"/>${lines}${flow.map((m, i) => {
+  }).join("")}<line class="chart-zero-line" x1="54" x2="626" y1="${zero}" y2="${zero}"/>${flow.map((m, i) => {
     const x = xAt(i), groupWidth = Math.min(74, step - 8), barWidth = Math.min(18, (groupWidth - 8) / series.length);
     const bars = config.type === "bar" ? series.map((key, sIndex) => {
       const value = dashboardChartValue(m, key), yy = y(value), left = x - groupWidth / 2 + 4 + sIndex * (barWidth + 3);
       return `<rect class="chart-${dashboardChartSeries[key].className}" x="${left}" y="${Math.min(yy, zero)}" width="${barWidth}" height="${Math.max(1, Math.abs(zero - yy))}" rx="4"/>`;
     }).join("") : "";
-    return `<g role="button" tabindex="0" data-dashboard-index="${i}" aria-pressed="${i === flow.length - 1}" aria-label="Consultar ${e(dashboardMonth(m.month))}: ${series.map((key) => dashboardChartSeries[key].label + " " + money(dashboardChartValue(m, key))).join(", ")}" class="dashboard-chart-month ${i === flow.length - 1 ? "is-selected" : ""}"><title>${e(dashboardMonth(m.month))}</title><rect class="chart-hit" x="${x - step / 2}" y="12" width="${step}" height="204" rx="10"/>${bars}<text x="${x}" y="201" text-anchor="middle">${dashboardMonth(m.month, true)}</text></g>`;
-  }).join("")}</svg></div>`;
+    return `<g role="button" tabindex="0" data-dashboard-index="${i}" aria-pressed="${i === flow.length - 1}" aria-label="Consultar ${e(dashboardMonth(m.month))}: ${series.map((key) => dashboardChartSeries[key].label + " " + money(dashboardChartValue(m, key))).join(", ")}" class="dashboard-chart-month ${i === flow.length - 1 ? "is-selected" : ""}"><rect class="chart-hit" x="${x - step / 2}" y="12" width="${step}" height="204" rx="10"/>${bars}<text x="${x}" y="201" text-anchor="middle">${dashboardMonth(m.month, true)}</text></g>`;
+  }).join("")}${lines}</svg></div>`;
 }
 function dashboardChartValues(m, series) {
   return `<span class="chart-detail-month">${e(dashboardMonth(m.month))}</span><dl>${series.map((key) => `<div><dt>${dashboardChartSeries[key].label}</dt><dd class="${key === "income" || (key === "result" && dashboardChartValue(m, key) >= 0) ? "positive" : key === "result" ? "negative" : ""}">${money(dashboardChartValue(m, key))}</dd></div>`).join("")}</dl>`;
