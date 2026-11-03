@@ -1,5 +1,11 @@
 # Changelog do Fintry
 
+## [0.32.3] - 2026-11-03
+
+### Correção visual do dashboard
+
+- Impede que as séries do gráfico de linhas sejam preenchidas como áreas ao passar o cursor pelos meses.
+
 ## [0.32.2] - 2026-11-03
 
 ### Documentação de apresentação
