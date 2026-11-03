@@ -4612,6 +4612,10 @@ dialog::backdrop {
   stroke: var(--focus);
   fill: var(--focus);
 }
+/* Series colors also fill markers; keep the line geometry transparent. */
+.dashboard-chart polyline.chart-series-line {
+  fill: none;
+}
 .dashboard-chart .chart-point {
   stroke: var(--paper);
   stroke-width: 2;
