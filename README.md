@@ -4,7 +4,7 @@
 
 **Versão atual: 0.32.1**
 
-Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard reúne indicadores analíticos e visualizações de gráficos ajustáveis. Veja a [visão geral do dashboard](docs/01-product/dashboard.md) e o [roteiro de apresentação](docs/01-product/roteiro-linkedin-90s.md).
+Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard reúne indicadores analíticos e visualizações de gráficos ajustáveis. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
 
 Novo cadastro abre a comparação de planos, com Profissional em teste de 14 dias no modo comercial e opção de começar sem contratar. Veja [primeiro acesso](docs/01-product/first-access.md).
 
@@ -233,7 +233,7 @@ A CI executa ambos com JDK 21 e também constrói a imagem Docker. A suíte cobr
 
 A versão **0.32.0** reúne o percurso planejado para demonstração: dashboard, lançamentos, pagamentos parciais, relatórios e conciliação. Os dados fictícios são opcionais e identificados no próprio fluxo; não há conexão bancária automática.
 
-O roteiro de 90 segundos está em [docs/01-product/roteiro-linkedin-90s.md](docs/01-product/roteiro-linkedin-90s.md). Antes de gravar, carregue os dados de exemplo em uma empresa de avaliação e confirme que a demonstração usa apenas informações fictícias.
+Antes de gravar, carregue os dados de exemplo em uma empresa de avaliação e confirme que a demonstração usa apenas informações fictícias.
 
 O Fintry é um projeto pessoal em desenvolvimento, não um serviço comercial disponível. A configuração de produção está documentada, mas publicar para clientes ainda exige infraestrutura, credenciais próprias, SMTP e operação externa de backups e monitoramento. Veja o [roadmap](docs/01-product/roadmap.md).
 
