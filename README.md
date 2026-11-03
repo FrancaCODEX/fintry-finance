@@ -2,9 +2,9 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.32.0**
+**Versão atual: 0.32.1**
 
-Dashboard com saldo atual, indicadores analíticos e um estúdio de gráficos interativo: ajuste período, formato e séries, salve visualizações e consulte os valores em tabela. Veja a [visão geral](docs/01-product/dashboard.md).
+Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard reúne indicadores analíticos e visualizações de gráficos ajustáveis. Veja a [visão geral do dashboard](docs/01-product/dashboard.md) e o [roteiro de apresentação](docs/01-product/roteiro-linkedin-90s.md).
 
 Novo cadastro abre a comparação de planos, com Profissional em teste de 14 dias no modo comercial e opção de começar sem contratar. Veja [primeiro acesso](docs/01-product/first-access.md).
 
@@ -37,7 +37,7 @@ Em **Conciliação**, escolha uma conta, importe um extrato OFX e confira banco,
 - **Ignorar:** registre um motivo; o movimento continua consultável.
 - **Reabrir revisão:** remove a decisão/vínculo, preservando o pagamento. Correções financeiras são feitas pelas ações existentes depois da reabertura.
 
-Administradores e Financeiro podem importar e decidir; Consulta pode acompanhar as revisões. A tela oferece um OFX fictício para contas de avaliação. Use até 1 MB/500 movimentos por arquivo, de uma conta bancária em BRL, em UTF-8 ou Windows-1252. Cartões, investimentos, correções OFX e a conciliação agrupada permite baixar vários movimentos de uma só vez contra o saldo de um lançamento; tarifas continuam registradas como despesas separadas. A integração é por arquivo; não há conexão automática com bancos. [Detalhes e API](docs/05-api/bank-reconciliation.md).
+Administradores e Financeiro podem importar e decidir; Consulta pode acompanhar as revisões. A tela oferece um OFX fictício para contas de avaliação. Use até 1 MB/500 movimentos por arquivo, de uma conta bancária em BRL, em UTF-8 ou Windows-1252. A conciliação agrupada permite usar vários movimentos de uma mesma conta e direção em uma baixa; tarifas são registradas separadamente como despesas. A integração é por arquivo; não há conexão automática com bancos. [Detalhes e API](docs/05-api/bank-reconciliation.md).
 
 ## Rodar com Docker (recomendado)
 
@@ -172,7 +172,7 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 - Prévia de datas/valores, acompanhamento, pausa/retomada de recorrências e encerramento controlado.
 - Pagamentos parciais e conciliação bancária demonstrados no pacote fictício de apresentação.
 - Interface refinada com superfícies mais claras, navegação consistente e componentes responsivos.
-- Dashboard apresenta a variação do caixa nos últimos seis meses com minigráficos acessíveis.
+- Dashboard com saldo atual, indicadores, comparação mensal, despesas por categoria e gráfico de caixa interativo e acessível.
 - Lançamentos pendentes e realizados; baixa com data de pagamento.
 - Edição de lançamentos pendentes, sem alterar saldos realizados.
 - Cancelamento preservando o histórico; para corrigir um registro realizado, cancele e cadastre novamente.
@@ -181,7 +181,6 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 - Vínculo opcional de lançamentos a clientes/fornecedores e categorias cadastradas.
 - Transferência atômica entre duas contas da mesma empresa.
 - Busca, filtro por tipo/status, período mensal e paginação de lançamentos.
-- Dashboard com saldo atual, resultado de caixa, comparação com o mês anterior, despesas por categoria e gráfico de seis meses.
 - Relatórios por período, conta, tipo, situação, categoria e cliente/fornecedor.
 - Exportações CSV, Excel (.xlsx) e PDF com os filtros aplicados.
 - Fluxo de caixa projetado por dia, com horizonte e conta selecionáveis e indicação de saldo negativo.
@@ -230,36 +229,28 @@ sh mvnw -Dspring.profiles.active=postgres-test verify
 
 A CI executa ambos com JDK 21 e também constrói a imagem Docker. A suíte cobre autenticação, CSRF, isolamento entre empresas, valores inválidos, datas, filtros, baixa repetida, cancelamento, transferências, séries mensais, relatórios, projeções e arquivos exportados.
 
-## Próximas entregas
+## Preparação para apresentação
 
-A sequência está no [roadmap](docs/01-product/roadmap.md):
+A versão **0.32.0** reúne o percurso planejado para demonstração: dashboard, lançamentos, pagamentos parciais, relatórios e conciliação. Os dados fictícios são opcionais e identificados no próprio fluxo; não há conexão bancária automática.
 
-- **Entregue até 0.10.0:** controle financeiro, relatórios/projeções, comprovantes, acesso/equipe, produtos/estoque/vendas, central de pendências, orçamentos, exemplos completos e navegação/visual renovados.
-- **Próximas prioridades:** importação CSV com prévia e detecção de duplicidades e evolução de serviços/propostas, conforme o roadmap.
+O roteiro de 90 segundos está em [docs/01-product/roteiro-linkedin-90s.md](docs/01-product/roteiro-linkedin-90s.md). Antes de gravar, carregue os dados de exemplo em uma empresa de avaliação e confirme que a demonstração usa apenas informações fictícias.
 
-Depois da base: importações/conciliação, integrações bancárias, cobrança, planos/assinaturas, recorrências sem prazo final e organização avançada dos comprovantes.
-
-Esta é uma versão funcional para desenvolvimento e demonstração. A recuperação de senha já está implementada e requer a configuração de e-mail. Antes de oferecer o serviço a clientes, é necessário definir e testar backups, observabilidade e a operação em produção. Para publicar, configure HTTPS, `COOKIE_SECURE=true`, credenciais próprias e a infraestrutura de acesso; o Compose padrão expõe a aplicação apenas no computador local. Sessões são armazenadas no processo e expiram em 30 minutos de inatividade; reiniciar a aplicação exige novo login.
+O Fintry é um projeto pessoal em desenvolvimento, não um serviço comercial disponível. A configuração de produção está documentada, mas publicar para clientes ainda exige infraestrutura, credenciais próprias, SMTP e operação externa de backups e monitoramento. Veja o [roadmap](docs/01-product/roadmap.md).
 
 Contato: **vfranca.dev@gmail.com**
 
-## Atualizar da primeira versão
+## Atualizar o projeto
 
-Na pasta do projeto:
+Na pasta do repositório, sincronize a versão atual e recrie a aplicação:
 
 ```bash
 git fetch origin
 git switch main
-git pull --ff-only
-git pull --ff-only origin codex/fintry-v0.5-comprovantes-temas
+git pull --ff-only origin main
 docker compose up --build -d
 ```
 
-A atualização adiciona tabelas e vínculos por migração Flyway; não precisa recriar o banco nem remover o volume. Os lançamentos antigos mantêm a categoria em texto e podem continuar sendo usados. Não execute `docker compose down -v` para atualizar.
-
-Os novos menus são **Clientes e fornecedores** e **Categorias**. Cadastre os registros e selecione-os no formulário de lançamento. Um contato pode ser cliente, fornecedor ou ambos. Receitas aceitam clientes; despesas aceitam fornecedores. Categorias podem ser de receitas, despesas ou ambas.
-
-Inativar um cadastro preserva os lançamentos existentes. Um vínculo antigo inativo pode ser mantido ao editar sua pendência; novos vínculos exigem cadastros ativos. Nomes de contato/categoria ficam registrados no lançamento no momento em que ele é salvo, preservando o histórico em caso de renomeação. O tipo de um cadastro vinculado não pode ser alterado. CPF/CNPJ de contatos são opcionais; a validação nesta versão verifica formato e quantidade de dígitos, não consulta situação cadastral.
+O Flyway aplica as migrações incrementais durante a inicialização. Preserve o volume PostgreSQL existente: não use `docker compose down -v` para atualizar. Consulte [publicação](docs/07-devops/deployment.md) e [backup/restauração](docs/07-devops/backups.md) antes de atualizar uma instalação hospedada.
 
 ## Parcelamentos e recorrências — v0.3.0
 

@@ -90,6 +90,10 @@ function dashboardAttention() {
   const count = p.windows.find((w) => w.group === "OVERDUE")?.totals.count || 0;
   return `<section class="dashboard-attention ${count ? "needs-attention" : ""}" aria-label="Situação dos vencimentos atuais"><div class="attention-icon">${icon("calendar")}</div><div><span class="eyebrow">VENCIMENTOS ATUAIS · ${dateLabel(p.today)}</span><p>${count ? `<strong>${count} pendência(s) vencida(s).</strong> Confira o que precisa de atenção.` : "Nenhum atraso cadastrado. Confira os próximos vencimentos."}</p></div><button class="btn secondary small" ${count ? 'data-action="pending-group" data-group="OVERDUE"' : 'data-nav="pending"'}>${count ? "Ver vencidas" : "Ver pendências"}</button></section>`;
 }
+/**
+ * Lê somente preferências visuais do usuário. O resumo e os valores financeiros
+ * continuam sendo carregados do backend em `state.summary`.
+ */
 function dashboardChartPrefs() {
   const defaults = {
     active: "default",
@@ -110,6 +114,7 @@ function dashboardChartPrefs() {
     return defaults;
   }
 }
+/** Resolve a visualização ativa ou retorna a configuração padrão do gráfico. */
 function dashboardChartConfig() {
   const prefs = dashboardChartPrefs();
   const view = prefs.views.find((item) => item.id === prefs.active);
@@ -122,6 +127,7 @@ function saveDashboardChartPrefs(prefs) {
     toast("Não foi possível salvar as visualizações neste navegador.");
   }
 }
+/** Deriva cada série a partir do resumo realizado; `result` é receita menos despesa. */
 function dashboardChartValue(month, key) {
   if (key === "income") return Number(month.income);
   if (key === "expense") return Number(month.expense);
@@ -132,6 +138,10 @@ const dashboardChartSeries = {
   expense: { label: "Despesas", className: "expense" },
   result: { label: "Resultado", className: "result" },
 };
+/**
+ * Desenha os meses já recebidos do backend. A escala inclui zero para preservar
+ * a leitura quando a série Resultado fica negativa.
+ */
 function chart(flow, config) {
   const series = config.series.filter((key) => dashboardChartSeries[key]);
   if (!flow.some((m) => Number(m.income) || Number(m.expense)))
@@ -162,6 +172,7 @@ function chart(flow, config) {
 function dashboardChartValues(m, series) {
   return `<span class="chart-detail-month">${e(dashboardMonth(m.month))}</span><dl>${series.map((key) => `<div><dt>${dashboardChartSeries[key].label}</dt><dd class="${key === "income" || (key === "result" && dashboardChartValue(m, key) >= 0) ? "positive" : key === "result" ? "negative" : ""}">${money(dashboardChartValue(m, key))}</dd></div>`).join("")}</dl>`;
 }
+/** Compõe controles, gráfico, detalhe mensal e tabela usando a mesma seleção. */
 function dashboardChart(s) {
   const prefs = dashboardChartPrefs(), config = dashboardChartConfig();
   const flow = s.flow.slice(-Math.min(Number(config.period) || 6, s.flow.length));
@@ -200,6 +211,10 @@ function dashboardPresentationTour() {
   ];
   return `<section class="dashboard-tour" aria-labelledby="dashboard-tour-title"><div class="dashboard-tour-heading"><div><span class="eyebrow">ROTEIRO DE APRESENTAÇÃO</span><h2 id="dashboard-tour-title">Veja o fluxo completo do Fintry</h2><p>Um percurso curto pelos dados de demonstração.</p></div><span class="demo-label">${icon("sparkles")} Dados fictícios</span></div><div class="dashboard-tour-steps">${steps.map(([number, title, description, page]) => `<button class="dashboard-tour-step" data-nav="${page}"><span class="tour-number">${number}</span><span class="tour-copy"><strong>${title}</strong><small>${description}</small></span><span class="tour-arrow" aria-hidden="true">→</span></button>`).join("")}</div><button class="dashboard-tour-all" data-nav="examples">Ver todos os exemplos →</button></section>`;
 }
+/**
+ * Atualiza apenas o cartão do gráfico ao mudar preferências; selecionar um mês
+ * atualiza o detalhe localmente e não altera lançamentos nem recarrega o resumo.
+ */
 function bindDashboardChart(page) {
   const slot = page.querySelector(".dashboard-chart-slot");
   if (!slot) return;

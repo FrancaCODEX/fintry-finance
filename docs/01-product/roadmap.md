@@ -37,11 +37,12 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.29.0 | Roteiro de apresentação contextual no dashboard e organização da página de exemplos | Incorporada à main (PR #32) |
 | 0.30.0 | Refinamento visual amplo do front-end: superfícies, hierarquia, navegação, componentes e telas móveis | Incorporada à main (PR #33) |
 | 0.31.0 | Indicadores analíticos com minigráficos acessíveis no dashboard | Incorporada à main (PR #34) |
-| 0.32.0 | Estúdio de gráficos interativo com séries, períodos e visualizações personalizadas | Em andamento |
+| 0.32.0 | Estúdio de gráficos interativo com séries, períodos e visualizações personalizadas | Incorporada à main (PR #35) |
+| 0.32.1 | Documentação do dashboard, README alinhado e roteiro de apresentação | Material preparado para demonstração |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
-Depois da base: importações/conciliação, integrações bancárias, cobrança, planos/assinaturas e recorrência sem prazo final. A identidade visual mantém verde escuro, verde claro e fundo suave; a evolução deve priorizar hierarquia, estados de carregamento, feedback de ações, detalhes acessíveis e uso no celular.
+A base funcional de importações, conciliação, cobrança, planos/assinaturas e recorrências está entregue, com homologação real de provedores e operação externa ainda dependentes de infraestrutura/credenciais. Para a apresentação, as próximas prioridades são revisar o percurso em navegador desktop e celular, manter os exemplos fictícios consistentes e evoluir acessibilidade/feedback sem ampliar o escopo comercial. A identidade visual mantém verde escuro, verde claro e fundo suave.
 
 Por orientação do usuário em 21/10/2026, cobrança integrada foi antecipada à publicação real. A base Asaas é entregue na 0.15.0. Próximas prioridades: homologar o provedor real e validar a instalação (servidor, domínio, SMTP e cópia externa); a base de planos/assinaturas é entregue na 0.16.0 com ativação manual. Próximas etapas comerciais: definir preços/termos, homologar a conta recebedora do Fintry e homologar as mensalidades integradas entregues na 0.17.0, mantendo-as separadas das cobranças dos clientes. Geração recorrente autorizada é entregue na 0.18.0; débito automático, nota fiscal e avisos de inadimplência permanecem nas próximas etapas. Rotação de credenciais, reemissão, estornos assistidos, fila de webhooks e conciliação agrupada continuam como evoluções de cobrança. OFX e conciliação por movimento são entregues na 0.13.0; pagamentos parciais dos lançamentos foram entregues na 0.25.0 e a conciliação agrupada segue na 0.26.0. Conexão bancária automática e regras avançadas continuam no backlog. Evolução dos dados de exemplo para os novos módulos e personalização da empresa continuam no backlog. As entregas seguintes continuam incluindo melhorias de uso e visual.
 
@@ -60,4 +61,4 @@ Em 26/10/2026, após a v0.26.0 incorporada na PR #29, a v0.27.0 implementa pausa
 Em 26/10/2026, a v0.27.0 foi incorporada à main pela PR #30. A v0.28.0 prepara o percurso de demonstração com exemplos diversos e relacionados; a v0.29.0 organiza a exploração desses fluxos; e a v0.30.0 renova os estilos compartilhados. A v0.31.0 dá uma leitura própria aos indicadores do dashboard com minigráficos acessíveis.
 
 
-Em 26/10/2026, a v0.32.0 aprofunda a rodada de UX ao tornar os gráficos do dashboard exploráveis e personalizáveis: escolha de séries e formato, filtros de período, visualizações salvas por usuário e leitura em tabela. A rodada visual continua com foco em interações úteis e uma interface autoral e acessível.
+Em 30/10/2026, a v0.32.0 foi incorporada à main pela PR #35: gráficos do dashboard com séries e formato ajustáveis, períodos de 3 ou 6 meses, visualizações salvas por usuário e consulta em tabela. A v0.32.1 prepara a apresentação com documentação alinhada ao produto e um roteiro de demonstração; os dados financeiros do pacote de exemplos são fictícios.
