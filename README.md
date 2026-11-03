@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.32.2**
+**Versão atual: 0.32.3**
 
 Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard reúne indicadores analíticos e visualizações de gráficos ajustáveis. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
 
