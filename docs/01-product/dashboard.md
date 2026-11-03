@@ -1,13 +1,23 @@
-# Visão geral — 0.21.0
+# Dashboard financeiro
 
-O saldo destacado é o saldo atual de todas as contas, incluindo saldos iniciais e movimentos realizados. Ele independe do mês selecionado. Os três indicadores ao lado mostram receitas, despesas e resultado de caixa realizados pela data de pagamento ou recebimento no mês escolhido. Resultado de caixa não representa lucro contábil.
+O saldo destacado representa o saldo atual de todas as contas, incluindo saldos iniciais e movimentos realizados. Ele independe do mês selecionado. Os indicadores mostram receitas, despesas e resultado de caixa realizados pela data do pagamento ou recebimento no mês escolhido. Resultado de caixa não representa lucro contábil.
 
-O gráfico mostra os seis meses terminando no mês selecionado. Passe o mouse, toque ou foque um mês para consultar os valores. As setas esquerda/direita percorrem os meses; Enter e espaço também selecionam. A seção **Ver valores em tabela** permite ler todos os valores sem depender das barras. Selecionar um ponto apenas consulta o gráfico, sem alterar o mês da página ou criar lançamentos.
+## Explorar os gráficos
 
-**No seu radar** apresenta receitas e despesas ainda pendentes pelo vencimento no mês escolhido. Esses valores não integram o saldo realizado antes da baixa. O resumo de atrasos e a lista **Hoje e nos próximos 7 dias** usam a data atual de São Paulo, independente do mês em análise. O botão **Ir para mês atual** volta ao mês de hoje sem limpar os dados da empresa.
+O histórico usa os até seis meses fornecidos pelo resumo financeiro, terminando no mês selecionado na página. Nos controles do gráfico, escolha **3 meses** ou **6 meses**, alterne entre **Barras** e **Linhas**, e mostre ou esconda as séries de **Receitas**, **Despesas** e **Resultado**. O resultado de caixa é calculado como receitas menos despesas realizadas.
 
-Os atalhos respeitam as permissões: lançamentos e transferências aparecem para quem pode registrar operações; demais perfis recebem acesso às contas e pendências. Relatórios e conciliação continuam consultáveis de acordo com as permissões existentes. Sem conta, o atalho de lançamento abre o cadastro de conta já existente no fluxo.
+Selecione um mês com mouse, toque ou teclado para atualizar os detalhes abaixo do gráfico. Use as setas esquerda/direita para percorrer os meses e Enter ou espaço para selecionar. A tabela **Consultar valores em tabela** acompanha o período e as séries visíveis.
 
-A comparação usa o mês anterior. Sem base anterior, isso é informado em texto. Quando o resultado anterior é negativo, a variação aparece em reais para evitar uma porcentagem ambígua. Nenhum percentual é tratado como recomendação de negócio.
+## Visualizações salvas
 
-A atualização reorganiza o front-end e usa os mesmos endpoints e totais do backend. Não há migração, nova cobrança, projeção automática, substituição de dados ou alteração nos critérios de cálculo.
+A visualização padrão é **Fluxo de caixa**. Ajuste os controles, abra **Salvar como nova visualização** e informe um nome para guardar outra configuração. É possível selecionar, ajustar ou excluir as visualizações salvas; o dashboard permite até dez.
+
+As preferências ficam no armazenamento local do navegador, associadas ao usuário conectado. Elas incluem somente nome, período, formato e séries selecionadas; não armazenam nem alteram dados financeiros e não são sincronizadas entre dispositivos. Limpar os dados do site remove essas preferências.
+
+## Contexto e limites
+
+Selecionar um ponto ou configurar uma visualização não muda o mês da página, não cria lançamentos e não registra pagamentos. Os totais do gráfico continuam vindo do backend e seguem as datas e regras atuais dos indicadores. O período máximo disponível é de seis meses.
+
+**No seu radar** apresenta receitas e despesas ainda pendentes pelo vencimento no mês escolhido; esses valores não integram o saldo realizado antes da baixa. O resumo de atrasos e a lista **Hoje e nos próximos 7 dias** usam a data atual de São Paulo, independentemente do mês em análise.
+
+Os atalhos respeitam as permissões existentes. O botão **Ir para mês atual** volta ao mês de hoje sem limpar dados da empresa.
