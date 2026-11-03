@@ -5,6 +5,7 @@
 ### Correção visual do dashboard
 
 - Impede que as séries do gráfico de linhas sejam preenchidas como áreas ao passar o cursor pelos meses.
+- Remove o cartão tutorial de apresentação do dashboard.
 
 ## [0.32.2] - 2026-11-03
 
