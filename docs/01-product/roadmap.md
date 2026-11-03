@@ -38,7 +38,7 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.30.0 | Refinamento visual amplo do front-end: superfícies, hierarquia, navegação, componentes e telas móveis | Incorporada à main (PR #33) |
 | 0.31.0 | Indicadores analíticos com minigráficos acessíveis no dashboard | Incorporada à main (PR #34) |
 | 0.32.0 | Estúdio de gráficos interativo com séries, períodos e visualizações personalizadas | Incorporada à main (PR #35) |
-| 0.32.1 | Documentação do dashboard, README alinhado e roteiro de apresentação | Material preparado para demonstração |
+| 0.32.1 | Documentação do dashboard e README alinhados para demonstração | Material preparado para demonstração |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
@@ -61,4 +61,4 @@ Em 26/10/2026, após a v0.26.0 incorporada na PR #29, a v0.27.0 implementa pausa
 Em 26/10/2026, a v0.27.0 foi incorporada à main pela PR #30. A v0.28.0 prepara o percurso de demonstração com exemplos diversos e relacionados; a v0.29.0 organiza a exploração desses fluxos; e a v0.30.0 renova os estilos compartilhados. A v0.31.0 dá uma leitura própria aos indicadores do dashboard com minigráficos acessíveis.
 
 
-Em 30/10/2026, a v0.32.0 foi incorporada à main pela PR #35: gráficos do dashboard com séries e formato ajustáveis, períodos de 3 ou 6 meses, visualizações salvas por usuário e consulta em tabela. A v0.32.1 prepara a apresentação com documentação alinhada ao produto e um roteiro de demonstração; os dados financeiros do pacote de exemplos são fictícios.
+Em 30/10/2026, a v0.32.0 foi incorporada à main pela PR #35: gráficos do dashboard com séries e formato ajustáveis, períodos de 3 ou 6 meses, visualizações salvas por usuário e consulta em tabela. A v0.32.1 prepara a apresentação com documentação alinhada ao produto; os dados financeiros do pacote de exemplos são fictícios.
