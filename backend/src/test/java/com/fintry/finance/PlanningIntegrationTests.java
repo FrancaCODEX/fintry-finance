@@ -271,8 +271,17 @@ class PlanningIntegrationTests {
     assertEquals(0, result.get("content").size());
     amount("25", result.get("unbudgetedPaid"));
     assertEquals(1, b.request("GET", "/finance/entries", null, 200).get("totalElements").asInt());
+    var auditDate = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
     var audit =
-        b.request("GET", "/audit?start=2026-10-01&end=2026-10-31&resource=BUDGET", null, 200);
+        b.request(
+            "GET",
+            "/audit?start="
+                + auditDate.minusDays(1)
+                + "&end="
+                + auditDate.plusDays(1)
+                + "&resource=BUDGET",
+            null,
+            200);
     assertEquals(3, audit.get("totalElements").asInt());
     var onlyBudget = category(b, "Só orçamento", "EXPENSE");
     budget(b, "2026-10", onlyBudget, "10");
