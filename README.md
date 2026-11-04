@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.37.0**
+**Versão atual: 0.38.0**
 
 Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard React reúne indicadores explicáveis e gráficos ajustáveis. O simulador compara hipóteses com o fluxo previsto, salva planejamentos e preserva o histórico de cálculos sem alterar os registros financeiros. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
 
@@ -208,7 +208,7 @@ Compare adiamentos de recebimentos/pagamentos, novas receitas e despesas mensais
 
 ## Evolução do frontend
 
-A v0.35.0 acrescenta cenários e indicadores explicáveis ao dashboard e lançamentos em React/TypeScript com filtros na URL, consultas canceláveis e gráficos acessíveis. A v0.36.0 unifica criação, edição, baixa e cancelamento em formulários React; a v0.37.0 acrescenta cenários salvos, revisões e histórico de cálculos. Todas as operações continuam integradas à sessão e às permissões do Spring Boot. Veja a [decisão de arquitetura](docs/03-architecture/frontend-workspace.md) e os [contratos da API](api/README.md).
+A v0.35.0 acrescenta cenários e indicadores explicáveis ao dashboard e lançamentos em React/TypeScript com filtros na URL, consultas canceláveis e gráficos acessíveis. A v0.36.0 unifica criação, edição, baixa e cancelamento em formulários React; a v0.37.0 acrescenta cenários salvos, revisões e histórico de cálculos. A v0.38.0 migra a conciliação para React com sugestões explicadas, regras reutilizáveis e evidência da decisão. Todas as operações continuam integradas à sessão e às permissões do Spring Boot. Veja a [decisão de arquitetura](docs/03-architecture/frontend-workspace.md) e os [contratos da API](api/README.md).
 
 ## Stack e estrutura
 

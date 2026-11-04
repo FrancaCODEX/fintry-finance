@@ -31,6 +31,9 @@ public class ReconciliationService {
   private final ReconciliationBatchRepository batches;
   private final FinanceService finance;
   private final AuditService audit;
+  private final ReconciliationRuleService rules;
+  private final tools.jackson.databind.json.JsonMapper json =
+      tools.jackson.databind.json.JsonMapper.builder().build();
 
   public record Input(@NotNull UUID accountId, @NotBlank @Size(max = 1048576) String ofx) {}
 
@@ -74,7 +77,16 @@ public class ReconciliationService {
       UUID categoryId,
       @Size(max = 255) String reason) {}
 
-  public record Candidate(FinanceService.EntryView entry, String explanation) {}
+  public record Candidate(
+      FinanceService.EntryView entry,
+      String explanation,
+      int score,
+      List<String> reasons,
+      List<String> rules) {}
+
+  public record RuleEvidence(UUID id, long revision, String name) {}
+
+  public record DecisionEvidence(int score, List<String> reasons, List<RuleEvidence> rules) {}
 
   public record LineView(
       UUID id,
@@ -89,7 +101,8 @@ public class ReconciliationService {
       int batchMovements,
       long revision,
       FinanceService.EntryView entry,
-      List<Candidate> suggestions) {}
+      List<Candidate> suggestions,
+      DecisionEvidence evidence) {}
 
   public record Result(
       List<LineView> content,
@@ -107,10 +120,16 @@ public class ReconciliationService {
       @NotBlank @Size(max = 255) String reason) {}
 
   public record GroupCandidatesInput(
-      @NotNull UUID accountId, @NotEmpty @Size(min = 2, max = 50) List<@NotNull UUID> movementIds) {}
+      @NotNull UUID accountId,
+      @NotEmpty @Size(min = 2, max = 50) List<@NotNull UUID> movementIds) {}
 
   public record BatchView(
-      UUID id, UUID entryId, BigDecimal amount, LocalDate paymentDate, String reason, int movements) {}
+      UUID id,
+      UUID entryId,
+      BigDecimal amount,
+      LocalDate paymentDate,
+      String reason,
+      int movements) {}
 
   private ResponseStatusException missing() {
     return new ResponseStatusException(HttpStatus.NOT_FOUND, "Registro não encontrado.");
@@ -270,7 +289,9 @@ public class ReconciliationService {
         "Grupo de conciliação",
         l.getReconciliationBatchId(),
         "Motivo",
-        l.getReason());
+        l.getReason(),
+        "Justificativas da sugestão",
+        l.getDecisionEvidence());
   }
 
   private FinancialEntry.Type type(StatementLine l) {
@@ -286,6 +307,7 @@ public class ReconciliationService {
       p.add(cb.equal(root.get("type"), type(line)));
       p.add(cb.equal(root.get("amount"), line.getAmount().abs()));
       p.add(cb.notEqual(root.get("status"), FinancialEntry.Status.CANCELLED));
+      p.add(cb.isFalse(root.get("seriesPaused")));
       var sub = q.subquery(UUID.class);
       var linked = sub.from(StatementLine.class);
       sub.select(linked.get("entryId")).where(cb.equal(linked.get("entryId"), root.get("id")));
@@ -301,8 +323,8 @@ public class ReconciliationService {
                 cb.equal(root.get("status"), FinancialEntry.Status.PAID),
                 cb.between(
                     root.<LocalDate>get("dueDate"),
-                    line.getPostedDate().minusDays(7),
-                    line.getPostedDate().plusDays(7))));
+                    line.getPostedDate().minusDays(30),
+                    line.getPostedDate().plusDays(30))));
       if (search != null && !search.isBlank())
         p.add(
             cb.like(
@@ -328,46 +350,103 @@ public class ReconciliationService {
   }
 
   private List<Candidate> candidates(StatementLine l, boolean nearby, String search) {
+    return candidates(
+        l,
+        nearby,
+        search,
+        l.getStatus() == StatementLine.Status.OPEN ? rules.active(l.getAccountId()) : List.of());
+  }
+
+  private Candidate ranked(
+      StatementLine l, FinancialEntry entry, List<ReconciliationRule> available) {
+    var reasons = new ArrayList<String>();
+    reasons.add("Mesma conta (+20), direção (+10) e valor exato (+30).");
+    int score = 60;
+    long days =
+        Math.abs(
+            java.time.temporal.ChronoUnit.DAYS.between(
+                l.getPostedDate(),
+                entry.getStatus() == FinancialEntry.Status.PAID
+                    ? entry.getPaymentDate()
+                    : entry.getDueDate()));
+    int datePoints = days == 0 ? 20 : days <= 3 ? 17 : days <= 7 ? 14 : 5;
+    score += datePoints;
+    reasons.add(
+        (entry.getStatus() == FinancialEntry.Status.PAID ? "Pagamento" : "Vencimento")
+            + " a "
+            + days
+            + " dia(s) do extrato (+"
+            + datePoints
+            + ").");
+    if (normalized(entry.getDescription()).equals(normalized(l.getDescription()))) {
+      score += 10;
+      reasons.add("Descrições equivalentes, ignorando acentos e pontuação (+10).");
+    }
+    var matched = rules.matching(l, entry, available);
+    if (!matched.isEmpty()) {
+      score += 10;
+      reasons.add(
+          "Regra(s) textual(is) atendida(s) (+10 no total): "
+              + String.join(", ", matched.stream().map(ReconciliationRule::getName).toList()));
+    }
+    String consequence =
+        entry.getStatus() == FinancialEntry.Status.PENDING
+            ? "Confirmar registra a baixa na data do extrato."
+            : "Já realizado na mesma data: confirmar preserva o saldo.";
+    reasons.add(consequence);
+    return new Candidate(
+        finance.view(entry),
+        String.join(" ", reasons),
+        score,
+        reasons,
+        matched.stream().map(ReconciliationRule::getName).toList());
+  }
+
+  private List<Candidate> candidates(
+      StatementLine l, boolean nearby, String search, List<ReconciliationRule> available) {
     if (l.getStatus() != StatementLine.Status.OPEN) return List.of();
     return entries
         .findAll(
             candidatesFilter(l, nearby, search),
-            PageRequest.of(
-                0, nearby ? 10 : 100, Sort.by(Sort.Order.desc("dueDate"), Sort.Order.asc("id"))))
-        .getContent()
+            PageRequest.of(0, 100, Sort.by(Sort.Order.desc("dueDate"), Sort.Order.asc("id"))))
         .stream()
         .filter(
             e ->
                 e.getStatus() == FinancialEntry.Status.PENDING
-                    || l.getPostedDate().equals(e.getPaymentDate()))
+                    || e.getStatus() == FinancialEntry.Status.PAID
+                        && l.getPostedDate().equals(e.getPaymentDate()))
+        .filter(
+            e ->
+                !nearby
+                    || e.getStatus() == FinancialEntry.Status.PAID
+                    || Math.abs(
+                            java.time.temporal.ChronoUnit.DAYS.between(
+                                l.getPostedDate(), e.getDueDate()))
+                        <= 7
+                    || !rules.matching(l, e, available).isEmpty())
+        .map(e -> ranked(l, e, available))
         .sorted(
-            Comparator.<FinancialEntry>comparingInt(
-                    e ->
-                        normalized(e.getDescription()).equals(normalized(l.getDescription()))
-                            ? 0
-                            : 1)
-                .thenComparing(
-                    e ->
+            Comparator.comparingInt(Candidate::score)
+                .reversed()
+                .thenComparingLong(
+                    c ->
                         Math.abs(
                             java.time.temporal.ChronoUnit.DAYS.between(
                                 l.getPostedDate(),
-                                e.getStatus() == FinancialEntry.Status.PAID
-                                    ? e.getPaymentDate()
-                                    : e.getDueDate())))
-                .thenComparing(FinancialEntry::getId))
+                                c.entry().status() == FinancialEntry.Status.PAID
+                                    ? c.entry().paymentDate()
+                                    : c.entry().dueDate())))
+                .thenComparing(c -> c.entry().id()))
         .limit(nearby ? 3 : 100)
-        .map(
-            e ->
-                new Candidate(
-                    finance.view(e),
-                    e.getStatus() == FinancialEntry.Status.PENDING
-                        ? "Mesmo valor e tipo. Ao vincular, será realizada a baixa na data do"
-                            + " extrato."
-                        : "Mesmo valor, tipo e data de pagamento. Vincular não altera o saldo."))
         .toList();
   }
 
   private LineView view(StatementLine l) {
+    return view(
+        l, l.getStatus() == StatementLine.Status.OPEN ? rules.active(l.getAccountId()) : List.of());
+  }
+
+  private LineView view(StatementLine l, List<ReconciliationRule> available) {
     var entry =
         l.getEntryId() == null
             ? null
@@ -385,10 +464,15 @@ public class ReconciliationService {
         l.getEntryId(),
         l.getReason(),
         l.getReconciliationBatchId(),
-        l.getReconciliationBatchId() == null ? 0 : (int) lines.countByReconciliationBatchId(l.getReconciliationBatchId()),
+        l.getReconciliationBatchId() == null
+            ? 0
+            : (int) lines.countByReconciliationBatchId(l.getReconciliationBatchId()),
         l.getRevision(),
         entry,
-        candidates(l, true, null));
+        candidates(l, true, null, available),
+        l.getDecisionEvidence() == null
+            ? null
+            : json.readValue(l.getDecisionEvidence(), DecisionEvidence.class));
   }
 
   public List<Candidate> candidates(UUID id, String search) {
@@ -400,21 +484,35 @@ public class ReconciliationService {
   public List<FinanceService.EntryView> groupCandidates(GroupCandidatesInput input) {
     account(input.accountId());
     var ids = new LinkedHashSet<>(input.movementIds());
-    if (ids.size() != input.movementIds().size()) throw OfxParser.invalid("A seleção contém movimentos repetidos.");
+    if (ids.size() != input.movementIds().size())
+      throw OfxParser.invalid("A seleção contém movimentos repetidos.");
     var selected = ids.stream().map(this::line).toList();
-    if (selected.stream().anyMatch(m -> !m.getAccountId().equals(input.accountId()) || m.getStatus() != StatementLine.Status.OPEN))
+    if (selected.stream()
+        .anyMatch(
+            m ->
+                !m.getAccountId().equals(input.accountId())
+                    || m.getStatus() != StatementLine.Status.OPEN))
       throw conflict("Atualize a conciliação: há movimentos que não estão mais em revisão.");
     int direction = selected.get(0).getAmount().signum();
     if (selected.stream().anyMatch(m -> m.getAmount().signum() != direction)) return List.of();
-    var total = selected.stream().map(StatementLine::getAmount).map(java.math.BigDecimal::abs)
-        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-    var candidates = entries.findAll(
-        (root, q, cb) -> cb.and(
-            cb.equal(root.get("companyId"), current.companyId()),
-            cb.equal(root.get("accountId"), input.accountId()),
-            cb.equal(root.get("type"), direction > 0 ? FinancialEntry.Type.INCOME : FinancialEntry.Type.EXPENSE),
-            cb.or(cb.equal(root.get("status"), FinancialEntry.Status.PENDING), cb.equal(root.get("status"), FinancialEntry.Status.PARTIAL))),
-        PageRequest.of(0, 100, Sort.by(Sort.Order.asc("dueDate"), Sort.Order.asc("id"))));
+    var total =
+        selected.stream()
+            .map(StatementLine::getAmount)
+            .map(java.math.BigDecimal::abs)
+            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+    var candidates =
+        entries.findAll(
+            (root, q, cb) ->
+                cb.and(
+                    cb.equal(root.get("companyId"), current.companyId()),
+                    cb.equal(root.get("accountId"), input.accountId()),
+                    cb.equal(
+                        root.get("type"),
+                        direction > 0 ? FinancialEntry.Type.INCOME : FinancialEntry.Type.EXPENSE),
+                    cb.or(
+                        cb.equal(root.get("status"), FinancialEntry.Status.PENDING),
+                        cb.equal(root.get("status"), FinancialEntry.Status.PARTIAL))),
+            PageRequest.of(0, 100, Sort.by(Sort.Order.asc("dueDate"), Sort.Order.asc("id"))));
     return candidates.getContent().stream()
         .filter(e -> e.getAmount().subtract(e.getPaidAmount()).compareTo(total) >= 0)
         .limit(50)
@@ -446,12 +544,16 @@ public class ReconciliationService {
         || e.getStatus() == FinancialEntry.Status.CANCELLED)
       throw conflict("O lançamento não corresponde à conta e ao tipo dos movimentos.");
     finance.requireBillingEditable(e.getId());
-    var total = selected.stream().map(StatementLine::getAmount).map(java.math.BigDecimal::abs)
-        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+    var total =
+        selected.stream()
+            .map(StatementLine::getAmount)
+            .map(java.math.BigDecimal::abs)
+            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
     var remaining = e.getAmount().subtract(e.getPaidAmount());
     if (total.signum() <= 0 || total.compareTo(remaining) > 0)
       throw conflict("O total selecionado excede o saldo restante do lançamento.");
-    var paymentDate = selected.stream().map(StatementLine::getPostedDate).max(LocalDate::compareTo).orElseThrow();
+    var paymentDate =
+        selected.stream().map(StatementLine::getPostedDate).max(LocalDate::compareTo).orElseThrow();
     selected.sort(
         Comparator.comparing(StatementLine::getPostedDate).thenComparing(StatementLine::getId));
     var batch = new ReconciliationBatch();
@@ -464,20 +566,41 @@ public class ReconciliationService {
     batches.save(batch);
     for (var movement : selected) {
       var before = snapshot(movement);
-      finance.payFromReconciliation(e.getId(), movement.getPostedDate(),
-          movement.getAmount().abs(), batch.getId());
+      finance.payFromReconciliation(
+          e.getId(), movement.getPostedDate(), movement.getAmount().abs(), batch.getId());
       movement.setEntryId(e.getId());
       movement.setReconciliationBatchId(batch.getId());
       movement.setStatus(StatementLine.Status.LINKED);
       movement.setReason(input.reason().strip());
       movement.setRevision(movement.getRevision() + 1);
       lines.save(movement);
-      audit.change("RECONCILE_GROUP", "RECONCILIATION", movement.getId(), movement.getDescription(), before, snapshot(movement));
+      audit.change(
+          "RECONCILE_GROUP",
+          "RECONCILIATION",
+          movement.getId(),
+          movement.getDescription(),
+          before,
+          snapshot(movement));
     }
-    audit.change("RECONCILE_GROUP", "RECONCILIATION_BATCH", batch.getId(), input.reason().strip(),
-        Map.of(), fields("Lançamento", e.getDescription(), "Valor", total, "Data", paymentDate,
-            "Movimentos", selected.size(), "Motivo", input.reason().strip()));
-    return new BatchView(batch.getId(), e.getId(), total, paymentDate, batch.getReason(), selected.size());
+    audit.change(
+        "RECONCILE_GROUP",
+        "RECONCILIATION_BATCH",
+        batch.getId(),
+        input.reason().strip(),
+        Map.of(),
+        fields(
+            "Lançamento",
+            e.getDescription(),
+            "Valor",
+            total,
+            "Data",
+            paymentDate,
+            "Movimentos",
+            selected.size(),
+            "Motivo",
+            input.reason().strip()));
+    return new BatchView(
+        batch.getId(), e.getId(), total, paymentDate, batch.getReason(), selected.size());
   }
 
   public Result list(UUID accountId, StatementLine.Status status, int page, int size) {
@@ -489,6 +612,7 @@ public class ReconciliationService {
                 cb.equal(root.get("companyId"), current.companyId()),
                 cb.equal(root.get("accountId"), accountId),
                 status == null ? cb.conjunction() : cb.equal(root.get("status"), status));
+    var activeRules = rules.active(accountId);
     var result =
         lines.findAll(
             spec,
@@ -500,7 +624,7 @@ public class ReconciliationService {
                     Sort.Order.desc("createdAt"),
                     Sort.Order.desc("id"))));
     return new Result(
-        result.stream().map(this::view).toList(),
+        result.stream().map(l -> view(l, activeRules)).toList(),
         result.getTotalElements(),
         result.getTotalPages(),
         page,
@@ -528,6 +652,7 @@ public class ReconciliationService {
       if (input.reason() == null || input.reason().isBlank())
         throw OfxParser.invalid("Informe o motivo da reabertura.");
       l.setEntryId(null);
+      l.setDecisionEvidence(null);
       l.setStatus(StatementLine.Status.OPEN);
       l.setReason(input.reason().strip());
     } else {
@@ -565,6 +690,17 @@ public class ReconciliationService {
               && !l.getPostedDate().equals(e.getPaymentDate()))
             throw conflict(
                 "A data de pagamento difere do extrato. Corrija o lançamento antes de vincular.");
+          var availableRules = rules.active(l.getAccountId());
+          var ranked = ranked(l, e, availableRules);
+          var matchedRules = rules.matching(l, e, availableRules);
+          l.setDecisionEvidence(
+              json.writeValueAsString(
+                  new DecisionEvidence(
+                      ranked.score(),
+                      ranked.reasons(),
+                      matchedRules.stream()
+                          .map(r -> new RuleEvidence(r.getId(), r.getRevision(), r.getName()))
+                          .toList())));
           finance.pay(e.getId(), new FinanceService.PaymentInput(l.getPostedDate()));
           entryId = e.getId();
         }

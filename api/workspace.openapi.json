@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fintry workspace API",
-    "version": "0.37.0",
+    "version": "0.38.0",
     "description": "Contrato incremental de consultas e operações do workspace. Cálculos e autorização pertencem ao backend; entradas monetárias são texto decimal."
   },
   "servers": [
@@ -927,6 +927,297 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SavedScenario"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/finance/reconciliation": {
+      "get": {
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação isolada por empresa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatementMovementPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/finance/reconciliation/{id}/candidates": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Até 100 sugestões explicáveis",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReconciliationCandidate"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/finance/reconciliation/{id}/resolve": {
+      "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação isolada por empresa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatementMovement"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationResolution"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/finance/reconciliation/preview": {
+      "post": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Operação isolada por empresa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfxPreview"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfxInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/finance/reconciliation/rules": {
+      "get": {
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação isolada por empresa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Operação isolada por empresa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationRule"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationRuleInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/finance/reconciliation/rules/{id}": {
+      "put": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação isolada por empresa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationRule"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationRuleInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/finance/reconciliation/import": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfxImportInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operação autorizada da conta da empresa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfxImportResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/finance/reconciliation/group": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationGroupInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operação autorizada da conta da empresa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationBatch"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/finance/reconciliation/group/candidates": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationGroupCandidatesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operação autorizada da conta da empresa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Entry"
+                  }
                 }
               }
             }
@@ -2283,6 +2574,582 @@
         "required": [
           "revision",
           "archived"
+        ]
+      },
+      "ReconciliationRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "INCOME",
+              "EXPENSE"
+            ]
+          },
+          "bankText": {
+            "type": "string"
+          },
+          "entryText": {
+            "type": "string"
+          },
+          "windowDays": {
+            "type": "integer"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "revision",
+          "accountId",
+          "name",
+          "author",
+          "direction",
+          "bankText",
+          "entryText",
+          "windowDays",
+          "active"
+        ]
+      },
+      "ReconciliationRuleInput": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "nullable": true
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "INCOME",
+              "EXPENSE"
+            ]
+          },
+          "bankText": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          },
+          "entryText": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 80
+          },
+          "windowDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "requestId",
+          "accountId",
+          "name",
+          "direction",
+          "bankText",
+          "entryText",
+          "windowDays",
+          "active"
+        ]
+      },
+      "ReconciliationRulePage": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationRule"
+            }
+          },
+          "number": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "totalElements": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content",
+          "number",
+          "totalPages",
+          "totalElements"
+        ]
+      },
+      "ReconciliationCandidate": {
+        "type": "object",
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/Entry"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "entry",
+          "explanation",
+          "score",
+          "reasons",
+          "rules"
+        ]
+      },
+      "RuleEvidence": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "revision",
+          "name"
+        ]
+      },
+      "DecisionEvidence": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "integer"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleEvidence"
+            }
+          }
+        },
+        "required": [
+          "score",
+          "reasons",
+          "rules"
+        ]
+      },
+      "StatementMovement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fitId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "LINKED",
+              "IGNORED"
+            ]
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "batchId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "batchMovements": {
+            "type": "integer"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "entry": {
+            "$ref": "#/components/schemas/Entry",
+            "nullable": true
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationCandidate"
+            }
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/DecisionEvidence",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "fitId",
+          "description",
+          "date",
+          "amount",
+          "status",
+          "revision",
+          "batchMovements",
+          "suggestions"
+        ]
+      },
+      "StatementMovementPage": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatementMovement"
+            }
+          },
+          "number": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "totalElements": {
+            "type": "integer"
+          },
+          "open": {
+            "type": "integer"
+          },
+          "linked": {
+            "type": "integer"
+          },
+          "ignored": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content",
+          "number",
+          "totalPages",
+          "totalElements",
+          "open",
+          "linked",
+          "ignored"
+        ]
+      },
+      "OfxPreviewRow": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "integer"
+          },
+          "fitId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "number",
+          "fitId",
+          "description",
+          "date",
+          "amount",
+          "state",
+          "message"
+        ]
+      },
+      "OfxPreview": {
+        "type": "object",
+        "properties": {
+          "accountName": {
+            "type": "string"
+          },
+          "bank": {
+            "type": "string"
+          },
+          "accountHint": {
+            "type": "string"
+          },
+          "ready": {
+            "type": "integer"
+          },
+          "duplicates": {
+            "type": "integer"
+          },
+          "invalid": {
+            "type": "integer"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OfxPreviewRow"
+            }
+          }
+        },
+        "required": [
+          "accountName",
+          "bank",
+          "accountHint",
+          "ready",
+          "duplicates",
+          "invalid",
+          "rows"
+        ]
+      },
+      "OfxInput": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ofx": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "accountId",
+          "ofx"
+        ]
+      },
+      "ReconciliationResolution": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "LINK",
+              "CREATE",
+              "IGNORE",
+              "REOPEN"
+            ]
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "revision",
+          "action"
+        ]
+      },
+      "OfxImportInput": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ofx": {
+            "type": "string"
+          },
+          "selectedRows": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "accountId",
+          "ofx",
+          "selectedRows"
+        ]
+      },
+      "ReconciliationGroupInput": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "movementIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "accountId",
+          "movementIds",
+          "entryId",
+          "reason"
+        ]
+      },
+      "ReconciliationGroupCandidatesInput": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "movementIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "accountId",
+          "movementIds"
+        ]
+      },
+      "ReconciliationBatch": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "paymentDate": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "movements": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "entryId",
+          "amount",
+          "paymentDate",
+          "reason",
+          "movements"
+        ]
+      },
+      "OfxImportResult": {
+        "type": "object",
+        "properties": {
+          "imported": {
+            "type": "integer"
+          },
+          "skipped": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "imported",
+          "skipped"
         ]
       }
     },

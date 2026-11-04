@@ -5,7 +5,7 @@ import type {
   Summary,
   Transport,
 } from '../api/client';
-export type Page = 'dashboard' | 'entries' | 'scenarios';
+export type Page = 'dashboard' | 'entries' | 'scenarios' | 'reconciliation';
 export interface Bridge {
   page: Page;
   month: string;

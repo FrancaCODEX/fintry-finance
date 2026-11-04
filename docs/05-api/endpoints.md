@@ -89,3 +89,12 @@ Os valores monetários das **novas respostas** são textos decimais com duas cas
 - `GET /api/v1/scenarios/saved/{id}/compare?left=UUID&right=UUID`: comparação calculada no servidor entre retratos do mesmo cenário.
 
 Todas as referências são isoladas por empresa. Escritas seguem perfil/assinatura/CSRF; a exceção de leitura do preview não permite persistir cenários. Revisão desatualizada retorna 409. Datas de cálculo são instantes UTC.
+
+
+### Regras e sugestões de conciliação (0.38.0)
+
+`GET/POST /api/v1/finance/reconciliation/rules` consulta ou cria regras da conta; `PUT /rules/{id}` exige revisão corrente. Critérios: nome, conta, direção, textos do banco/lançamento (mínimo três letras/números), janela de 0–30 dias e ativa. A criação aceita chave persistida para repetir uma intenção sem outra regra; edições stale retornam 409.
+
+Candidatos expõem `score`, `reasons` e nomes das regras correspondentes. A consulta examina até 100 registros compatíveis; refine a busca em contas de grande volume. Os três primeiros resultados próximos consideram até sete dias, ou até a janela de uma regra (máximo 30). Valor, conta, direção, situação e disponibilidade nunca são relaxados. Ocorrências suspensas não são sugeridas. Vínculos de transferências realizadas na mesma data continuam disponíveis, preservando os saldos e as regras existentes.
+
+Um vínculo confirmado preserva `evidence` com a pontuação, motivos e IDs/revisões/nomes das regras correspondentes naquele momento. Consultas não conciliam automaticamente. Toda escrita continua exigindo perfil, assinatura e CSRF; metadados e movimentos pertencem à empresa autenticada.

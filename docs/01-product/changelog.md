@@ -1,5 +1,15 @@
 # Changelog do Fintry
 
+## [0.38.0] - 2026-11-04
+
+### Conciliação assistida
+
+- Migra a revisão bancária para React, com importação OFX e seleção, filtros por conta/situação, vínculo/criação/ignorar/reabrir e conciliação agrupada com confirmação.
+- Ordena correspondências por pontos explicáveis de conta, direção, valor, datas, descrições e regras textuais. Pontos não representam probabilidade. As restrições financeiras de vínculo permanecem obrigatórias.
+- Adiciona regras por conta/direção, textos normalizados e janela de até 30 dias, com ativação, revisão, autoria e histórico de alterações. Até 50 regras ativas por conta.
+- Preserva a pontuação, motivos e versões das regras na confirmação do vínculo e no histórico, mesmo após editar a regra. Reabrir limpa a evidência corrente e preserva a anterior na auditoria.
+
+
 ## [0.37.0] - 2026-11-04
 
 ### Planejamento persistente

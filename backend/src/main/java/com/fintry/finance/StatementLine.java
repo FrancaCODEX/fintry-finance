@@ -47,6 +47,9 @@ public class StatementLine extends BaseEntity {
   @Column(nullable = false, length = 8)
   private Status status;
 
+  @Column(columnDefinition = "text")
+  private String decisionEvidence;
+
   private UUID entryId;
 
   private UUID reconciliationBatchId;

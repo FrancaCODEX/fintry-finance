@@ -392,6 +392,28 @@ class ReconciliationIntegrationTests {
         204);
     viewer.login();
     assertEquals(1, list(viewer, a).get("open").asInt());
+    viewer.request("GET", base + "/rules?accountId=" + a, null, 200);
+    viewer.request(
+        "POST",
+        base + "/rules",
+        Map.of(
+            "requestId",
+            UUID.randomUUID().toString(),
+            "accountId",
+            a,
+            "name",
+            "Regra de consulta",
+            "direction",
+            "INCOME",
+            "bankText",
+            "PIX",
+            "entryText",
+            "Venda",
+            "windowDays",
+            7,
+            "active",
+            true),
+        403);
     viewer.request("POST", base + "/preview", file(a, text), 403);
     decision(viewer, row, "IGNORE", Map.of("reason", "Não permitido"), 403);
   }
@@ -555,5 +577,73 @@ class ReconciliationIntegrationTests {
         assertEquals(0, r.getInt(1));
       }
     }
+  }
+
+  @Test
+  void rulesRankExactCandidatesWithoutMutationAndPreserveDecisionEvidence() throws Exception {
+    var b = new Browser().signup();
+    String account = b.account("Banco de regras");
+    entry(b, account, "80.00", "Receita avulsa", false);
+    var expected = entry(b, account, "80.00", "Venda Cliente Acme", false);
+    upload(b, account, ofx(txn("RULE-1", "80.00", "PIX CLIENTE ACME")), 1);
+    var rule = new HashMap<String, Object>();
+    rule.put("requestId", UUID.randomUUID().toString());
+    rule.put("accountId", account);
+    rule.put("name", "Cliente Acme");
+    rule.put("direction", "INCOME");
+    rule.put("bankText", "cliente");
+    rule.put("entryText", "Venda");
+    rule.put("windowDays", 7);
+    rule.put("active", true);
+    var created = b.request("POST", base + "/rules", rule, 200);
+    assertEquals(created.get("id"), b.request("POST", base + "/rules", rule, 200).get("id"));
+    assertEquals(0, balance(b));
+    var movement = byFit(list(b, account), "RULE-1");
+    var suggestion = movement.get("suggestions").get(0);
+    assertEquals(expected.get("id"), suggestion.get("entry").get("id"));
+    assertEquals(90, suggestion.get("score").asInt());
+    assertTrue(suggestion.get("reasons").size() >= 3);
+    var linked = decision(b, movement, "LINK", Map.of("entryId", expected.get("id").asText()), 200);
+    assertEquals("Cliente Acme", linked.get("evidence").get("rules").get(0).get("name").asText());
+    assertEquals(80, balance(b));
+    rule.put("revision", 0);
+    rule.put("active", false);
+    rule.put("name", "Regra editada");
+    b.request("PUT", base + "/rules/" + created.get("id").asText(), rule, 200);
+    var historical = byFit(list(b, account), "RULE-1");
+    assertEquals(
+        "Cliente Acme", historical.get("evidence").get("rules").get(0).get("name").asText());
+    assertEquals(0, historical.get("evidence").get("rules").get(0).get("revision").asInt());
+    b.request("PUT", base + "/rules/" + created.get("id").asText(), rule, 409);
+  }
+
+  @Test
+  void reconciliationRuleScopeAndLiteralValidationDoNotRelaxFinancialEligibility()
+      throws Exception {
+    var b = new Browser().signup();
+    var foreign = new Browser().signup();
+    String bank = b.account("Banco"), other = foreign.account("Outro banco");
+    var body = new HashMap<String, Object>();
+    body.put("requestId", UUID.randomUUID().toString());
+    body.put("accountId", bank);
+    body.put("name", "Regra");
+    body.put("direction", "INCOME");
+    body.put("bankText", "PIX");
+    body.put("entryText", "Venda");
+    body.put("windowDays", 30);
+    body.put("active", true);
+    var rule = b.request("POST", base + "/rules", body, 200);
+    foreign.request("GET", base + "/rules?accountId=" + bank, null, 404);
+    body.put("accountId", other);
+    foreign.request("PUT", base + "/rules/" + rule.get("id").asText(), body, 404);
+    body.put("accountId", bank);
+    body.put("bankText", "%%%_");
+    body.put("requestId", UUID.randomUUID().toString());
+    b.request("POST", base + "/rules", body, 400);
+    entry(b, bank, "79.99", "Venda", false);
+    entry(foreign, other, "80.00", "Venda", false);
+    upload(b, bank, ofx(txn("RULE-2", "80.00", "PIX")), 1);
+    assertEquals(0, byFit(list(b, bank), "RULE-2").get("suggestions").size());
+    assertEquals(0, balance(b));
   }
 }

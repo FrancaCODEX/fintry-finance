@@ -60,3 +60,10 @@ A chave de baixa ou série pertence à intenção do formulário. Ela é preserv
 Escritas serializam a criação/alteração pela empresa e validam a revisão antes de calcular. Uma impressão digital conservadora usa agregados de contas/lançamentos e data de negócio para indicar quando os dados mudaram; não invalida ou altera os retratos antigos. Definições são validadas pelo mesmo serviço de simulação antes de salvar. Séries históricas são paginadas, e arquivar preserva os cálculos.
 
 Conflitos de unicidade/serialização das transações de planejamento com chave persistida permitem uma nova tentativa interna após rollback completo, fora da transação encerrada. Isso cobre a corrida entre duas requisições da mesma intenção em isolamento REPEATABLE_READ; não repete mutações financeiras nem operações arbitrárias do transporte.
+
+
+## Revisão bancária assistida (0.38.0)
+
+A página de conciliação e suas operações usam React e os componentes compartilhados `Field` e `Dialog`. As regras textuais são critérios explícitos normalizados em Java, sem expressões regulares fornecidas pelo usuário nem modelo externo. A mesma pontuação alimenta a ordem e a explicação; limites de candidatos/regras mantêm o trabalho por consulta previsível. As regras da conta são carregadas uma vez por página de revisão.
+
+A confirmação continua no serviço financeiro existente com revisão e bloqueio da empresa. Evidências de ordenação são capturadas antes da baixa, armazenadas no movimento e incluídas na auditoria. Uma alteração futura na regra não reescreve a justificativa de um vínculo anterior.
