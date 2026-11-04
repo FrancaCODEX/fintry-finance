@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.33.0**
+**Versão atual: 0.34.0**
 
 Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard reúne indicadores analíticos e visualizações de gráficos ajustáveis. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
 
@@ -79,7 +79,16 @@ Em **Importar CSV**, baixe o modelo e escolha uma conta de destino. Envie um CSV
 
 ## Rodar sem Docker
 
-Pré-requisito: **JDK 21**. O Maven Wrapper já acompanha o projeto.
+Pré-requisitos: **JDK 21** e **Node.js 22.12+**. O Maven Wrapper acompanha o projeto. Antes de iniciar o backend, compile a interface:
+
+```bash
+cd frontend
+npm ci
+npm run build
+cd ..
+```
+
+Após alterar o frontend, repita `npm run build` em `frontend` para atualizar os assets servidos pelo backend.
 
 Linux / WSL / macOS:
 
@@ -195,13 +204,13 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 
 ## Evolução do frontend
 
-A v0.33.0 separa estado e transporte HTTP e publica consultas tipadas para a evolução gradual do workspace. Veja a [decisão de arquitetura](docs/03-architecture/frontend-workspace.md) e os [contratos da API](api/README.md).
+A v0.34.0 entrega dashboard e lançamentos em React/TypeScript com filtros na URL, consultas canceláveis e gráficos acessíveis. Os formulários financeiros existentes continuam integrados à sessão e às permissões do Spring Boot. Veja a [decisão de arquitetura](docs/03-architecture/frontend-workspace.md) e os [contratos da API](api/README.md).
 
 ## Stack e estrutura
 
 Java 21 · Spring Boot 4.1 · Spring Security · JPA/Hibernate · PostgreSQL · Flyway · Docker.
 
-A interface inicial usa HTML, CSS e JavaScript servidos pelo próprio Spring Boot. Assim, o primeiro uso exige apenas uma aplicação, sem instalação de Node ou processo separado para o frontend. React/TypeScript permanecem como uma possibilidade de evolução, não como funcionalidade implementada.
+O dashboard e os lançamentos usam React e TypeScript, com build Vite servido pelo próprio Spring Boot. As demais páginas e os diálogos financeiros permanecem integrados à interface existente durante a migração. O Docker compila o frontend automaticamente; a execução final exige uma única aplicação, sem processo Node separado.
 
 ```text
 backend/src/main/java/com/fintry/

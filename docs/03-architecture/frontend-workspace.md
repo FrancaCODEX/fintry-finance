@@ -22,3 +22,15 @@ Valores monetários das respostas existentes são números JSON. O cliente usa e
 - 0.35: simulação comparável ao fluxo existente, hipóteses separadas dos registros financeiros e origem dos valores consultável.
 
 A divisão inicial mantém um monólito modular. Novos módulos devem expor serviços e DTOs próprios, evitando que controllers façam cálculos ou que componentes alterem entidades diretamente.
+
+## Workspace React (0.34.0)
+
+O código novo fica em `frontend/src`, organizado em `app`, `shared`, `api` e `features`. Dashboard e lançamentos possuem estado local e consultas identificadas por parâmetros; cada troca cancela consultas anteriores. Os contratos gerados tipam os dados de leitura.
+
+`workspace-host.js` delimita a migração: o host controla sessão, navegação geral e diálogos de operações financeiras; React controla os dois conteúdos de página. O componente é desmontado antes de mudar a página ou encerrar a sessão, cancelando consultas. Os formulários existentes continuam responsáveis por criação, edição, baixa, cancelamento e comprovantes. Outras páginas permanecem na interface existente.
+
+Mês, pesquisa, tipo, situação, conta e página dos lançamentos ficam na URL. Voltar/avançar reaplica a consulta; abrir detalhes não altera a URL. Indicadores realizados levam ao relatório com base de pagamento e filtros limpos para corresponder ao valor exibido. O saldo atual continua independente do mês selecionado.
+
+O build de produção substitui o ambiente de desenvolvimento do React e gera `workspace/fintry.js` e `workspace/fintry.css`. O Docker compila esses arquivos em um estágio Node e copia somente o resultado para o backend; não há Node no contêiner de execução. No checkout de código, execute `npm ci && npm run build` em `frontend` antes de iniciar o backend. Sem assets compilados, os dois conteúdos anteriores continuam disponíveis como compatibilidade de desenvolvimento.
+
+As preferências do gráfico usam a chave anterior por usuário no mesmo navegador; entradas inválidas são normalizadas. O backend continua sendo a autoridade dos valores, escopo da empresa e permissões.

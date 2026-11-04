@@ -48,6 +48,8 @@ public class SecurityConfig {
                         "/app.js",
                         "/state.js",
                         "/http.js",
+                        "/workspace-host.js",
+                        "/workspace/**",
                         "/commerce.js",
                         "/proposals.js",
                         "/ux.js",

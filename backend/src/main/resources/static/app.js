@@ -144,6 +144,7 @@ function readAccessLink() {
 }
 window.addEventListener("hashchange", readAccessLink);
 function renderAuth(mode = "login", notice = "") {
+  window.FintryWorkspace?.unmount();
   if (!state.user) {
     resetCommerce();
     resetCommercial();
@@ -889,6 +890,7 @@ function renderAccounts() {
 }
 let requestId = 0;
 async function load() {
+  window.FintryWorkspace?.unmount();
   const id = ++requestId,
     page = state.page;
   const focused = document.activeElement?.closest("#page-content")
@@ -930,6 +932,7 @@ async function loadData(id) {
   const access = await api("/subscription/access");
   if (id !== requestId || !state.user) return;
   state.subscriptionAccess = access;
+  if (["dashboard", "entries"].includes(state.page) && await mountWorkspace(id)) return;
   if (!root.querySelector(".shell")) shell();
   if (state.page === "company") {
     if (!isAdmin()) {
@@ -1687,16 +1690,7 @@ root.addEventListener("click", async (ev) => {
   const nav = ev.target.closest("[data-nav]");
   if (nav) {
     ev.preventDefault();
-    closeNavigation();
-    navigation.query = "";
-    window.scrollTo({ top: 0, behavior: "instant" });
-    if (state.page === "subscription" && nav.dataset.nav !== "subscription")
-      subscription.welcome = false;
-    state.page = nav.dataset.nav;
-    state.entryPage = 0;
-    state.contactPage = 0;
-    state.seriesPage = 0;
-    await safeLoad();
+    await navigateWorkspace(nav.dataset.nav);
     return;
   }
   const btn = ev.target.closest("[data-action]");
@@ -2116,7 +2110,7 @@ drawer.addEventListener("click", async (event) => {
     try {
       state.user = await api("/auth/me");
     } catch {}
-    if (state.user) await safeLoad();
+    if (state.user) { restoreWorkspaceLocation(); await safeLoad(); }
     else renderAuth();
   } catch (err) {
     root.innerHTML =
