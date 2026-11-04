@@ -69,3 +69,11 @@ Comprovantes podem pertencer a pendentes, realizados, cancelados e transferênci
 ### Chave de operação em baixas (0.33.0)
 
 O corpo de `POST /api/v1/finance/entries/{id}/pay` pode incluir `requestId` UUID. Preserve a chave ao repetir uma requisição de resultado desconhecido. Repetições com a mesma data e valor retornam o lançamento corrente sem duplicar o pagamento. Outra data, valor ou lançamento com a mesma chave retorna 409. A chave é isolada por empresa. Sem a chave, mantém-se o comportamento anterior. Valores e datas continuam sujeitos à validação e autorização existentes.
+
+### Cenários e explicação de indicadores (0.35.0)
+
+- `GET /api/v1/scenarios/candidates`: `days` (1–366), `accountId`, `includeOverdue`, `search`, `page`, `size` (1–50). Retorna lançamentos elegíveis, paginados e isolados por empresa.
+- `POST /api/v1/scenarios/preview`: corpo com `days`, `accountId` opcional, `includeOverdue`, `shifts` (`entryId`, `delayDays`), `hypotheses` (`label`, `type`, `amount`, `date`, `occurrences`) e `explainDate` opcional. Aceita até 20 itens por lista. `amount` é texto decimal positivo de até 12 dígitos inteiros e duas casas. O cálculo é somente leitura; exige sessão e CSRF e está disponível também para VIEWER e assinatura expirada. Contas/lançamentos de outra empresa retornam 404; parâmetros ou movimentos incompatíveis retornam 400.
+- `GET /api/v1/reports/explanation`: `kind` (`BALANCE`, `INCOME`, `EXPENSE`, `RESULT`), `month` (`AAAA-MM`, necessário exceto BALANCE) e `page`. Expõe fórmula, componentes, baixas paginadas, escopo e instante da consulta. Usa uma transação de leitura consistente.
+
+Os valores monetários das **novas respostas** são textos decimais com duas casas; os contratos anteriores permanecem compatíveis. Todas as respostas novas usam `Cache-Control: no-store`. A explicação diária do cenário declara truncamento acima de 100 fontes, sem truncar os totais. O contrato OpenAPI parcial e os tipos TypeScript cobrem essas consultas e o cálculo.

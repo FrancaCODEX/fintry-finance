@@ -10,6 +10,8 @@ import {
 } from '../../shared/format';
 import { PageHeading, Panel, QueryState } from '../../shared/components';
 import { useResource } from '../../shared/useResource';
+import { IndicatorDetails } from './IndicatorDetails';
+import type { IndicatorKind } from '../../api/client';
 import { CashChart } from './CashChart';
 function change(value: number, previous: number) {
   if (!previous)
@@ -18,6 +20,7 @@ function change(value: number, previous: number) {
   return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(((value - previous) / previous) * 100)}% vs. mês anterior`;
 }
 export function Dashboard({ bridge }: { bridge: Bridge }) {
+  const [indicator, setIndicator] = useState<IndicatorKind>();
   const [month, setMonth] = useState(() => readLocation(bridge.month).month);
   const client = useMemo(() => workspaceApi(bridge.request), [bridge]);
   const query = useResource('dashboard:' + month, async (signal) => {
@@ -125,6 +128,9 @@ export function Dashboard({ bridge }: { bridge: Bridge }) {
               <button onClick={() => bridge.navigate('accounts')}>
                 Consultar contas <span>↗</span>
               </button>
+              <button onClick={() => setIndicator('BALANCE')}>
+                Como este saldo é formado? <span>↗</span>
+              </button>
             </section>
             <section
               className="workspace-indicators"
@@ -158,14 +164,14 @@ export function Dashboard({ bridge }: { bridge: Bridge }) {
                 <button
                   key={tone}
                   className={`workspace-kpi ${tone}`}
-                  onClick={() => explore(month, type)}
+                  onClick={() => setIndicator(type || 'RESULT')}
                 >
                   <span>
                     {label} <i>↗</i>
                   </span>
                   <strong>{money(value)}</strong>
                   <small>{change(value, previous)}</small>
-                  <em>Consultar baixas</em>
+                  <em>Entender valor</em>
                 </button>
               ))}
             </section>
@@ -180,10 +186,10 @@ export function Dashboard({ bridge }: { bridge: Bridge }) {
               <b>Organizar pendências</b>
               <small>Vencimentos e próximos compromissos ↗</small>
             </button>
-            <button onClick={() => bridge.navigate('forecast')}>
+            <button onClick={() => bridge.navigate('scenarios')}>
               <span>02</span>
-              <b>Olhar os próximos dias</b>
-              <small>Consulte a projeção do seu caixa ↗</small>
+              <b>Explorar possibilidades</b>
+              <small>Simule o efeito de novas decisões ↗</small>
             </button>
             <button onClick={() => bridge.navigate('reconciliation')}>
               <span>03</span>
@@ -261,6 +267,15 @@ export function Dashboard({ bridge }: { bridge: Bridge }) {
             </div>
           </div>
         </>
+      )}
+      {indicator && (
+        <IndicatorDetails
+          key={indicator + month}
+          kind={indicator}
+          month={month}
+          bridge={bridge}
+          onClose={() => setIndicator(undefined)}
+        />
       )}
     </>
   );

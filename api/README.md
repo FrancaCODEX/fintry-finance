@@ -1,6 +1,6 @@
 # Contratos do workspace
 
-`workspace.openapi.json` cobre consultas de contas, indicadores, lançamentos, detalhes e projeção. A autenticação usa a sessão HTTP existente; a empresa sempre vem da sessão, nunca de um parâmetro selecionado pelo cliente.
+`workspace.openapi.json` cobre consultas de contas, indicadores, lançamentos, detalhes e projeção, além de cenários e explicações de indicadores. O POST de simulação é um cálculo somente leitura com CSRF. Os novos valores monetários dessas respostas são textos decimais exatos. A autenticação usa a sessão HTTP existente; a empresa sempre vem da sessão, nunca de um parâmetro selecionado pelo cliente.
 
 ```bash
 cd frontend

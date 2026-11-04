@@ -19,6 +19,7 @@ function navigationGroups() {
         ["budgets", "Orçamentos", "budget"],
         ["reports", "Relatórios", "chart"],
         ["forecast", "Fluxo projetado", "trend"],
+        ["scenarios", "Simular cenários", "sparkles"],
         ["series", "Parcelas e recorrências", "repeat"],
         ...(canWrite() ? [["imports", "Importar CSV", "entries"]] : []),
       ],

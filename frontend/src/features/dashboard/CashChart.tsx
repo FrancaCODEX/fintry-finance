@@ -53,8 +53,7 @@ export function CashChart({
       : [...config.series, series];
     if (next.length) update({ series: next });
   }
-  const value = (m: Summary['flow'][number], s: Series) =>
-    s === 'result' ? m.income - m.expense : m[s];
+  const value = (m: Summary['flow'][number], s: Series) => m[s];
   const values = flow.flatMap((m) => config.series.map((s) => value(m, s)));
   const min = Math.min(0, ...values),
     max = Math.max(1, ...values),

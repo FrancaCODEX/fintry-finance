@@ -69,3 +69,5 @@ Em 30/10/2026, a v0.32.0 foi incorporada à main pela PR #35: gráficos do dashb
 Em 04/11/2026, a v0.33.0 inicia a evolução autorizada do workspace: estado/transporte separados, consultas documentadas em OpenAPI com tipos TypeScript e chave opcional para repetir baixas parciais com segurança. A sequência acordada é v0.34.0 (dashboard e lançamentos em React) e v0.35.0 (simulador e indicadores explicáveis).
 
 A v0.34.0 entrega dashboard e lançamentos em React/TypeScript, preservando as demais páginas durante a migração. Filtros na URL, detalhes integrados, gráficos acessíveis e build no mesmo domínio preparam o simulador da v0.35.0.
+
+A v0.35.0 conclui a sequência autorizada com cenários hipotéticos de caixa e explicação dos indicadores. Inclui comparação diária, adiamentos pelo restante, repetições mensais, origem dos valores, paginação e consultas também para perfis de leitura. Persistência/compartilhamento de cenários e sugestões de conciliação justificadas continuam como evoluções futuras.
