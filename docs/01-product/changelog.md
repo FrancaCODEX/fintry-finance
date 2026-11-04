@@ -1,5 +1,27 @@
 # Changelog do Fintry
 
+## [0.39.0] - 2026-11-04
+
+### Funcionalidades
+
+- Migra todas as 26 páginas do menu para React/TypeScript: financeiro, planejamento, comercial, cadastros e administração. Usa consultas canceláveis, estados de carregamento/erro, filtros na URL e paginação onde suportada pela API.
+- Implementa formulários React de empresa, segurança e orçamentos, além da importação CSV com seleção, prévia, confirmação e proteção contra duplicidades.
+- Implementa consulta e controle de séries, relatório/exportações, projeção com gráfico/tabela, estoque e auditoria; preserva confirmações de cobrança e assinatura.
+- Integra as ações de cadastro, edição, inativação, convites, movimentação de estoque, detalhes de vendas/propostas e transferências aos fluxos existentes, preservando confirmações e validações no servidor.
+
+### Melhorias
+
+- Renova cores, superfícies, hierarquia, botões, campos, cartões, dashboard e navegação com tokens compartilhados para temas claro/escuro e telas móveis.
+- Separa Financeiro e Planejamento no menu e adiciona atalho de novo lançamento na lateral.
+- Adiciona componentes compartilhados para estados vazios e paginação, com nomes acessíveis e feedback de consulta.
+- Remove o carregador das páginas HTML do host: todas as rotas autenticadas do menu usam React. A sessão, a estrutura da navegação, os detalhes globais e os diálogos comerciais/operacionais continuam integrados pelo host. Esta entrega não altera cálculos financeiros nem banco de dados.
+
+### Correções
+
+- Preserva o produto selecionado e o endereço de retorno ao abrir o histórico de estoque a partir do catálogo React.
+- Mantém filtros aplicados ao recarregar, navegar para trás e concluir ações pelos formulários existentes.
+- Corrige o seletor de fechamento do teste de produto que bloqueava a primeira execução do CI.
+
 ## [0.38.0] - 2026-11-04
 
 ### Conciliação assistida

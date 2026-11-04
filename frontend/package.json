@@ -1,13 +1,13 @@
 {
   "name": "fintry-workspace",
   "private": true,
-  "version": "0.38.0",
+  "version": "0.39.0",
   "type": "module",
   "scripts": {
     "contracts": "openapi-typescript ../api/workspace.openapi.json -o src/api/schema.d.ts",
     "contracts:check": "node scripts/check-contracts.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/*.test.cjs && node --import tsx --test src/features/dashboard/*.test.ts src/shared/*.test.ts",
+    "test": "node --test tests/*.test.cjs && node --import tsx --test src/features/dashboard/*.test.ts src/features/catalog/*.test.ts src/shared/*.test.ts",
     "build": "tsc --noEmit && vite build",
     "test:e2e": "playwright test",
     "format:check": "prettier --check src vite.config.ts playwright.config.ts e2e",
