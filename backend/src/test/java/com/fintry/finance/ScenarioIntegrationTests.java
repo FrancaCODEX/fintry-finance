@@ -323,7 +323,7 @@ class ScenarioIntegrationTests {
             "amount",
             "10",
             "dueDate",
-            today.plusDays(45).toString(),
+            today.plusDays(2).toString(),
             "paid",
             false);
     var series =
@@ -342,6 +342,7 @@ class ScenarioIntegrationTests {
                 201)
             .get("id")
             .asText();
+    assertEquals("20.00", b.preview(input(90)).get("baseline").get("pendingExpense").asText());
     b.call("POST", "/finance/series/" + series + "/pause", null, 200);
     assertEquals(
         0, b.call("GET", "/scenarios/candidates?days=90", null, 200).get("totalElements").asInt());

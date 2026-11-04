@@ -27,6 +27,7 @@ public class SeriesService {
   private final SeriesRepository series;
   private final EntryRepository entries;
   private final FinanceService finance;
+  private final Clock clock;
 
   public record Input(
       @NotNull UUID requestId,
@@ -294,7 +295,7 @@ public class SeriesService {
     if (s.isStopped()) throw new ResponseStatusException(HttpStatus.CONFLICT, "A recorrência já foi encerrada.");
     if (s.isPaused()) return view(s, items);
     var before = com.fintry.audit.AuditService.fields("Pausada", false);
-    var today = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+    var today = LocalDate.now(clock);
     for (var e : items)
       if (e.getStatus() == FinancialEntry.Status.PENDING && e.getDueDate().isAfter(today)) {
         finance.requireUnreconciled(e.getId());
