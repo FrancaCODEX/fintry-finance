@@ -1,5 +1,16 @@
 # Changelog do Fintry
 
+## [0.37.0] - 2026-11-04
+
+### Planejamento persistente
+
+- Salva cenários da empresa com premissas, autoria, revisão, arquivamento e restauração. Permite duplicar um planejamento e retomá-lo por link autenticado.
+- Preserva cálculos como retratos imutáveis com data UTC, histórico paginado e comparação dos saldos finais sem aritmética financeira no cliente.
+- Indica quando os dados financeiros ou a data de negócio mudaram e permite registrar novo cálculo. Recalcular mantém os retratos anteriores.
+- Exige revisão atual ao editar e recalcular, protege tentativas repetidas com chave persistida e respeita os perfis de consulta/escrita e a empresa autenticada. Nenhuma operação de planejamento altera lançamentos ou baixas.
+
+
+
 ## [0.36.0] - 2026-11-04
 
 ### Operações financeiras em React

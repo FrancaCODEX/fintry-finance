@@ -51,3 +51,12 @@ A única exceção nova à regra de escrita por assinatura/perfil é `POST /api/
 Um segundo root React mantém diálogos financeiros independentes do conteúdo de página. `act` encaminha criação, edição, baixa e cancelamento ao workspace depois da verificação de permissão. A API segue como autoridade; as páginas antigas continuam disponíveis durante a migração. Ao salvar, a consulta atual e o painel de detalhes são atualizados. Sessão expirada e voltar/avançar fecham os diálogos.
 
 A chave de baixa ou série pertence à intenção do formulário. Ela é preservada ao repetir o mesmo conteúdo depois de erro e renovada quando valor/data/configuração mudam. Não há repetição automática de escrita. A criação avulsa usa a API existente, sem promessa de idempotência. Campos monetários aceitam vírgula ou ponto e enviam texto decimal, sem arredondamento silencioso. A prévia de parcelas usa inteiros em centavos; o servidor valida a confirmação.
+
+
+## Planejamento persistente (0.37.0)
+
+`saved_scenarios` guarda a definição corrente, autoria e revisão otimista. `scenario_runs` guarda premissas e respostas de cada cálculo como retratos imutáveis, com instantes UTC explícitos. A comparação de retratos é calculada com BigDecimal no backend. Referências e chaves de tentativas são sempre consultadas pela empresa autenticada. Escritas de planejamento exigem perfil e assinatura de escrita; a exceção somente leitura de `/preview` não é estendida.
+
+Escritas serializam a criação/alteração pela empresa e validam a revisão antes de calcular. Uma impressão digital conservadora usa agregados de contas/lançamentos e data de negócio para indicar quando os dados mudaram; não invalida ou altera os retratos antigos. Definições são validadas pelo mesmo serviço de simulação antes de salvar. Séries históricas são paginadas, e arquivar preserva os cálculos.
+
+Conflitos de unicidade/serialização das transações de planejamento com chave persistida permitem uma nova tentativa interna após rollback completo, fora da transação encerrada. Isso cobre a corrida entre duas requisições da mesma intenção em isolamento REPEATABLE_READ; não repete mutações financeiras nem operações arbitrárias do transporte.

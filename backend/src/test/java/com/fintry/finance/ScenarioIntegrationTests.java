@@ -405,4 +405,158 @@ class ScenarioIntegrationTests {
             .asText());
     b.call("GET", "/reports/explanation?kind=INCOME&month=bad", null, 400);
   }
+
+  @Test
+  void savedScenariosKeepSnapshotsAndDetectFinancialChanges() throws Exception {
+    var b = new Browser().signup();
+    var bank = b.account("100");
+    String key = UUID.randomUUID().toString();
+    var body = new HashMap<String, Object>();
+    body.put("name", "Contratação");
+    body.put("requestId", key);
+    body.put("input", input(90));
+    var saved = b.call("POST", "/scenarios/saved", body, 200);
+    String id = saved.get("id").asText();
+    assertFalse(saved.get("stale").asBoolean());
+    assertEquals(id, b.call("POST", "/scenarios/saved", body, 200).get("id").asText());
+    String first = saved.get("latest").get("id").asText();
+    b.entry(bank, "EXPENSE", "10.10", 2);
+    assertTrue(b.call("GET", "/scenarios/saved/" + id, null, 200).get("stale").asBoolean());
+    String calculation = UUID.randomUUID().toString();
+    var run =
+        b.call(
+            "POST",
+            "/scenarios/saved/" + id + "/calculate",
+            Map.of("requestId", calculation, "revision", 0),
+            200);
+    assertEquals("89.90", run.get("summary").get("closingBalance").asText());
+    assertEquals(
+        run.get("summary").get("id"),
+        b.call(
+                "POST",
+                "/scenarios/saved/" + id + "/calculate",
+                Map.of("requestId", calculation, "revision", 0),
+                200)
+            .get("summary")
+            .get("id"));
+    assertEquals(
+        2,
+        b.call("GET", "/scenarios/saved/" + id + "/runs", null, 200).get("totalElements").asInt());
+    assertEquals(
+        "100.00",
+        b.call("GET", "/scenarios/saved/" + id + "/runs/" + first, null, 200)
+            .get("summary")
+            .get("closingBalance")
+            .asText());
+    var comparison =
+        b.call(
+            "GET",
+            "/scenarios/saved/"
+                + id
+                + "/compare?left="
+                + first
+                + "&right="
+                + run.get("summary").get("id").asText(),
+            null,
+            200);
+    assertEquals("-10.10", comparison.get("closingChange").asText());
+    assertFalse(b.call("GET", "/scenarios/saved/" + id, null, 200).get("stale").asBoolean());
+  }
+
+  @Test
+  void savedScenarioRevisionIsolationAndPermissionsAreEnforced() throws Exception {
+    var a = new Browser().signup();
+    var other = new Browser().signup();
+    a.account("0");
+    var original =
+        Map.of(
+            "requestId", UUID.randomUUID().toString(), "name", "Plano inicial", "input", input(30));
+    var s = a.call("POST", "/scenarios/saved", original, 200);
+    String id = s.get("id").asText();
+    other.call("GET", "/scenarios/saved/" + id, null, 404);
+    other.call(
+        "POST",
+        "/scenarios/saved/" + id + "/calculate",
+        Map.of("revision", 0, "requestId", UUID.randomUUID().toString()),
+        404);
+    var update =
+        Map.of(
+            "requestId",
+            UUID.randomUUID().toString(),
+            "revision",
+            0,
+            "name",
+            "Plano revisado",
+            "input",
+            input(60));
+    var revised = a.call("PUT", "/scenarios/saved/" + id, update, 200);
+    assertEquals(1, revised.get("revision").asInt());
+    assertEquals(1, a.call("PUT", "/scenarios/saved/" + id, update, 200).get("revision").asInt());
+    a.call(
+        "PUT",
+        "/scenarios/saved/" + id,
+        Map.of(
+            "requestId",
+            UUID.randomUUID().toString(),
+            "revision",
+            0,
+            "name",
+            "Conflito",
+            "input",
+            input(30)),
+        409);
+    a.call(
+        "PUT", "/scenarios/saved/" + id + "/archive", Map.of("revision", 1, "archived", true), 200);
+    assertEquals(0, a.call("GET", "/scenarios/saved", null, 200).get("totalElements").asInt());
+    assertEquals(
+        1, a.call("GET", "/scenarios/saved?archived=true", null, 200).get("totalElements").asInt());
+    a.call(
+        "POST",
+        "/scenarios/saved/" + id + "/calculate",
+        Map.of("requestId", UUID.randomUUID().toString(), "revision", 2),
+        409);
+    var user = users.findByEmail(a.email).orElseThrow();
+    user.setRole(com.fintry.auth.AppUser.Role.VIEWER);
+    users.saveAndFlush(user);
+    a.login();
+    a.call("GET", "/scenarios/saved/" + id, null, 200);
+    a.call("POST", "/scenarios/saved", original, 403);
+  }
+
+  @Test
+  void concurrentPlanningRetriesCreateOneDefinitionAndOneSnapshot() throws Exception {
+    var b = new Browser().signup();
+    b.account("1.23");
+    var body =
+        Map.of(
+            "requestId",
+            UUID.randomUUID().toString(),
+            "name",
+            "Tentativa concorrente",
+            "input",
+            input(30));
+    var start = new java.util.concurrent.CountDownLatch(1);
+    var tasks = new java.util.ArrayList<java.util.concurrent.CompletableFuture<JsonNode>>();
+    for (int i = 0; i < 2; i++)
+      tasks.add(
+          java.util.concurrent.CompletableFuture.supplyAsync(
+              () -> {
+                try {
+                  start.await();
+                  return b.call("POST", "/scenarios/saved", body, 200);
+                } catch (Exception e) {
+                  throw new RuntimeException(e);
+                }
+              }));
+    start.countDown();
+    var first = tasks.get(0).get();
+    var second = tasks.get(1).get();
+    assertEquals(first.get("id"), second.get("id"));
+    assertEquals(1, b.call("GET", "/scenarios/saved", null, 200).get("totalElements").asInt());
+    assertEquals(
+        1,
+        b.call("GET", "/scenarios/saved/" + first.get("id").asText() + "/runs", null, 200)
+            .get("totalElements")
+            .asInt());
+  }
 }

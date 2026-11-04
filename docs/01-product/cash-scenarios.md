@@ -20,6 +20,15 @@ No dashboard, **Entender valor** explica receitas, despesas e resultado pelas ba
 
 ## Limites
 
-As hipóteses ficam apenas na página e desaparecem ao sair/recarregar; não há cenários persistidos ou compartilhados nesta entrega. Simular não cria lançamentos, pagamentos, tarifas, cobranças ou decisões de conciliação. A previsão usa os dados existentes e as hipóteses informadas, sem prever comportamento de clientes ou movimentação bancária externa.
+Rascunhos não salvos desaparecem ao sair/recarregar. A área **Cenários salvos** permite guardar premissas e cálculos, duplicar, arquivar/restaurar e retomar por link autenticado dentro da mesma empresa. Simular não cria lançamentos, pagamentos, tarifas, cobranças ou decisões de conciliação. A previsão usa os dados existentes e as hipóteses informadas, sem prever comportamento de clientes ou movimentação bancária externa.
 
 Perfis Administrador, Financeiro e Somente leitura podem simular, inclusive com assinatura sem escrita habilitada. A simulação não concede permissão para alterar dados reais. As operações financeiras continuam exigindo as confirmações e permissões existentes.
+
+
+## Cenários salvos (0.37.0)
+
+Salvar registra a definição e um retrato imutável do cálculo. O histórico paginado permite abrir resultados anteriores e comparar dois cálculos da página. Valores e fontes dos retratos preservam o estado do momento do cálculo; não representam automaticamente a posição atual.
+
+Uma mudança em qualquer lançamento ou conta da empresa, ou a mudança da data de negócio, marca o retrato como desatualizado de forma conservadora. **Recalcular e registrar** usa os dados atuais e mantém os cálculos anteriores. Se uma hipótese ficou fora do novo horizonte ou uma referência deixou de ser válida, ajuste as premissas antes de salvar; não há deslocamento silencioso de datas.
+
+Administrador/Financeiro podem salvar, duplicar, recalcular, arquivar e restaurar durante o acesso de escrita. Somente leitura consulta o planejamento e pode fazer comparações temporárias no simulador. Arquivar preserva o histórico. Compartilhar o link exige login na mesma empresa; não cria acesso público. Revisões impedem sobrescrever alterações de outra pessoa: em conflito, atualize a versão e revise as premissas.
