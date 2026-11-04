@@ -71,3 +71,6 @@ Em 04/11/2026, a v0.33.0 inicia a evolução autorizada do workspace: estado/tra
 A v0.34.0 entrega dashboard e lançamentos em React/TypeScript, preservando as demais páginas durante a migração. Filtros na URL, detalhes integrados, gráficos acessíveis e build no mesmo domínio preparam o simulador da v0.35.0.
 
 A v0.35.0 conclui a sequência autorizada com cenários hipotéticos de caixa e explicação dos indicadores. Inclui comparação diária, adiamentos pelo restante, repetições mensais, origem dos valores, paginação e consultas também para perfis de leitura. Persistência/compartilhamento de cenários e sugestões de conciliação justificadas continuam como evoluções futuras.
+
+
+A v0.35.1 corrige o build Docker a partir de checkouts Windows com CRLF, antes da sequência v0.36–v0.39. Não altera dados nem migrações.
