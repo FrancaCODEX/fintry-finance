@@ -1,3 +1,4 @@
+import { Field } from '../../shared/Field';
 import { useState, useMemo, useEffect } from 'react';
 import { workspaceApi } from '../../api/client';
 import type { Bridge } from '../../app/bridge';
@@ -61,8 +62,7 @@ export function Dashboard({ bridge }: { bridge: Bridge }) {
         title="Seu caixa, com contexto."
         description="Acompanhe o realizado e descubra o que está por trás de cada número."
       >
-        <label className="field workspace-period">
-          Mês em análise
+        <Field className="field workspace-period" label={<>Mês em análise</>}>
           <input
             type="month"
             min="2000-01"
@@ -75,7 +75,7 @@ export function Dashboard({ bridge }: { bridge: Bridge }) {
               }
             }}
           />
-        </label>
+        </Field>
         <button
           className="btn secondary"
           onClick={() => {

@@ -1,3 +1,4 @@
+import { Field } from '../../shared/Field';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { saveLocation } from '../../app/location';
 import type { Bridge } from '../../app/bridge';
@@ -179,8 +180,7 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
           <Panel title="Prepare o cenário" eyebrow="01 · PREMISSAS">
             <div className="workspace-scenario-fields">
               <QueryState {...accounts} />
-              <label className="field">
-                Horizonte
+              <Field className="field" label={<>Horizonte</>}>
                 <select
                   value={days}
                   onChange={(e) =>
@@ -193,9 +193,8 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                     </option>
                   ))}
                 </select>
-              </label>
-              <label className="field">
-                Conta da projeção
+              </Field>
+              <Field className="field" label={<>Conta da projeção</>}>
                 <select
                   value={accountId}
                   onChange={(e) =>
@@ -209,7 +208,7 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                     </option>
                   ))}
                 </select>
-              </label>
+              </Field>
               <label className="check">
                 <input
                   type="checkbox"
@@ -229,8 +228,7 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
             eyebrow="02 · MOVIMENTOS EXISTENTES"
           >
             <div className="workspace-scenario-fields">
-              <label className="field">
-                Buscar movimento pendente
+              <Field className="field" label={<>Buscar movimento pendente</>}>
                 <input
                   type="search"
                   maxLength={255}
@@ -238,9 +236,8 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Descrição do lançamento"
                 />
-              </label>
-              <label className="field">
-                Movimento para adiar
+              </Field>
+              <Field className="field" label={<>Movimento para adiar</>}>
                 <select
                   value={chosen}
                   onChange={(e) => setChosen(e.target.value)}
@@ -256,7 +253,7 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                     </option>
                   ))}
                 </select>
-              </label>
+              </Field>
               <QueryState {...candidates} />
               <div className="workspace-row-actions">
                 <button
@@ -311,8 +308,7 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
               {shifts.map((s, i) => (
                 <div key={s.entryId} className="workspace-hypothesis">
                   <strong>{s.label}</strong>
-                  <label className="field">
-                    Dias de adiamento
+                  <Field className="field" label={<>Dias de adiamento</>}>
                     <input
                       type="number"
                       min={1}
@@ -329,7 +325,7 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                         )
                       }
                     />
-                  </label>
+                  </Field>
                   <button
                     type="button"
                     className="btn text small"
@@ -385,8 +381,7 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                 return (
                   <fieldset key={h.id} className="workspace-hypothesis">
                     <legend>Hipótese {i + 1}</legend>
-                    <label className="field">
-                      Descrição da hipótese
+                    <Field className="field" label={<>Descrição da hipótese</>}>
                       <input
                         required
                         maxLength={120}
@@ -394,10 +389,9 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                         onChange={(e) => update({ label: e.target.value })}
                         placeholder="Ex.: nova despesa mensal"
                       />
-                    </label>
+                    </Field>
                     <div className="workspace-pair">
-                      <label className="field">
-                        Tipo da hipótese
+                      <Field className="field" label={<>Tipo da hipótese</>}>
                         <select
                           value={h.type}
                           onChange={(e) =>
@@ -409,9 +403,8 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                           <option value="EXPENSE">Despesa</option>
                           <option value="INCOME">Receita</option>
                         </select>
-                      </label>
-                      <label className="field">
-                        Valor da hipótese
+                      </Field>
+                      <Field className="field" label={<>Valor da hipótese</>}>
                         <input
                           required
                           inputMode="decimal"
@@ -420,11 +413,10 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                           value={h.amount}
                           onChange={(e) => update({ amount: e.target.value })}
                         />
-                      </label>
+                      </Field>
                     </div>
                     <div className="workspace-pair">
-                      <label className="field">
-                        Primeira data
+                      <Field className="field" label={<>Primeira data</>}>
                         <input
                           type="date"
                           required
@@ -432,9 +424,8 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                           value={h.date}
                           onChange={(e) => update({ date: e.target.value })}
                         />
-                      </label>
-                      <label className="field">
-                        Ocorrências mensais
+                      </Field>
+                      <Field className="field" label={<>Ocorrências mensais</>}>
                         <input
                           type="number"
                           required
@@ -445,7 +436,7 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                             update({ occurrences: Number(e.target.value) })
                           }
                         />
-                      </label>
+                      </Field>
                     </div>
                     <button
                       type="button"
@@ -610,8 +601,7 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                   )}
                 </svg>
                 <div className="workspace-scenario-fields">
-                  <label className="field">
-                    Dia da projeção
+                  <Field className="field" label={<>Dia da projeção</>}>
                     <input
                       type="range"
                       min={0}
@@ -619,7 +609,7 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
                       value={selected}
                       onChange={(e) => setSelected(Number(e.target.value))}
                     />
-                  </label>
+                  </Field>
                   {point && (
                     <div className="workspace-day-selection">
                       <span>{dateLabel(point.date)}</span>

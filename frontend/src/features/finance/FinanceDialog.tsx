@@ -1,3 +1,4 @@
+import { Field } from '../../shared/Field';
 import { useEffect, useRef, useState } from 'react';
 import type { FinanceBridge } from '../../app/bridge';
 import type {
@@ -327,8 +328,7 @@ export function FinanceDialog({
                     {(action === 'entry' || action === 'edit-entry') && (
                       <>
                         {action === 'entry' && (
-                          <label className="field">
-                            Formato
+                          <Field className="field" label={<>Formato</>}>
                             <select
                               value={form.mode}
                               onChange={(e) => update('mode', e.target.value)}
@@ -341,11 +341,10 @@ export function FinanceDialog({
                                 Repetir valor mensalmente
                               </option>
                             </select>
-                          </label>
+                          </Field>
                         )}
                         <div className="workspace-form-grid">
-                          <label className="field">
-                            Tipo
+                          <Field className="field" label={<>Tipo</>}>
                             <select
                               value={form.type}
                               onChange={(e) => {
@@ -361,13 +360,19 @@ export function FinanceDialog({
                               <option value="INCOME">Receita</option>
                               <option value="EXPENSE">Despesa</option>
                             </select>
-                          </label>
-                          <label className="field">
-                            {form.mode === 'INSTALLMENT'
-                              ? 'Valor total (R$)'
-                              : form.mode === 'RECURRING'
-                                ? 'Valor mensal (R$)'
-                                : 'Valor (R$)'}
+                          </Field>
+                          <Field
+                            className="field"
+                            label={
+                              <>
+                                {form.mode === 'INSTALLMENT'
+                                  ? 'Valor total (R$)'
+                                  : form.mode === 'RECURRING'
+                                    ? 'Valor mensal (R$)'
+                                    : 'Valor (R$)'}
+                              </>
+                            }
+                          >
                             <input
                               name="amount"
                               inputMode="decimal"
@@ -380,10 +385,9 @@ export function FinanceDialog({
                               id="amount-error"
                               error={errors.amount}
                             />
-                          </label>
+                          </Field>
                         </div>
-                        <label className="field">
-                          Descrição
+                        <Field className="field" label={<>Descrição</>}>
                           <input
                             name="description"
                             autoFocus
@@ -399,9 +403,8 @@ export function FinanceDialog({
                             id="description-error"
                             error={errors.description}
                           />
-                        </label>
-                        <label className="field">
-                          Conta
+                        </Field>
+                        <Field className="field" label={<>Conta</>}>
                           <select
                             name="accountId"
                             required
@@ -421,9 +424,11 @@ export function FinanceDialog({
                             id="accountId-error"
                             error={errors.accountId}
                           />
-                        </label>
-                        <label className="field">
-                          Categoria cadastrada
+                        </Field>
+                        <Field
+                          className="field"
+                          label={<>Categoria cadastrada</>}
+                        >
                           <select
                             value={form.categoryId}
                             onChange={(e) =>
@@ -438,10 +443,12 @@ export function FinanceDialog({
                               </option>
                             ))}
                           </select>
-                        </label>
+                        </Field>
                         {!form.categoryId && (
-                          <label className="field">
-                            Categoria avulsa
+                          <Field
+                            className="field"
+                            label={<>Categoria avulsa</>}
+                          >
                             <input
                               required
                               maxLength={80}
@@ -455,19 +462,23 @@ export function FinanceDialog({
                               id="category-error"
                               error={errors.category}
                             />
-                          </label>
+                          </Field>
                         )}
-                        <label className="field">
-                          Buscar cliente ou fornecedor
+                        <Field
+                          className="field"
+                          label={<>Buscar cliente ou fornecedor</>}
+                        >
                           <input
                             type="search"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             maxLength={255}
                           />
-                        </label>
-                        <label className="field">
-                          Cliente / fornecedor
+                        </Field>
+                        <Field
+                          className="field"
+                          label={<>Cliente / fornecedor</>}
+                        >
                           <select
                             value={form.contactId}
                             onChange={(e) =>
@@ -497,11 +508,17 @@ export function FinanceDialog({
                                   ? 'Mostrando os primeiros 50. Refine a busca.'
                                   : 'Vínculo opcional.')}
                           </small>
-                        </label>
-                        <label className="field">
-                          {form.mode === 'SINGLE'
-                            ? 'Vencimento'
-                            : 'Primeiro vencimento'}
+                        </Field>
+                        <Field
+                          className="field"
+                          label={
+                            <>
+                              {form.mode === 'SINGLE'
+                                ? 'Vencimento'
+                                : 'Primeiro vencimento'}
+                            </>
+                          }
+                        >
                           <input
                             type="date"
                             required
@@ -513,11 +530,13 @@ export function FinanceDialog({
                             id="dueDate-error"
                             error={errors.dueDate}
                           />
-                        </label>
+                        </Field>
                         {form.mode !== 'SINGLE' && (
                           <>
-                            <label className="field">
-                              Quantidade de ocorrências
+                            <Field
+                              className="field"
+                              label={<>Quantidade de ocorrências</>}
+                            >
                               <input
                                 type="number"
                                 min={2}
@@ -533,7 +552,7 @@ export function FinanceDialog({
                                 id="occurrences-error"
                                 error={errors.occurrences}
                               />
-                            </label>
+                            </Field>
                             <section
                               className="workspace-schedule"
                               aria-live="polite"
@@ -579,8 +598,10 @@ export function FinanceDialog({
                           <span>Saldo restante</span>
                           <strong>{money(row!.remainingAmount)}</strong>
                         </div>
-                        <label className="field">
-                          Valor desta baixa (R$)
+                        <Field
+                          className="field"
+                          label={<>Valor desta baixa (R$)</>}
+                        >
                           <input
                             autoFocus
                             required
@@ -590,7 +611,7 @@ export function FinanceDialog({
                             {...field('amount')}
                           />
                           <FieldError id="amount-error" error={errors.amount} />
-                        </label>
+                        </Field>
                         <p className="workspace-caption">
                           Pode ser uma baixa parcial. A operação é identificada
                           para evitar duplicação ao repetir a mesma tentativa.
@@ -598,8 +619,10 @@ export function FinanceDialog({
                       </>
                     )}
                     {(action === 'pay' || form.paid) && (
-                      <label className="field">
-                        Data do pagamento / recebimento
+                      <Field
+                        className="field"
+                        label={<>Data do pagamento / recebimento</>}
+                      >
                         <input
                           type="date"
                           required
@@ -614,7 +637,7 @@ export function FinanceDialog({
                           id="paymentDate-error"
                           error={errors.paymentDate}
                         />
-                      </label>
+                      </Field>
                     )}
                   </>
                 )}
