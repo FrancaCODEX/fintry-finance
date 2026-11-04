@@ -52,6 +52,7 @@
   gap: 18px;
 }
 .workspace-balance {
+  container-type: inline-size;
   padding: 30px;
   border-radius: 22px;
   color: #f0faed;
@@ -66,12 +67,15 @@
   color: #c3ddce;
 }
 .workspace-balance > strong {
-  font-size: clamp(30px, 3.1vw, 48px);
+  font-size: clamp(26px, 12cqi, 48px);
   font-weight: 600;
   letter-spacing: -2px;
   line-height: 1.3;
   margin: 25px 0 10px;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow-x: auto;
+  font-variant-numeric: tabular-nums;
 }
 .workspace-balance p {
   font-size: 12px;
@@ -98,6 +102,7 @@
   gap: 14px;
 }
 .workspace-kpi {
+  container-type: inline-size;
   text-align: left;
   border: 1px solid var(--line);
   border-radius: 22px;
@@ -127,11 +132,14 @@
   font-size: 18px;
 }
 .workspace-kpi strong {
-  font-size: clamp(20px, 1.9vw, 30px);
+  font-size: clamp(18px, 12cqi, 30px);
   letter-spacing: -1px;
   font-weight: 600;
   margin: 32px 0 14px;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow-x: auto;
+  font-variant-numeric: tabular-nums;
 }
 .workspace-kpi small {
   font-size: 11px;
@@ -478,6 +486,7 @@
   overflow: auto;
 }
 .workspace-entry-table table {
+  white-space: normal;
   width: 100%;
   border-collapse: collapse;
   min-width: 850px;
@@ -632,7 +641,7 @@
     grid-template-columns: 1fr;
   }
   .workspace-aside {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   }
   .workspace-kpi strong {
     font-size: 28px;
@@ -669,7 +678,7 @@
     grid-column: 2;
     grid-row: 1/3;
     text-align: right;
-    font-size: 25px;
+    font-size: clamp(18px, 6vw, 25px);
     margin: 0;
     align-self: center;
   }
@@ -734,11 +743,13 @@
   }
   .workspace-entry-table tbody {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 15px;
     padding: 0 15px 20px;
   }
   .workspace-entry-table tr {
     display: block;
+    min-width: 0;
     border: 1px solid var(--line);
     border-radius: 15px;
     padding: 16px;
@@ -753,6 +764,7 @@
     text-align: right;
     min-width: 0 !important;
     max-width: none !important;
+    overflow-wrap: anywhere;
   }
   .workspace-entry-table td:before {
     content: attr(data-label);

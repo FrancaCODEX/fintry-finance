@@ -9,6 +9,7 @@
 - Acrescenta explicação de receitas, despesas, resultado e saldo atual no dashboard, com fórmula, componentes e baixas paginadas na mesma consulta consistente. Valores monetários novos trafegam como texto decimal e são formatados preservando centavos no cliente.
 - Permite a consulta de cenários também a perfis de leitura e assinaturas expiradas, mantendo sessão, isolamento por empresa e CSRF na requisição de cálculo. Escritas financeiras continuam com as permissões existentes.
 - Usa o relógio de negócio na projeção e explicita a exclusão de ocorrências suspensas. Acrescenta testes HTTP de precisão, escopo, repetições mensais, períodos, paginação, ausência de efeitos persistidos e explicações; amplia a aceitação em navegador.
+- Ajusta a tipografia monetária à largura dos indicadores e impede cortes nos cartões de lançamentos no celular, com verificação de largura interna na aceitação em navegador.
 
 ## [0.34.0] - 2026-11-04
 

@@ -40,6 +40,13 @@ test('React dashboard keeps line series visible and saves a named view', async (
   await expect(
     page.getByRole('heading', { name: 'Seu caixa, com contexto.' }),
   ).toBeVisible();
+  for (const metric of await page
+    .locator('.workspace-kpi strong, .workspace-balance>strong')
+    .all()) {
+    expect(
+      await metric.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBeTruthy();
+  }
   await page.getByRole('button', { name: 'Linhas', exact: true }).click();
   const path = page.locator('.workspace-cash-chart path').first();
   await expect(path).toHaveAttribute('fill', 'none');
@@ -112,6 +119,17 @@ test('mobile entries remain within the viewport and session expiration returns t
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBeTruthy();
+  expect(
+    await page
+      .locator('.workspace-entry-table')
+      .evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+  ).toBeTruthy();
+  const firstCard = page.locator('.workspace-entry-table tbody tr').first();
+  for (const cell of await firstCard.locator('td').all()) {
+    expect(
+      await cell.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBeTruthy();
+  }
   await page.screenshot({
     path: 'test-results/entries-mobile.png',
     fullPage: true,
