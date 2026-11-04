@@ -9,6 +9,7 @@ import java.util.*;
 public class ReportController {
     private final ReportService service;
     private final ReportExporter exporter;
+    private final IndicatorExplanationService explanations;
     @GetMapping public ReportService.Report report(@RequestParam LocalDate start,@RequestParam LocalDate end,
         @RequestParam(defaultValue="PAYMENT") ReportService.Basis basis,@RequestParam(required=false) FinancialEntry.Status status,
         @RequestParam(required=false) FinancialEntry.Type type,@RequestParam(required=false)UUID accountId,
@@ -30,6 +31,10 @@ public class ReportController {
         }
         return ResponseEntity.ok().contentType(MediaType.parseMediaType(mime)).cacheControl(CacheControl.noStore())
             .header(HttpHeaders.CONTENT_DISPOSITION,ContentDisposition.attachment().filename("fintry-relatorio-"+start+"-"+end+"."+format).build().toString()).body(bytes);
+    }
+    @GetMapping("/explanation") public ResponseEntity<IndicatorExplanationService.Explanation> explanation(
+        @RequestParam IndicatorExplanationService.Kind kind,@RequestParam(required=false) String month,@RequestParam(defaultValue="0") int page) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(explanations.explain(kind,month,page));
     }
     @GetMapping("/forecast") public ReportService.Forecast forecast(@RequestParam(defaultValue="90")int days,
         @RequestParam(required=false)UUID accountId,@RequestParam(defaultValue="false")boolean includeOverdue) {

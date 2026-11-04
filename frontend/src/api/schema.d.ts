@@ -267,6 +267,211 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/scenarios/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Cálculo autenticado, sem escrita. Exige o token CSRF; disponível também para consulta e assinaturas expiradas. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ScenarioInput"];
+                };
+            };
+            responses: {
+                /** @description Consulta sem persistência; valores monetários como texto decimal exato. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScenarioPreview"];
+                    };
+                };
+                /** @description Parâmetros inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sessão ausente ou expirada */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description CSRF ausente na simulação */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Conta ou lançamento não pertencente à empresa */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    days?: number;
+                    accountId?: string;
+                    includeOverdue?: boolean;
+                    search?: string;
+                    page?: number;
+                    size?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Consulta sem persistência; valores monetários como texto decimal exato. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["EntryPage"];
+                    };
+                };
+                /** @description Parâmetros inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sessão ausente ou expirada */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description CSRF ausente na simulação */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Conta ou lançamento não pertencente à empresa */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/explanation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    kind: string;
+                    month?: string;
+                    page?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Consulta sem persistência; valores monetários como texto decimal exato. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["IndicatorExplanation"];
+                    };
+                };
+                /** @description Parâmetros inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sessão ausente ou expirada */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description CSRF ausente na simulação */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Conta ou lançamento não pertencente à empresa */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -281,6 +486,7 @@ export interface components {
             month: string;
             income: number;
             expense: number;
+            result: number;
         };
         CategoryTotal: {
             category: string | null;
@@ -364,6 +570,110 @@ export interface components {
             includeOverdue: boolean;
             days: components["schemas"]["ForecastDay"][];
         };
+        ScenarioShift: {
+            entryId: string;
+            delayDays: number;
+        };
+        ScenarioHypothesis: {
+            label: string;
+            type: components["schemas"]["EntryType"];
+            amount: string;
+            date: string;
+            occurrences: number;
+        };
+        ScenarioInput: {
+            days: number;
+            accountId?: string;
+            includeOverdue?: boolean;
+            shifts?: components["schemas"]["ScenarioShift"][];
+            hypotheses?: components["schemas"]["ScenarioHypothesis"][];
+            explainDate?: string;
+        };
+        ScenarioPoint: {
+            date: string;
+            income: string;
+            expense: string;
+            balance: string;
+        };
+        ScenarioProjection: {
+            start: string;
+            end: string;
+            openingBalance: string;
+            closingBalance: string;
+            pendingIncome: string;
+            pendingExpense: string;
+            minimumBalance: string;
+            firstNegativeDate: string | null;
+            days: components["schemas"]["ScenarioPoint"][];
+        };
+        ScenarioEffect: {
+            entryId: string | null;
+            label: string;
+            type: components["schemas"]["EntryType"];
+            amount: string;
+            originalDate: string | null;
+            projectedDate: string;
+            outsideHorizon: boolean;
+            kind: string;
+        };
+        ScenarioSource: {
+            entryId: string | null;
+            label: string;
+            type: components["schemas"]["EntryType"];
+            amount: string;
+            dueDate: string | null;
+            projectedDate: string;
+            baselineIncluded: boolean;
+            scenarioIncluded: boolean;
+            kind: string;
+        };
+        ScenarioExplanation: {
+            date: string;
+            baselineOpening: string;
+            scenarioOpening: string;
+            baselineIncome: string;
+            baselineExpense: string;
+            scenarioIncome: string;
+            scenarioExpense: string;
+            baselineBalance: string;
+            scenarioBalance: string;
+            sources: components["schemas"]["ScenarioSource"][];
+            totalSources: number;
+            truncated: boolean;
+        };
+        ScenarioPreview: {
+            baseline: components["schemas"]["ScenarioProjection"];
+            scenario: components["schemas"]["ScenarioProjection"];
+            closingDelta: string;
+            effects: components["schemas"]["ScenarioEffect"][];
+            explanation: components["schemas"]["ScenarioExplanation"];
+        };
+        AmountStep: {
+            label: string;
+            amount: string;
+        };
+        IndicatorSource: {
+            entryId: string;
+            paymentId: string | null;
+            description: string;
+            type: components["schemas"]["EntryType"];
+            amount: string;
+            paymentDate: string;
+        };
+        IndicatorExplanation: {
+            kind: components["schemas"]["IndicatorKind"];
+            amount: string;
+            formula: string;
+            scope: string;
+            capturedAt: string;
+            steps: components["schemas"]["AmountStep"][];
+            sources: components["schemas"]["IndicatorSource"][];
+            totalElements: number;
+            totalPages: number;
+            number: number;
+        };
+        /** @enum {string} */
+        IndicatorKind: "BALANCE" | "INCOME" | "EXPENSE" | "RESULT";
     };
     responses: never;
     parameters: never;

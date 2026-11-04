@@ -1,5 +1,8 @@
 spring:
   datasource:
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 0
     url: jdbc:postgresql://localhost:5432/fintry_test
     username: fintry
     password: fintry-test

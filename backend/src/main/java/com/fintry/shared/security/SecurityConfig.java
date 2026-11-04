@@ -99,6 +99,9 @@ public class SecurityConfig {
                     .requestMatchers(
                         org.springframework.http.HttpMethod.PUT, "/api/v1/companies/**")
                     .hasRole("ADMIN")
+                    // Simulation is a read-only calculation, still protected by authentication and CSRF.
+                    .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/scenarios/preview")
+                    .hasAnyRole("ADMIN", "FINANCE", "VIEWER")
                     .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/**")
                     .hasAnyRole("ADMIN", "FINANCE")
                     .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/v1/**")

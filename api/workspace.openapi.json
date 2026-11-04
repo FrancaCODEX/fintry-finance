@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fintry workspace read API",
-    "version": "0.33.0",
+    "version": "0.35.0",
     "description": "Contrato parcial para as consultas usadas pelo workspace. Valores monetários JSON são apenas exibidos no cliente; cálculos e mutações financeiras pertencem ao backend. APIs de escrita existentes seguem a documentação em docs/05-api."
   },
   "servers": [
@@ -244,6 +244,177 @@
           }
         }
       }
+    },
+    "/scenarios/preview": {
+      "post": {
+        "description": "Cálculo autenticado, sem escrita. Exige o token CSRF; disponível também para consulta e assinaturas expiradas.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consulta sem persistência; valores monetários como texto decimal exato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioPreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetros inválidos"
+          },
+          "401": {
+            "description": "Sessão ausente ou expirada"
+          },
+          "403": {
+            "description": "CSRF ausente na simulação"
+          },
+          "404": {
+            "description": "Conta ou lançamento não pertencente à empresa"
+          }
+        }
+      }
+    },
+    "/scenarios/candidates": {
+      "get": {
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeOverdue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta sem persistência; valores monetários como texto decimal exato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetros inválidos"
+          },
+          "401": {
+            "description": "Sessão ausente ou expirada"
+          },
+          "403": {
+            "description": "CSRF ausente na simulação"
+          },
+          "404": {
+            "description": "Conta ou lançamento não pertencente à empresa"
+          }
+        }
+      }
+    },
+    "/reports/explanation": {
+      "get": {
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta sem persistência; valores monetários como texto decimal exato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndicatorExplanation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetros inválidos"
+          },
+          "401": {
+            "description": "Sessão ausente ou expirada"
+          },
+          "403": {
+            "description": "CSRF ausente na simulação"
+          },
+          "404": {
+            "description": "Conta ou lançamento não pertencente à empresa"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -276,7 +447,8 @@
         "required": [
           "month",
           "income",
-          "expense"
+          "expense",
+          "result"
         ],
         "properties": {
           "month": {
@@ -286,6 +458,9 @@
             "type": "number"
           },
           "expense": {
+            "type": "number"
+          },
+          "result": {
             "type": "number"
           }
         }
@@ -689,6 +864,457 @@
             }
           }
         }
+      },
+      "ScenarioShift": {
+        "type": "object",
+        "required": [
+          "entryId",
+          "delayDays"
+        ],
+        "properties": {
+          "entryId": {
+            "type": "string"
+          },
+          "delayDays": {
+            "type": "integer"
+          }
+        }
+      },
+      "ScenarioHypothesis": {
+        "type": "object",
+        "required": [
+          "label",
+          "type",
+          "amount",
+          "date",
+          "occurrences"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EntryType"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "occurrences": {
+            "type": "integer"
+          }
+        }
+      },
+      "ScenarioInput": {
+        "type": "object",
+        "required": [
+          "days"
+        ],
+        "properties": {
+          "days": {
+            "type": "integer"
+          },
+          "accountId": {
+            "type": "string"
+          },
+          "includeOverdue": {
+            "type": "boolean"
+          },
+          "shifts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScenarioShift"
+            }
+          },
+          "hypotheses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScenarioHypothesis"
+            }
+          },
+          "explainDate": {
+            "type": "string"
+          }
+        }
+      },
+      "ScenarioPoint": {
+        "type": "object",
+        "required": [
+          "date",
+          "income",
+          "expense",
+          "balance"
+        ],
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "income": {
+            "type": "string"
+          },
+          "expense": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "string"
+          }
+        }
+      },
+      "ScenarioProjection": {
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "openingBalance",
+          "closingBalance",
+          "pendingIncome",
+          "pendingExpense",
+          "minimumBalance",
+          "firstNegativeDate",
+          "days"
+        ],
+        "properties": {
+          "start": {
+            "type": "string"
+          },
+          "end": {
+            "type": "string"
+          },
+          "openingBalance": {
+            "type": "string"
+          },
+          "closingBalance": {
+            "type": "string"
+          },
+          "pendingIncome": {
+            "type": "string"
+          },
+          "pendingExpense": {
+            "type": "string"
+          },
+          "minimumBalance": {
+            "type": "string"
+          },
+          "firstNegativeDate": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScenarioPoint"
+            }
+          }
+        }
+      },
+      "ScenarioEffect": {
+        "type": "object",
+        "required": [
+          "entryId",
+          "label",
+          "type",
+          "amount",
+          "originalDate",
+          "projectedDate",
+          "outsideHorizon",
+          "kind"
+        ],
+        "properties": {
+          "entryId": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EntryType"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "originalDate": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "projectedDate": {
+            "type": "string"
+          },
+          "outsideHorizon": {
+            "type": "boolean"
+          },
+          "kind": {
+            "type": "string"
+          }
+        }
+      },
+      "ScenarioSource": {
+        "type": "object",
+        "required": [
+          "entryId",
+          "label",
+          "type",
+          "amount",
+          "dueDate",
+          "projectedDate",
+          "baselineIncluded",
+          "scenarioIncluded",
+          "kind"
+        ],
+        "properties": {
+          "entryId": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EntryType"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "dueDate": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "projectedDate": {
+            "type": "string"
+          },
+          "baselineIncluded": {
+            "type": "boolean"
+          },
+          "scenarioIncluded": {
+            "type": "boolean"
+          },
+          "kind": {
+            "type": "string"
+          }
+        }
+      },
+      "ScenarioExplanation": {
+        "type": "object",
+        "required": [
+          "date",
+          "baselineOpening",
+          "scenarioOpening",
+          "baselineIncome",
+          "baselineExpense",
+          "scenarioIncome",
+          "scenarioExpense",
+          "baselineBalance",
+          "scenarioBalance",
+          "sources",
+          "totalSources",
+          "truncated"
+        ],
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "baselineOpening": {
+            "type": "string"
+          },
+          "scenarioOpening": {
+            "type": "string"
+          },
+          "baselineIncome": {
+            "type": "string"
+          },
+          "baselineExpense": {
+            "type": "string"
+          },
+          "scenarioIncome": {
+            "type": "string"
+          },
+          "scenarioExpense": {
+            "type": "string"
+          },
+          "baselineBalance": {
+            "type": "string"
+          },
+          "scenarioBalance": {
+            "type": "string"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScenarioSource"
+            }
+          },
+          "totalSources": {
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ScenarioPreview": {
+        "type": "object",
+        "required": [
+          "baseline",
+          "scenario",
+          "closingDelta",
+          "effects",
+          "explanation"
+        ],
+        "properties": {
+          "baseline": {
+            "$ref": "#/components/schemas/ScenarioProjection"
+          },
+          "scenario": {
+            "$ref": "#/components/schemas/ScenarioProjection"
+          },
+          "closingDelta": {
+            "type": "string"
+          },
+          "effects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScenarioEffect"
+            }
+          },
+          "explanation": {
+            "$ref": "#/components/schemas/ScenarioExplanation"
+          }
+        }
+      },
+      "AmountStep": {
+        "type": "object",
+        "required": [
+          "label",
+          "amount"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          }
+        }
+      },
+      "IndicatorSource": {
+        "type": "object",
+        "required": [
+          "entryId",
+          "paymentId",
+          "description",
+          "type",
+          "amount",
+          "paymentDate"
+        ],
+        "properties": {
+          "entryId": {
+            "type": "string"
+          },
+          "paymentId": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/EntryType"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "paymentDate": {
+            "type": "string"
+          }
+        }
+      },
+      "IndicatorExplanation": {
+        "type": "object",
+        "required": [
+          "kind",
+          "amount",
+          "formula",
+          "scope",
+          "capturedAt",
+          "steps",
+          "sources",
+          "totalElements",
+          "totalPages",
+          "number"
+        ],
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/IndicatorKind"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "formula": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AmountStep"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IndicatorSource"
+            }
+          },
+          "totalElements": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "number": {
+            "type": "integer"
+          }
+        }
+      },
+      "IndicatorKind": {
+        "type": "string",
+        "enum": [
+          "BALANCE",
+          "INCOME",
+          "EXPENSE",
+          "RESULT"
+        ]
       }
     },
     "securitySchemes": {

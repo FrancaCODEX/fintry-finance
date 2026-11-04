@@ -125,7 +125,11 @@ public class FinanceService {
   public record EntryPage(
       List<EntryView> content, long totalElements, int totalPages, int number) {}
 
-  public record MonthView(String month, BigDecimal income, BigDecimal expense) {}
+  public record MonthView(String month, BigDecimal income, BigDecimal expense, BigDecimal result) {
+    public MonthView(String month, BigDecimal income, BigDecimal expense) {
+      this(month, income, expense, income.subtract(expense));
+    }
+  }
 
   public record Summary(
       BigDecimal balance,

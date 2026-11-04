@@ -42,6 +42,7 @@ public class ReportService {
     private final EntryPaymentRepository payments;
     private final FinanceService finance;
     private final EntityManager em;
+    private final Clock clock;
 
     private ResponseStatusException invalid(String m){return new ResponseStatusException(HttpStatus.BAD_REQUEST,m);}
     private void validate(Filters f) {
@@ -148,7 +149,7 @@ public class ReportService {
         var available=finance.accounts();
         if(accountId!=null && available.stream().noneMatch(a->a.id().equals(accountId)))throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Conta não encontrada.");
         BigDecimal opening=available.stream().filter(a->accountId==null||a.id().equals(accountId)).map(FinanceService.AccountView::balance).reduce(BigDecimal.ZERO,BigDecimal::add);
-        var today=LocalDate.now(ZoneId.of("America/Sao_Paulo"));var end=today.plusDays(horizon);
+        var today=LocalDate.now(clock);var end=today.plusDays(horizon);
         BigDecimal overdueIncome=BigDecimal.ZERO,overdueExpense=BigDecimal.ZERO;
         Map<LocalDate,BigDecimal[]> movements=new HashMap<>();
         for(Object[] row:entries.forecast(current.companyId(),accountId,end)) {

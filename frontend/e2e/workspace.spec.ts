@@ -40,6 +40,13 @@ test('React dashboard keeps line series visible and saves a named view', async (
   await expect(
     page.getByRole('heading', { name: 'Seu caixa, com contexto.' }),
   ).toBeVisible();
+  for (const metric of await page
+    .locator('.workspace-kpi strong, .workspace-balance>strong')
+    .all()) {
+    expect(
+      await metric.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBeTruthy();
+  }
   await page.getByRole('button', { name: 'Linhas', exact: true }).click();
   const path = page.locator('.workspace-cash-chart path').first();
   await expect(path).toHaveAttribute('fill', 'none');
@@ -112,6 +119,17 @@ test('mobile entries remain within the viewport and session expiration returns t
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBeTruthy();
+  expect(
+    await page
+      .locator('.workspace-entry-table')
+      .evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+  ).toBeTruthy();
+  const firstCard = page.locator('.workspace-entry-table tbody tr').first();
+  for (const cell of await firstCard.locator('td').all()) {
+    expect(
+      await cell.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBeTruthy();
+  }
   await page.screenshot({
     path: 'test-results/entries-mobile.png',
     fullPage: true,
@@ -122,4 +140,66 @@ test('mobile entries remain within the viewport and session expiration returns t
   });
   await page.reload();
   await expect(page.locator('#auth-form')).toBeVisible();
+});
+test('scenario preview compares exact hypothetical expense without creating entries', async ({
+  page,
+}) => {
+  const before = await (
+    await page.request.get('/api/v1/finance/entries?size=1')
+  ).json();
+  await page.goto('/?page=scenarios');
+  await expect(
+    page.getByRole('heading', { name: 'E se o caixa mudasse?' }),
+  ).toBeVisible();
+  await page
+    .getByRole('button', { name: '＋ Adicionar hipótese', exact: true })
+    .click();
+  await page
+    .getByLabel('Descrição da hipótese', { exact: true })
+    .fill('Despesa hipotética');
+  await page.getByLabel('Valor da hipótese', { exact: true }).fill('100,10');
+  await page
+    .getByRole('button', { name: 'Comparar cenário', exact: true })
+    .click();
+  await expect(
+    page.getByLabel('Diferença no saldo final', { exact: true }),
+  ).toHaveText(/-R\$\s*100,10/);
+  await expect(
+    page
+      .locator('.workspace-sources')
+      .getByText('Despesa hipotética', { exact: true }),
+  ).toBeVisible();
+  const after = await (
+    await page.request.get('/api/v1/finance/entries?size=1')
+  ).json();
+  expect(after.totalElements).toBe(before.totalElements);
+  await page.screenshot({
+    path: 'test-results/scenarios-desktop.png',
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBeTruthy();
+});
+test('dashboard explains a metric through its underlying payments', async ({
+  page,
+}) => {
+  await page.goto('/?page=dashboard');
+  await page.locator('.workspace-kpi.income').click();
+  await expect(
+    page.getByRole('heading', { name: 'De onde vêm as receitas' }),
+  ).toBeVisible();
+  await expect(page.locator('.workspace-explanation-value')).toBeVisible();
+  await expect(
+    page
+      .locator('.workspace-explanation-dialog .workspace-sources>div')
+      .first(),
+  ).toBeVisible();
+  await page
+    .getByRole('button', { name: 'Fechar explicação', exact: true })
+    .click();
+  await expect(page.locator('.workspace-explanation-dialog')).toHaveCount(0);
 });

@@ -13,7 +13,7 @@ export function QueryState({
       <section className="workspace-message" role="alert">
         <h2>Não foi possível carregar</h2>
         <p>{error}</p>
-        <button className="btn secondary" onClick={retry}>
+        <button type="button" className="btn secondary" onClick={retry}>
           Tentar novamente
         </button>
       </section>

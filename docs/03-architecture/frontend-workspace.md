@@ -34,3 +34,13 @@ Mês, pesquisa, tipo, situação, conta e página dos lançamentos ficam na URL.
 O build de produção substitui o ambiente de desenvolvimento do React e gera `workspace/fintry.js` e `workspace/fintry.css`. O Docker compila esses arquivos em um estágio Node e copia somente o resultado para o backend; não há Node no contêiner de execução. No checkout de código, execute `npm ci && npm run build` em `frontend` antes de iniciar o backend. Sem assets compilados, os dois conteúdos anteriores continuam disponíveis como compatibilidade de desenvolvimento.
 
 As preferências do gráfico usam a chave anterior por usuário no mesmo navegador; entradas inválidas são normalizadas. O backend continua sendo a autoridade dos valores, escopo da empresa e permissões.
+
+## Cenários e explicações (0.35.0)
+
+`scenario` é um módulo de cálculo sem tabelas próprias. `ScenarioService` aplica deltas sobre os dias agregados de `ReportService.forecast`, consulta lançamentos pela empresa autenticada e nunca chama serviços de escrita. O relógio injetado define a data de negócio. Repetições mensais usam a primeira data como âncora para evitar deriva nos fins de mês.
+
+A resposta oferece previsão atual, cenário, diferença, efeitos e composição diária em uma transação `REPEATABLE_READ`. A busca de candidatos é paginada, limita 50 itens e escapa curingas de texto. A explicação diária consulta no máximo 101 movimentos para apresentar até 100, informa o total e inclui hipóteses correspondentes. Limites de 20 adiamentos, 20 hipóteses, 12 repetições e 366 dias limitam o trabalho por requisição.
+
+`IndicatorExplanationService` lê totais e fontes pela mesma base de pagamentos, sem reconstruir valores no frontend. Os novos DTOs monetários usam texto decimal; o cliente formata a parte inteira com BigInt e mantém os centavos, usando Number somente nas coordenadas visuais dos gráficos.
+
+A única exceção nova à regra de escrita por assinatura/perfil é `POST /api/v1/scenarios/preview`: é uma operação de leitura autenticada com CSRF. Nenhuma API de mutação financeira é liberada por essa exceção. Os testes de integração exercitam VIEWER, isolamento por empresa, entrada inválida e ausência de alterações persistidas.

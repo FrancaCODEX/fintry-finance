@@ -41,3 +41,9 @@ export function workspaceApi(request: Transport) {
       ),
   };
 }
+
+export type ScenarioInput = components['schemas']['ScenarioInput'];
+export type ScenarioPreview = components['schemas']['ScenarioPreview'];
+export type IndicatorExplanation =
+  components['schemas']['IndicatorExplanation'];
+export type IndicatorKind = components['schemas']['IndicatorKind'];

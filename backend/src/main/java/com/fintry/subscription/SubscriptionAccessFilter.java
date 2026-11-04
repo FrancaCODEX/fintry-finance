@@ -16,6 +16,7 @@ public class SubscriptionAccessFilter extends OncePerRequestFilter {
   protected boolean shouldNotFilter(HttpServletRequest r) {
     if (java.util.Set.of("GET", "HEAD", "OPTIONS").contains(r.getMethod())) return true;
     String p = r.getServletPath();
+    if (r.getMethod().equals("POST") && p.equals("/api/v1/scenarios/preview")) return true;
     // Security, membership administration and subscription requests remain available.
     // Downloads/exports and removal of attachments remain available even after expiration.
     if (!p.startsWith("/api/v1/")

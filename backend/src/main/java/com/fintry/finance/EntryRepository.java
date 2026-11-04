@@ -22,10 +22,12 @@ public interface EntryRepository
 
   Optional<FinancialEntry> findByIdAndCompanyId(UUID id, UUID companyId);
 
+  List<FinancialEntry> findByCompanyIdAndIdIn(UUID companyId, List<UUID> ids);
+
   @Query(
       "select e.dueDate,e.type,sum(e.amount-e.paidAmount) from FinancialEntry e where"
           + " e.companyId=:company and e.status in ('PENDING','PARTIAL')"
-          + " and e.transferId is null and e.dueDate<=:end and (:account is null"
+          + " and e.seriesPaused=false and e.transferId is null and e.dueDate<=:end and (:account is null"
           + " or e.accountId=:account) group by e.dueDate,e.type")
   List<Object[]> forecast(
       @Param("company") UUID company, @Param("account") UUID account, @Param("end") LocalDate end);

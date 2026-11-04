@@ -7,7 +7,10 @@ function restoreWorkspaceLocation() {
   const page = params.get("page");
   if (allowed.has(page)) state.page = page;
   const month = params.get("month");
-  if (/^(20\d{2}|2100)-(0[1-9]|1[0-2])$/.test(month || "")) state.month = month;
+  if (/^(20\d{2}|2100)-(0[1-9]|1[0-2])$/.test(month || "")) {
+    state.month = month;
+    if (state.page === "reports") state.reportFilters = {start:month+"-01",end:monthEnd(month),basis:"PAYMENT",status:"PAID",type:["INCOME","EXPENSE"].includes(params.get("type"))?params.get("type"):""};
+  }
 }
 async function navigateWorkspace(page, month, type) {
   closeNavigation();
@@ -21,7 +24,7 @@ async function navigateWorkspace(page, month, type) {
     state.reportPage = 0;
   }
   const url = new URL(location.href);
-  url.search = new URLSearchParams({page, month:state.month}).toString();
+  url.search = new URLSearchParams({page, month:state.month,...(page === "reports" && type ? {type} : {})}).toString();
   if (url.href !== location.href) history.pushState({}, "", url);
   window.scrollTo({top:0, behavior:"instant"});
   await safeLoad();
@@ -36,7 +39,14 @@ window.addEventListener("popstate", async () => {
   await safeLoad();
 });
 async function mountWorkspace(id) {
-  if (!await workspaceReady) return false; // A source checkout without npm build keeps the existing views available.
+  if (!await workspaceReady) {
+    // Older views remain available in a source checkout while assets are being built.
+    if (state.page === "scenarios") {
+      document.querySelector("#page-content").innerHTML = '<section class="empty"><h1>Não foi possível abrir o simulador.</h1><p>Recarregue a página para tentar novamente.</p><button class="btn" data-action="reload">Tentar novamente</button></section>';
+      return true;
+    }
+    return false;
+  }
   if (id !== requestId || !state.user) return true;
   shell();
   const container = document.querySelector("#page-content");

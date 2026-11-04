@@ -2,9 +2,9 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.34.0**
+**Versão atual: 0.35.0**
 
-Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard reúne indicadores analíticos e visualizações de gráficos ajustáveis. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
+Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard React reúne indicadores explicáveis e gráficos ajustáveis. O simulador compara hipóteses com o fluxo previsto sem alterar os registros financeiros. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
 
 Novo cadastro abre a comparação de planos, com Profissional em teste de 14 dias no modo comercial e opção de começar sem contratar. Veja [primeiro acesso](docs/01-product/first-access.md).
 
@@ -202,9 +202,13 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 
 **Como os números são calculados:** saldo inicial + receitas recebidas − despesas pagas. Pendências usam o vencimento e descontam pagamentos parciais; indicadores realizados usam a data e o valor de cada baixa. O saldo disponível é o saldo atual de todas as contas, independentemente do mês selecionado. Transferências afetam cada conta, mas não entram nas receitas/despesas e no resultado. Valores são armazenados com `BigDecimal` e duas casas decimais. A baixa repetida do mesmo lançamento não duplica o movimento.
 
+## Simular cenários de caixa
+
+Compare adiamentos de recebimentos/pagamentos, novas receitas e despesas mensais com a previsão atual. Consulte o saldo diário, menor saldo, primeiro dia negativo e a origem de cada valor. Hipóteses ficam na página; nenhuma baixa ou alteração financeira é realizada. Veja [funcionamento e limites](docs/01-product/cash-scenarios.md).
+
 ## Evolução do frontend
 
-A v0.34.0 entrega dashboard e lançamentos em React/TypeScript com filtros na URL, consultas canceláveis e gráficos acessíveis. Os formulários financeiros existentes continuam integrados à sessão e às permissões do Spring Boot. Veja a [decisão de arquitetura](docs/03-architecture/frontend-workspace.md) e os [contratos da API](api/README.md).
+A v0.35.0 acrescenta cenários e indicadores explicáveis ao dashboard e lançamentos em React/TypeScript com filtros na URL, consultas canceláveis e gráficos acessíveis. Os formulários financeiros existentes continuam integrados à sessão e às permissões do Spring Boot. Veja a [decisão de arquitetura](docs/03-architecture/frontend-workspace.md) e os [contratos da API](api/README.md).
 
 ## Stack e estrutura
 

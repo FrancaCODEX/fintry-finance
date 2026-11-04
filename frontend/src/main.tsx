@@ -3,6 +3,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import type { Bridge } from './app/bridge';
 import { Dashboard } from './features/dashboard/Dashboard';
+import { Scenario } from './features/scenarios/Scenario';
 import { Entries } from './features/entries/Entries';
 import './workspace.css';
 class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -34,6 +35,8 @@ window.FintryWorkspace = {
           <div className="fintry-workspace">
             {bridge.page === 'dashboard' ? (
               <Dashboard bridge={bridge} />
+            ) : bridge.page === 'scenarios' ? (
+              <Scenario bridge={bridge} />
             ) : (
               <Entries bridge={bridge} />
             )}
