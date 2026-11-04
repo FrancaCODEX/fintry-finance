@@ -1,5 +1,13 @@
 # Changelog do Fintry
 
+## [0.35.1] - 2026-11-04
+
+### Build em checkouts Windows
+
+- Corrige falso conflito na verificação dos contratos quando o Git usa CRLF no Windows e o gerador produz LF dentro do Docker. A comparação ignora somente a diferença de final de linha e continua rejeitando mudanças no conteúdo dos tipos.
+- Define LF para o contrato gerado e acrescenta teste de regressão para finais de linha e divergência real.
+
+
 ## [0.35.0] - 2026-11-04
 
 ### Simulação e números explicáveis

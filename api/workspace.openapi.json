@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fintry workspace read API",
-    "version": "0.35.0",
+    "version": "0.35.1",
     "description": "Contrato parcial para as consultas usadas pelo workspace. Valores monetários JSON são apenas exibidos no cliente; cálculos e mutações financeiras pertencem ao backend. APIs de escrita existentes seguem a documentação em docs/05-api."
   },
   "servers": [
