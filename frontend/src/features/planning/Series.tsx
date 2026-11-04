@@ -1,3 +1,5 @@
+import { seriesLabel, canPauseSeries } from '../../shared/series';
+import { today } from '../../shared/workspace';
 import { useState } from 'react';
 import type { Bridge } from '../../app/bridge';
 import { query, type EntryPage } from '../../api/client';
@@ -82,15 +84,7 @@ export function Series({ bridge }: { bridge: Bridge }) {
                 label: 'Acompanhamento',
                 render: (r) => (
                   <>
-                    <span className="workspace-status">
-                      {r.stopped
-                        ? 'Encerrada'
-                        : r.paused
-                          ? 'Pausada'
-                          : r.pending
-                            ? 'Em andamento'
-                            : 'Concluída'}
-                    </span>
+                    <span className="workspace-status">{seriesLabel(r)}</span>
                     <small>
                       {r.paid} realizadas · {r.partial} parciais · {r.pending}{' '}
                       pendentes · {r.pausedOccurrences} pausadas · {r.cancelled}{' '}
@@ -113,21 +107,25 @@ export function Series({ bridge }: { bridge: Bridge }) {
                     </button>
                     {bridge.canWrite &&
                       !r.stopped &&
-                      (r.pending > 0 || r.pausedOccurrences > 0) && (
+                      (r.pending > 0 ||
+                        r.partial > 0 ||
+                        r.pausedOccurrences > 0 ||
+                        r.paused) && (
                         <>
-                          {r.kind === 'RECURRING' && (
-                            <button
-                              className="btn secondary small"
-                              onClick={() =>
-                                setDecision({
-                                  row: r,
-                                  action: r.paused ? 'resume' : 'pause',
-                                })
-                              }
-                            >
-                              {r.paused ? 'Retomar' : 'Pausar'}
-                            </button>
-                          )}
+                          {r.kind === 'RECURRING' &&
+                            (r.paused || canPauseSeries(r, today())) && (
+                              <button
+                                className="btn secondary small"
+                                onClick={() =>
+                                  setDecision({
+                                    row: r,
+                                    action: r.paused ? 'resume' : 'pause',
+                                  })
+                                }
+                              >
+                                {r.paused ? 'Retomar' : 'Pausar'}
+                              </button>
+                            )}
                           <button
                             className="btn text small"
                             onClick={() =>

@@ -727,14 +727,12 @@ test('React budget editor creates, changes and removes only the selected limit',
   await page
     .getByRole('button', { name: 'Salvar orçamento', exact: true })
     .click();
-  const card = page
-    .locator('.workspace-record')
-    .filter({
-      has: page.getByRole('heading', {
-        name: 'Categoria orçamento React 039',
-        exact: true,
-      }),
-    });
+  const card = page.locator('.workspace-record').filter({
+    has: page.getByRole('heading', {
+      name: 'Categoria orçamento React 039',
+      exact: true,
+    }),
+  });
   await expect(card).toContainText('250,00');
   await card
     .getByRole('button', { name: 'Editar limite', exact: true })
@@ -747,4 +745,59 @@ test('React budget editor creates, changes and removes only the selected limit',
   await card.getByRole('button', { name: 'Remover', exact: true }).click();
   await page.getByRole('button', { name: 'Confirmar', exact: true }).click();
   await expect(card).toHaveCount(0);
+});
+
+test('read-only access can consult migrated pages without mutation controls', async ({
+  page,
+}) => {
+  let csrf = await (await page.request.get('/api/v1/auth/csrf')).json();
+  const email = `reader-${Date.now()}@example.com`;
+  const invite = await page.request.post('/api/v1/users', {
+    headers: { [csrf.headerName]: csrf.token },
+    data: { name: 'Pessoa consulta', email, role: 'VIEWER' },
+  });
+  expect(invite.ok()).toBeTruthy();
+  const link = (await invite.json()).link;
+  const token = new URLSearchParams(new URL(link).hash.slice(1)).get('invite');
+  const accepted = await page.request.post('/api/v1/auth/accept-invite', {
+    headers: { [csrf.headerName]: csrf.token },
+    data: { token, name: 'Pessoa consulta', password: 'Senha-consulta-123' },
+  });
+  expect(accepted.status()).toBe(204);
+  csrf = await (await page.request.get('/api/v1/auth/csrf')).json();
+  const login = await page.request.post('/api/v1/auth/login', {
+    headers: { [csrf.headerName]: csrf.token },
+    data: { email, password: 'Senha-consulta-123' },
+  });
+  expect(login.ok()).toBeTruthy();
+  await page.goto('/?page=products');
+  await expect(page.locator('.workspace-record').first()).toBeVisible();
+  await expect(
+    page
+      .locator('#page-content')
+      .getByRole('button', { name: 'Novo produto', exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.locator('#page-content').getByRole('button', { name: /^Editar / }),
+  ).toHaveCount(0);
+  await page.goto('/?page=pending');
+  await expect(page.locator('.workspace-loading')).toHaveCount(0);
+  await expect(
+    page
+      .locator('#page-content')
+      .getByRole('button', { name: /^(Pagar|Receber)$/ }),
+  ).toHaveCount(0);
+  await page.goto('/?page=team');
+  await expect(
+    page.getByRole('heading', {
+      name: 'Seu caixa, com contexto.',
+      exact: true,
+    }),
+  ).toBeVisible();
+  csrf = await (await page.request.get('/api/v1/auth/csrf')).json();
+  const blocked = await page.request.post('/api/v1/finance/accounts', {
+    headers: { [csrf.headerName]: csrf.token },
+    data: { name: 'Conta bloqueada', initialBalance: 0 },
+  });
+  expect(blocked.status()).toBe(403);
 });
