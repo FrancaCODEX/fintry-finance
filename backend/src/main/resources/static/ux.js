@@ -12,6 +12,7 @@ function uxSummary(form) {
 }
 function uxDecorate() {
   for (const form of document.forms) {
+    if (form.closest(".fintry-workspace")) continue;
     form.noValidate = true;
     for (const control of form.elements) {
       if (
@@ -128,7 +129,7 @@ document.addEventListener(
   "invalid",
   (ev) => {
     const control = ev.target;
-    if (!control.form) return;
+    if (!control.form || control.closest(".fintry-workspace")) return;
     ev.preventDefault();
     uxControlError(control, uxNativeMessage(control));
     uxSummary(control.form).textContent = "Confira os campos destacados.";
@@ -139,7 +140,7 @@ document.addEventListener(
   "submit",
   (ev) => {
     const form = ev.target;
-    if (!(form instanceof HTMLFormElement)) return;
+    if (!(form instanceof HTMLFormElement) || form.closest(".fintry-workspace")) return;
     uxDecorate();
     if (!form.checkValidity()) {
       ev.preventDefault();
@@ -153,7 +154,7 @@ document.addEventListener(
 );
 document.addEventListener("input", (ev) => {
   const control = ev.target;
-  if (control.form && control.matches("input,textarea,select")) {
+  if (control.form && !control.closest(".fintry-workspace") && control.matches("input,textarea,select")) {
     uxClearControl(control);
     if (!control.form.querySelector("[aria-invalid=true]")) {
       const summary = control.form.querySelector(".form-error");
@@ -162,7 +163,7 @@ document.addEventListener("input", (ev) => {
   }
 });
 document.addEventListener("change", (ev) => {
-  if (ev.target.matches("select"))
+  if (ev.target.matches("select") && !ev.target.closest(".fintry-workspace"))
     ev.target.dispatchEvent(new Event("input", { bubbles: true }));
 });
 new MutationObserver(uxDecorate).observe(document.body, {

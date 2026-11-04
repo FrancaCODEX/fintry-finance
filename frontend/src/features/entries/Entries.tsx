@@ -322,6 +322,7 @@ export function Entries({ bridge }: { bridge: Bridge }) {
                                     !row.saleId && (
                                       <button
                                         className="btn secondary small"
+                                        aria-label={'Editar ' + row.description}
                                         onClick={() =>
                                           bridge.action('edit-entry', row)
                                         }

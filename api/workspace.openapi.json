@@ -611,6 +611,42 @@
           }
         }
       }
+    },
+    "/finance/series": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeriesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Série criada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeriesView"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Tentativa já processada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeriesView"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1676,6 +1712,68 @@
           "totalPages",
           "number"
         ]
+      },
+      "SeriesInput": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "kind",
+          "occurrences",
+          "entry"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "INSTALLMENT",
+              "RECURRING"
+            ]
+          },
+          "occurrences": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 120
+          },
+          "entry": {
+            "$ref": "#/components/schemas/EntryInput"
+          }
+        }
+      },
+      "SeriesView": {
+        "type": "object",
+        "required": [
+          "id",
+          "description",
+          "kind",
+          "occurrences",
+          "totalAmount"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "INSTALLMENT",
+              "RECURRING"
+            ]
+          },
+          "occurrences": {
+            "type": "integer"
+          },
+          "totalAmount": {
+            "type": "number"
+          }
+        }
       }
     },
     "securitySchemes": {

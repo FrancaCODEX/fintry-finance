@@ -7,7 +7,17 @@
 - Unifica criação, edição, cancelamento e baixa em diálogos React com foco, teclado, estados de envio e erros por campo. As ações também funcionam a partir das páginas existentes.
 - Mantém categorias, contatos pesquisáveis, lançamentos únicos, parcelas, recorrências e primeira baixa. Prévia mensal preserva centavos e datas de fim de mês.
 - Envia valores como texto decimal e mantém a identidade da tentativa de baixa/série após falha, renovando a chave se o conteúdo mudar.
+- Delimita o DOM React para que os decoradores de formulários anteriores não sobrescrevam rótulos dinâmicos, validações e foco.
 - Amplia contratos de escrita e testes de navegador para cadastro/edição/baixa parcial, repetição de tentativa e formulário no celular.
+
+
+
+## [0.35.1] - 2026-11-04
+
+### Build em checkouts Windows
+
+- Corrige falso conflito na verificação dos contratos quando o Git usa CRLF no Windows e o gerador produz LF dentro do Docker. A comparação ignora somente a diferença de final de linha e continua rejeitando mudanças no conteúdo dos tipos.
+- Define LF para o contrato gerado e acrescenta teste de regressão para finais de linha e divergência real.
 
 
 ## [0.35.0] - 2026-11-04

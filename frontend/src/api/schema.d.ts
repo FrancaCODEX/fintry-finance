@@ -674,6 +674,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/finance/series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SeriesInput"];
+                };
+            };
+            responses: {
+                /** @description Tentativa já processada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SeriesView"];
+                    };
+                };
+                /** @description Série criada */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SeriesView"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -922,6 +970,23 @@ export interface components {
             totalElements: number;
             totalPages: number;
             number: number;
+        };
+        SeriesInput: {
+            /** Format: uuid */
+            requestId: string;
+            /** @enum {string} */
+            kind: "INSTALLMENT" | "RECURRING";
+            occurrences: number;
+            entry: components["schemas"]["EntryInput"];
+        };
+        SeriesView: {
+            /** Format: uuid */
+            id: string;
+            description: string;
+            /** @enum {string} */
+            kind: "INSTALLMENT" | "RECURRING";
+            occurrences: number;
+            totalAmount: number;
         };
     };
     responses: never;
