@@ -61,9 +61,11 @@ public class FinanceService {
 
   public record PaymentInput(
       @NotNull LocalDate paymentDate,
-      @DecimalMin("0.01") @Digits(integer = 12, fraction = 2) BigDecimal amount) {
+      @DecimalMin("0.01") @Digits(integer = 12, fraction = 2) BigDecimal amount,
+      UUID requestId) {
+    public PaymentInput(LocalDate paymentDate, BigDecimal amount) { this(paymentDate, amount, null); }
     public PaymentInput(LocalDate paymentDate) {
-      this(paymentDate, null);
+      this(paymentDate, null, null);
     }
   }
 
@@ -374,6 +376,16 @@ public class FinanceService {
     validPaymentDate(input.paymentDate());
     var e = entries.lock(id, current.companyId()).orElseThrow(this::missing);
     requireBillingEditable(id);
+    if (input.requestId() != null) {
+      var previous = payments.findByCompanyIdAndRequestId(current.companyId(), input.requestId());
+      if (previous.isPresent()) {
+        var payment = previous.get();
+        if (!payment.getEntry().getId().equals(id) || !payment.getPaymentDate().equals(input.paymentDate())
+            || (input.amount() != null && payment.getAmount().compareTo(input.amount()) != 0))
+          throw new ResponseStatusException(HttpStatus.CONFLICT, "Esta operação já foi usada em outra baixa. Confira o histórico antes de tentar novamente.");
+        return view(e);
+      }
+    }
     if (e.getStatus() == CANCELLED) throw invalid("Lançamento cancelado não pode ser pago.");
     if (e.getStatus() == PAID && input.amount() == null) return view(e);
     if (e.getStatus() == PAID) throw invalid("Este lançamento já foi totalmente pago.");
@@ -383,7 +395,7 @@ public class FinanceService {
       throw invalid("Informe um valor positivo até o saldo restante de " + remaining + ".");
     var before = snapshot(e);
     e.setPaidAmount(e.getPaidAmount().add(amount));
-    recordPayment(e, amount, input.paymentDate(), null);
+    recordPayment(e, amount, input.paymentDate(), null).setRequestId(input.requestId());
     boolean settled = e.getPaidAmount().compareTo(e.getAmount()) == 0;
     e.setStatus(settled ? PAID : FinancialEntry.Status.PARTIAL);
     e.setPaymentDate(settled ? input.paymentDate() : null);
@@ -414,7 +426,7 @@ public class FinanceService {
     recordPayment(e, amount, paymentDate, null);
   }
 
-  private void recordPayment(FinancialEntry e, BigDecimal amount, LocalDate paymentDate, UUID batchId) {
+  private EntryPayment recordPayment(FinancialEntry e, BigDecimal amount, LocalDate paymentDate, UUID batchId) {
     var payment = new EntryPayment();
     payment.setCompanyId(e.getCompanyId());
     payment.setEntry(e);
@@ -423,6 +435,7 @@ public class FinanceService {
     payment.setPaymentDate(paymentDate);
     payment.setReconciliationBatchId(batchId);
     payments.save(payment);
+    return payment;
   }
 
   public void requireBillingEditable(UUID id) {

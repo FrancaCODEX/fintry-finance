@@ -32,6 +32,9 @@ public class EntryPayment extends BaseEntity {
 
   private UUID reconciliationBatchId;
 
+  // Optional client operation key; scoped to the company by a unique database index.
+  private UUID requestId;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "entry_id", nullable = false)
   private FinancialEntry entry;

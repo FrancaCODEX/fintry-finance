@@ -1,44 +1,6 @@
 "use strict";
 const root = document.querySelector("#root");
 const modal = document.querySelector("#modal");
-const state = {
-  user: null,
-  recoveryAvailable: false,
-  team: null,
-  teamPage: 0,
-  teamFilters: {},
-  audit: null,
-  auditPage: 0,
-  auditFilters: { start: localDate().slice(0, 7) + "-01", end: localDate() },
-  report: null,
-  reportPage: 0,
-  reportFilters: {
-    start: localDate().slice(0, 7) + "-01",
-    end: monthEnd(localDate().slice(0, 7)),
-    basis: "PAYMENT",
-    status: "PAID",
-  },
-  forecast: null,
-  forecastFilters: { days: "90", includeOverdue: "false" },
-  version: "",
-  company: null,
-  onboardingEntries: null,
-  demoPack: null,
-  series: null,
-  seriesPage: 0,
-  page: "dashboard",
-  month: localDate().slice(0, 7),
-  accounts: [],
-  entries: null,
-  summary: null,
-  entryPage: 0,
-  filters: {},
-  contacts: null,
-  categories: [],
-  directoryFilters: { active: "true" },
-  contactPage: 0,
-  csrf: null,
-};
 const money = (value) =>
   Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const escapeHtml = (value) =>
@@ -50,11 +12,6 @@ const escapeHtml = (value) =>
       ],
   );
 const e = escapeHtml;
-function localDate() {
-  return new Intl.DateTimeFormat("sv-SE", {
-    timeZone: "America/Sao_Paulo",
-  }).format(new Date());
-}
 const dateLabel = (date) =>
   date
     ? new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
@@ -108,60 +65,14 @@ function toast(message) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove("visible"), 4500);
 }
-async function csrf() {
-  const res = await fetch("/api/v1/auth/csrf");
-  if (!res.ok) throw new Error("Não foi possível iniciar a sessão.");
-  state.csrf = await res.json();
-}
-async function api(path, options = {}) {
-  const method = options.method || "GET";
-  if (method !== "GET" && !state.csrf) await csrf();
-  const headers = { ...options.headers };
-  if (options.body && !(options.body instanceof FormData))
-    headers["Content-Type"] = "application/json";
-  if (method !== "GET") headers[state.csrf.headerName] = state.csrf.token;
-  let res;
-  try {
-    res = await fetch("/api/v1" + path, { ...options, headers });
-  } catch {
-    throw new Error("Sem conexão com o servidor. Tente novamente.");
-  }
-  let data = null;
-  if (res.status !== 204) {
-    const text = await res.text();
-    if (text) {
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = {};
-      }
-    }
-  }
-  if (!res.ok) {
-    if (res.status === 401 && state.user) {
-      state.user = null;
-      modal.close();
-      closeDetails();
-      state.csrf = null;
-      renderAuth(
-        "login",
-        "Sua sessão foi encerrada. Entre novamente para continuar.",
-      );
-    }
-    const error = new Error(
-      data?.message ||
-        (data?.errors
-          ? Object.values(data.errors).join(" ")
-          : "Não foi possível concluir a operação."),
-    );
-    error.fields = data?.errors || {};
-    error.status = res.status;
-    throw error;
-  }
-  return data;
-}
-const send = (path, body) =>
-  api(path, { method: "POST", body: body ? JSON.stringify(body) : undefined });
+window.addEventListener("fintry:session-expired", () => {
+  if (!state.user) return;
+  state.user = null;
+  modal.close();
+  closeDetails();
+  state.csrf = null;
+  renderAuth("login", "Sua sessão foi encerrada. Entre novamente para continuar.");
+});
 function field(label, name, type = "text", extra = "", value = "") {
   return `<label class="field">${label}<input name="${name}" type="${type}" value="${e(value)}" ${extra}></label>`;
 }
@@ -718,10 +629,6 @@ function shell() {
   root.innerHTML = renderAppShell(u);
   root.querySelector(".shell").dataset.session = key;
   navigationMount();
-}
-function monthEnd(month) {
-  const [y, m] = month.split("-").map(Number);
-  return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
 }
 function queryParams(values) {
   return new URLSearchParams(
@@ -1935,6 +1842,7 @@ async function act(btn) {
   }
   if (action === "reload") return safeLoad();
   if (action === "pay") {
+    const paymentRequestId = crypto.randomUUID();
     showDialog(
       "Registrar baixa",
       "O saldo será atualizado ao confirmar.",
@@ -1947,7 +1855,7 @@ async function act(btn) {
       ) + field("Valor desta baixa (R$)", "amount", "number", `required min="0.01" max="999999999999.99" step="0.01"`, (state.entries.content.find((r) => r.id === btn.dataset.id) || detailData?.entry)?.remainingAmount ?? ""),
       async (data) => {
         data.amount = Number(data.amount);
-        await send(`/finance/entries/${btn.dataset.id}/pay`, data);
+        await send(`/finance/entries/${btn.dataset.id}/pay`, { ...data, requestId: paymentRequestId });
         toast("Pagamento registrado.");
       },
       "Confirmar baixa",
