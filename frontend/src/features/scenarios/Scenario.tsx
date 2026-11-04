@@ -1,6 +1,6 @@
 import { Field } from '../../shared/Field';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { saveLocation } from '../../app/location';
+import { SavedPlanning } from './SavedPlanning';
 import type { Bridge } from '../../app/bridge';
 import {
   query,
@@ -114,7 +114,6 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
     }
   }
   useEffect(() => {
-    saveLocation('scenarios', {}, false);
     void run(
       { days: 90, includeOverdue: false, shifts: [], hypotheses: [] },
       JSON.stringify({
@@ -126,6 +125,42 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
     );
     return () => pending.current?.abort();
   }, []);
+  function loadSaved(input: ScenarioInput, preview?: ScenarioPreview) {
+    const normalized: ScenarioInput = {
+      days: input.days,
+      ...(input.accountId ? { accountId: input.accountId } : {}),
+      includeOverdue: !!input.includeOverdue,
+      shifts: input.shifts || [],
+      hypotheses: input.hypotheses || [],
+    };
+    setDays(input.days);
+    setAccount(input.accountId || '');
+    setOverdue(!!input.includeOverdue);
+    setShifts(
+      (input.shifts || []).map((s) => ({
+        ...s,
+        label:
+          preview?.effects.find((e) => e.entryId === s.entryId)?.label ||
+          'Movimento selecionado',
+      })),
+    );
+    setHypotheses(
+      (input.hypotheses || []).map((h) => ({
+        ...h,
+        id: crypto.randomUUID(),
+        amount: String(h.amount),
+      })),
+    );
+    setError('');
+    if (preview) {
+      pending.current?.abort();
+      setBusy(false);
+      setResult(preview);
+      setSelected(0);
+      applied.current = normalized;
+      setAppliedSignature(JSON.stringify(normalized));
+    } else void run(normalized, JSON.stringify(normalized));
+  }
   const point = result?.scenario.days[selected];
   function explain(index: number) {
     setSelected(index);
@@ -165,9 +200,11 @@ export function Scenario({ bridge }: { bridge: Bridge }) {
         title="E se o caixa mudasse?"
         description="Compare hipóteses com o fluxo previsto e acompanhe o efeito em cada dia."
       />
+      <SavedPlanning bridge={bridge} input={draft()} load={loadSaved} />
       <div className="workspace-scenario-note">
-        <strong>Um espaço para planejar.</strong> As hipóteses ficam nesta
-        página e não alteram lançamentos, pagamentos ou saldos reais.
+        <strong>Um espaço para planejar.</strong> As hipóteses só ficam
+        disponíveis ao sair quando você salva o cenário. Elas não alteram
+        lançamentos, pagamentos ou saldos reais.
       </div>
       <div className="workspace-scenario-layout">
         <form

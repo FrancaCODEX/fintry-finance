@@ -674,6 +674,241 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/scenarios/saved": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Consulta da empresa autenticada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SavedScenarioPage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveScenario"];
+                };
+            };
+            responses: {
+                /** @description Consulta da empresa autenticada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SavedScenario"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/saved/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Consulta da empresa autenticada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SavedScenario"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveScenario"];
+                };
+            };
+            responses: {
+                /** @description Consulta da empresa autenticada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SavedScenario"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/saved/{id}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Consulta da empresa autenticada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScenarioHistory"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/saved/{id}/runs/{run}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    run: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Consulta da empresa autenticada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScenarioRun"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/saved/{id}/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    left: string;
+                    right: string;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Consulta da empresa autenticada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScenarioComparison"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/finance/series": {
         parameters: {
             query?: never;
@@ -716,6 +951,88 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/saved/{id}/calculate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ScenarioCalculate"];
+                };
+            };
+            responses: {
+                /** @description Operação da empresa autenticada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ScenarioRun"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scenarios/saved/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ScenarioArchive"];
+                };
+            };
+            responses: {
+                /** @description Operação da empresa autenticada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SavedScenario"];
+                    };
+                };
+            };
+        };
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -971,6 +1288,56 @@ export interface components {
             totalPages: number;
             number: number;
         };
+        ScenarioRunSummary: {
+            /** Format: uuid */
+            id: string;
+            revision: number;
+            author: string;
+            calculatedAt: string;
+            closingBalance: string;
+            delta: string;
+        };
+        SavedScenario: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            author: string;
+            revision: number;
+            archived: boolean;
+            updatedAt: string;
+            input: components["schemas"]["ScenarioInput"];
+            latest?: components["schemas"]["ScenarioRunSummary"];
+            stale: boolean;
+        };
+        SavedScenarioPage: {
+            content: components["schemas"]["SavedScenario"][];
+            number: number;
+            totalPages: number;
+            totalElements: number;
+        };
+        ScenarioRun: {
+            summary: components["schemas"]["ScenarioRunSummary"];
+            input: components["schemas"]["ScenarioInput"];
+            result: components["schemas"]["ScenarioPreview"];
+        };
+        ScenarioHistory: {
+            content: components["schemas"]["ScenarioRunSummary"][];
+            number: number;
+            totalPages: number;
+            totalElements: number;
+        };
+        ScenarioComparison: {
+            left: components["schemas"]["ScenarioRun"];
+            right: components["schemas"]["ScenarioRun"];
+            closingChange: string;
+        };
+        SaveScenario: {
+            /** Format: uuid */
+            requestId: string;
+            name: string;
+            revision?: number | null;
+            input: components["schemas"]["ScenarioInput"];
+        };
         SeriesInput: {
             /** Format: uuid */
             requestId: string;
@@ -987,6 +1354,15 @@ export interface components {
             kind: "INSTALLMENT" | "RECURRING";
             occurrences: number;
             totalAmount: number;
+        };
+        ScenarioCalculate: {
+            /** Format: uuid */
+            requestId: string;
+            revision: number;
+        };
+        ScenarioArchive: {
+            revision: number;
+            archived: boolean;
         };
     };
     responses: never;

@@ -77,3 +77,15 @@ O corpo de `POST /api/v1/finance/entries/{id}/pay` pode incluir `requestId` UUID
 - `GET /api/v1/reports/explanation`: `kind` (`BALANCE`, `INCOME`, `EXPENSE`, `RESULT`), `month` (`AAAA-MM`, necessário exceto BALANCE) e `page`. Expõe fórmula, componentes, baixas paginadas, escopo e instante da consulta. Usa uma transação de leitura consistente.
 
 Os valores monetários das **novas respostas** são textos decimais com duas casas; os contratos anteriores permanecem compatíveis. Todas as respostas novas usam `Cache-Control: no-store`. A explicação diária do cenário declara truncamento acima de 100 fontes, sem truncar os totais. O contrato OpenAPI parcial e os tipos TypeScript cobrem essas consultas e o cálculo.
+
+
+### Planejamento persistente (0.37.0)
+
+- `GET/POST /api/v1/scenarios/saved`: lista paginada (`archived`, `page`) e criação com `requestId`, nome e `input`.
+- `GET/PUT /api/v1/scenarios/saved/{id}`: consulta e alteração com revisão atual.
+- `PUT /api/v1/scenarios/saved/{id}/archive`: arquivar/restaurar com `revision` e `archived`.
+- `POST /api/v1/scenarios/saved/{id}/calculate`: novo retrato com revisão e chave de tentativa.
+- `GET /api/v1/scenarios/saved/{id}/runs[/{run}]`: histórico paginado ou retrato.
+- `GET /api/v1/scenarios/saved/{id}/compare?left=UUID&right=UUID`: comparação calculada no servidor entre retratos do mesmo cenário.
+
+Todas as referências são isoladas por empresa. Escritas seguem perfil/assinatura/CSRF; a exceção de leitura do preview não permite persistir cenários. Revisão desatualizada retorna 409. Datas de cálculo são instantes UTC.

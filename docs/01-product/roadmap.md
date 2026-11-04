@@ -41,7 +41,11 @@ Ordem de evolução acordada em 19/10/2026. Cada entrega atualiza a versão Mave
 | 0.32.1 | Documentação do dashboard e README alinhados para demonstração | Incorporada à main (PR #36) |
 | 0.32.2 | Documentação de apresentação alinhada sem roteiro de vídeo versionado | Incorporada à main (PR #37) |
 | 0.32.3 | Correção do gráfico de linhas e remoção do cartão tutorial do dashboard | Incorporada à main (PR #38) |
-| 0.32.4 | Camada de seleção e tooltip do gráfico de linhas | Em preparação |
+| 0.32.4 | Camada de seleção e tooltip do gráfico de linhas | Incorporada à main |
+| 0.33.0 | Fundação modular e contratos tipados | Incorporada à main (PR #40) |
+| 0.34.0 | Dashboard e lançamentos em React | Incorporada à main (PR #41) |
+| 0.35.0 | Simulador e indicadores explicáveis | Incorporada à main (PR #42) |
+| 0.35.1 | Build de contratos em checkouts Windows | Incorporada à main (PR #44) |
 
 Os números futuros representam versões de funcionalidades planejadas; correções entre entregas recebem versões PATCH, por exemplo 0.3.1. O escopo e os números podem ser ajustados conforme a evolução, com registro no changelog.
 
@@ -77,9 +81,11 @@ Sequência autorizada em 04/11/2026 após a v0.35.0:
 
 | Versão | Entrega | Situação |
 |---|---|---|
-| 0.36.0 | Formulários financeiros em React e componentes compartilhados | Em validação |
-| 0.37.0 | Cenários salvos, duplicação, histórico de cálculos e recálculo | Planejada |
+| 0.36.0 | Formulários financeiros em React e componentes compartilhados | Incorporada à main (PR #43) |
+| 0.37.0 | Cenários salvos, duplicação, histórico de cálculos e recálculo | Em validação |
 | 0.38.0 | Sugestões explicáveis e regras reutilizáveis de conciliação, com confirmação | Planejada |
 | 0.39.0 | Repaginação completa do frontend, navegação e módulos em React/CSS | Planejada |
 
 A v0.35.1 corrige o build Windows antes desta sequência.
+
+A v0.37.0 persiste cenários da empresa e retratos dos cálculos com revisão, consulta e comparação de histórico, sem alterar dados financeiros.

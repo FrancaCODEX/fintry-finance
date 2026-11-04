@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Fintry workspace API",
-    "version": "0.36.0",
+    "version": "0.37.0",
     "description": "Contrato incremental de consultas e operações do workspace. Cálculos e autorização pertencem ao backend; entradas monetárias são texto decimal."
   },
   "servers": [
@@ -612,6 +612,218 @@
         }
       }
     },
+    "/scenarios/saved": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Consulta da empresa autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedScenarioPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Consulta da empresa autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedScenario"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveScenario"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scenarios/saved/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta da empresa autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedScenario"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta da empresa autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedScenario"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveScenario"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scenarios/saved/{id}/runs": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta da empresa autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioHistory"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scenarios/saved/{id}/runs/{run}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "run",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta da empresa autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioRun"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scenarios/saved/{id}/compare": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "left",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "right",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta da empresa autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioComparison"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/finance/series": {
       "post": {
         "requestBody": {
@@ -641,6 +853,80 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SeriesView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scenarios/saved/{id}/calculate": {
+      "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioCalculate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operação da empresa autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioRun"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/scenarios/saved/{id}/archive": {
+      "put": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioArchive"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operação da empresa autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedScenario"
                 }
               }
             }
@@ -1713,6 +1999,197 @@
           "number"
         ]
       },
+      "ScenarioRunSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "author": {
+            "type": "string"
+          },
+          "calculatedAt": {
+            "type": "string"
+          },
+          "closingBalance": {
+            "type": "string"
+          },
+          "delta": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "revision",
+          "author",
+          "calculatedAt",
+          "closingBalance",
+          "delta"
+        ]
+      },
+      "SavedScenario": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "input": {
+            "$ref": "#/components/schemas/ScenarioInput"
+          },
+          "latest": {
+            "$ref": "#/components/schemas/ScenarioRunSummary",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "author",
+          "revision",
+          "archived",
+          "updatedAt",
+          "input",
+          "stale"
+        ]
+      },
+      "SavedScenarioPage": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SavedScenario"
+            }
+          },
+          "number": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "totalElements": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content",
+          "number",
+          "totalPages",
+          "totalElements"
+        ]
+      },
+      "ScenarioRun": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/ScenarioRunSummary"
+          },
+          "input": {
+            "$ref": "#/components/schemas/ScenarioInput"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ScenarioPreview"
+          }
+        },
+        "required": [
+          "summary",
+          "input",
+          "result"
+        ]
+      },
+      "ScenarioHistory": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScenarioRunSummary"
+            }
+          },
+          "number": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "totalElements": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content",
+          "number",
+          "totalPages",
+          "totalElements"
+        ]
+      },
+      "ScenarioComparison": {
+        "type": "object",
+        "properties": {
+          "left": {
+            "$ref": "#/components/schemas/ScenarioRun"
+          },
+          "right": {
+            "$ref": "#/components/schemas/ScenarioRun"
+          },
+          "closingChange": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "left",
+          "right",
+          "closingChange"
+        ]
+      },
+      "SaveScenario": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "revision": {
+            "type": "integer",
+            "nullable": true
+          },
+          "input": {
+            "$ref": "#/components/schemas/ScenarioInput"
+          }
+        },
+        "required": [
+          "requestId",
+          "name",
+          "input"
+        ]
+      },
       "SeriesInput": {
         "type": "object",
         "required": [
@@ -1774,6 +2251,39 @@
             "type": "number"
           }
         }
+      },
+      "ScenarioCalculate": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "requestId",
+          "revision"
+        ]
+      },
+      "ScenarioArchive": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "archived": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "revision",
+          "archived"
+        ]
       }
     },
     "securitySchemes": {

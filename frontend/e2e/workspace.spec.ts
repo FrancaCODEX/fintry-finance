@@ -305,3 +305,40 @@ test('installment form previews every cent and fits on a phone', async ({
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
 });
+
+test('saved planning survives reload, duplicates and keeps calculation history', async ({
+  page,
+}) => {
+  await page.goto('/?page=scenarios');
+  const planning = page.locator('.workspace-saved-planning');
+  await planning.locator('summary').click();
+  await planning
+    .getByLabel('Nome do cenário', { exact: true })
+    .fill('Plano de contratação');
+  await planning
+    .getByRole('button', { name: 'Salvar cenário e cálculo', exact: true })
+    .click();
+  await expect(planning.getByRole('status').first()).toContainText(
+    'Cenário e cálculo salvos',
+  );
+  await expect(page).toHaveURL(/scenario=/);
+  await page.reload();
+  await expect(
+    planning.getByLabel('Nome do cenário', { exact: true }),
+  ).toHaveValue('Plano de contratação');
+  await planning
+    .getByRole('button', { name: 'Recalcular e registrar', exact: true })
+    .click();
+  await expect(planning.getByRole('status').first()).toContainText(
+    'Novo cálculo salvo',
+  );
+  await expect(
+    planning.locator('.workspace-run-history .workspace-saved-list>button'),
+  ).toHaveCount(2);
+  await planning
+    .getByRole('button', { name: 'Duplicar cenário', exact: true })
+    .click();
+  await expect(
+    planning.getByLabel('Nome do cenário', { exact: true }),
+  ).toHaveValue('Plano de contratação — cópia');
+});

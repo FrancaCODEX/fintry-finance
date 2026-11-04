@@ -51,3 +51,9 @@ export type IndicatorKind = components['schemas']['IndicatorKind'];
 export type EntryInput = components['schemas']['EntryInput'];
 export type Category = components['schemas']['Category'];
 export type ContactPage = components['schemas']['ContactPage'];
+
+export type SavedScenario = components['schemas']['SavedScenario'];
+export type SavedScenarioPage = components['schemas']['SavedScenarioPage'];
+export type ScenarioRun = components['schemas']['ScenarioRun'];
+export type ScenarioHistory = components['schemas']['ScenarioHistory'];
+export type ScenarioComparison = components['schemas']['ScenarioComparison'];

@@ -2,9 +2,9 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.36.0**
+**Versão atual: 0.37.0**
 
-Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard React reúne indicadores explicáveis e gráficos ajustáveis. O simulador compara hipóteses com o fluxo previsto sem alterar os registros financeiros. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
+Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard React reúne indicadores explicáveis e gráficos ajustáveis. O simulador compara hipóteses com o fluxo previsto, salva planejamentos e preserva o histórico de cálculos sem alterar os registros financeiros. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
 
 Novo cadastro abre a comparação de planos, com Profissional em teste de 14 dias no modo comercial e opção de começar sem contratar. Veja [primeiro acesso](docs/01-product/first-access.md).
 
@@ -204,17 +204,17 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 
 ## Simular cenários de caixa
 
-Compare adiamentos de recebimentos/pagamentos, novas receitas e despesas mensais com a previsão atual. Consulte o saldo diário, menor saldo, primeiro dia negativo e a origem de cada valor. Hipóteses ficam na página; nenhuma baixa ou alteração financeira é realizada. Veja [funcionamento e limites](docs/01-product/cash-scenarios.md).
+Compare adiamentos de recebimentos/pagamentos, novas receitas e despesas mensais com a previsão atual. Consulte o saldo diário, menor saldo, primeiro dia negativo e a origem de cada valor. Rascunhos ficam na página; cenários salvos podem ser retomados pela equipe, duplicados e comparados pelo histórico. Nenhuma baixa ou alteração financeira é realizada. Veja [funcionamento e limites](docs/01-product/cash-scenarios.md).
 
 ## Evolução do frontend
 
-A v0.35.0 acrescenta cenários e indicadores explicáveis ao dashboard e lançamentos em React/TypeScript com filtros na URL, consultas canceláveis e gráficos acessíveis. Os formulários financeiros existentes continuam integrados à sessão e às permissões do Spring Boot. Veja a [decisão de arquitetura](docs/03-architecture/frontend-workspace.md) e os [contratos da API](api/README.md).
+A v0.35.0 acrescenta cenários e indicadores explicáveis ao dashboard e lançamentos em React/TypeScript com filtros na URL, consultas canceláveis e gráficos acessíveis. A v0.36.0 unifica criação, edição, baixa e cancelamento em formulários React; a v0.37.0 acrescenta cenários salvos, revisões e histórico de cálculos. Todas as operações continuam integradas à sessão e às permissões do Spring Boot. Veja a [decisão de arquitetura](docs/03-architecture/frontend-workspace.md) e os [contratos da API](api/README.md).
 
 ## Stack e estrutura
 
 Java 21 · Spring Boot 4.1 · Spring Security · JPA/Hibernate · PostgreSQL · Flyway · Docker.
 
-O dashboard e os lançamentos usam React e TypeScript, com build Vite servido pelo próprio Spring Boot. As demais páginas e os diálogos financeiros permanecem integrados à interface existente durante a migração. O Docker compila o frontend automaticamente; a execução final exige uma única aplicação, sem processo Node separado.
+O dashboard e os lançamentos usam React e TypeScript, com build Vite servido pelo próprio Spring Boot. Os diálogos de criação, edição, baixa e cancelamento também usam React. As demais páginas permanecem integradas à interface existente durante a migração. O Docker compila o frontend automaticamente; a execução final exige uma única aplicação, sem processo Node separado.
 
 ```text
 backend/src/main/java/com/fintry/
