@@ -47,3 +47,7 @@ export type ScenarioPreview = components['schemas']['ScenarioPreview'];
 export type IndicatorExplanation =
   components['schemas']['IndicatorExplanation'];
 export type IndicatorKind = components['schemas']['IndicatorKind'];
+
+export type EntryInput = components['schemas']['EntryInput'];
+export type Category = components['schemas']['Category'];
+export type ContactPage = components['schemas']['ContactPage'];

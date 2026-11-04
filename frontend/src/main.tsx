@@ -6,6 +6,7 @@ import { Dashboard } from './features/dashboard/Dashboard';
 import { Scenario } from './features/scenarios/Scenario';
 import { Entries } from './features/entries/Entries';
 import './workspace.css';
+import { FinanceDialog } from './features/finance/FinanceDialog';
 class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() {
@@ -25,7 +26,38 @@ class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   }
 }
 let root: Root | null = null;
+let financeRoot: Root | null = null;
+let financeContainer: HTMLElement | null = null;
+function closeFinance() {
+  // Close is scheduled outside an event render so React can finish the current update.
+  queueMicrotask(() => {
+    financeRoot?.unmount();
+    financeRoot = null;
+    financeContainer?.remove();
+    financeContainer = null;
+  });
+}
+window.addEventListener('fintry:session-expired', closeFinance);
 window.FintryWorkspace = {
+  closeFinance,
+  openFinance(action, id, bridge) {
+    financeRoot?.unmount();
+    financeContainer?.remove();
+    financeContainer = document.createElement('div');
+    financeContainer.className = 'fintry-workspace';
+    document.body.append(financeContainer);
+    financeRoot = createRoot(financeContainer);
+    financeRoot.render(
+      <Boundary>
+        <FinanceDialog
+          action={action}
+          id={id}
+          bridge={bridge}
+          close={closeFinance}
+        />
+      </Boundary>,
+    );
+  },
   mount(element, bridge: Bridge) {
     root?.unmount();
     root = createRoot(element);

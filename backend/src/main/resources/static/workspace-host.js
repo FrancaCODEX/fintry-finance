@@ -32,6 +32,7 @@ async function navigateWorkspace(page, month, type) {
 window.addEventListener("popstate", async () => {
   if (!state.user) return;
   window.FintryWorkspace?.unmount();
+  window.FintryWorkspace?.closeFinance();
   modal.close();
   closeDetails();
   state.page = "dashboard";

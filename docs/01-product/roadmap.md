@@ -71,3 +71,13 @@ Em 04/11/2026, a v0.33.0 inicia a evolução autorizada do workspace: estado/tra
 A v0.34.0 entrega dashboard e lançamentos em React/TypeScript, preservando as demais páginas durante a migração. Filtros na URL, detalhes integrados, gráficos acessíveis e build no mesmo domínio preparam o simulador da v0.35.0.
 
 A v0.35.0 conclui a sequência autorizada com cenários hipotéticos de caixa e explicação dos indicadores. Inclui comparação diária, adiamentos pelo restante, repetições mensais, origem dos valores, paginação e consultas também para perfis de leitura. Persistência/compartilhamento de cenários e sugestões de conciliação justificadas continuam como evoluções futuras.
+
+
+Sequência autorizada em 04/11/2026 após a v0.35.0:
+
+| Versão | Entrega | Situação |
+|---|---|---|
+| 0.36.0 | Formulários financeiros em React e componentes compartilhados | Em validação |
+| 0.37.0 | Cenários salvos, duplicação, histórico de cálculos e recálculo | Planejada |
+| 0.38.0 | Sugestões explicáveis e regras reutilizáveis de conciliação, com confirmação | Planejada |
+| 0.39.0 | Repaginação completa do frontend, navegação e módulos em React/CSS | Planejada |

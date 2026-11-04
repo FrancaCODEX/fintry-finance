@@ -203,3 +203,105 @@ test('dashboard explains a metric through its underlying payments', async ({
     .click();
   await expect(page.locator('.workspace-explanation-dialog')).toHaveCount(0);
 });
+
+test('React finance forms create, edit and partially settle a movement', async ({
+  page,
+}) => {
+  await page.goto('/?page=entries');
+  await page.getByRole('button', { name: /Novo lançamento/ }).click();
+  const dialog = page.locator('.workspace-form-dialog');
+  await dialog.getByLabel('Descrição', { exact: true }).fill('Contrato React');
+  await dialog.getByLabel('Valor (R$)', { exact: true }).fill('100,10');
+  await dialog
+    .getByRole('button', { name: 'Salvar lançamento', exact: true })
+    .click();
+  await expect(dialog).toHaveCount(0);
+  await page
+    .getByRole('button', { name: 'Editar Contrato React', exact: true })
+    .click();
+  await dialog
+    .getByLabel('Descrição', { exact: true })
+    .fill('Contrato React revisado');
+  await dialog
+    .getByRole('button', { name: 'Salvar lançamento', exact: true })
+    .click();
+  await expect(dialog).toHaveCount(0);
+  const row = page.locator('tr').filter({ hasText: 'Contrato React revisado' });
+  await row.getByRole('button', { name: 'Receber', exact: true }).click();
+  await dialog
+    .getByLabel('Valor desta baixa (R$)', { exact: true })
+    .fill('40,05');
+  await dialog
+    .getByRole('button', { name: 'Confirmar baixa', exact: true })
+    .click();
+  await expect(dialog).toHaveCount(0);
+  await expect(
+    page
+      .locator('tr')
+      .filter({ hasText: 'Contrato React revisado' })
+      .locator('.workspace-status'),
+  ).toHaveText('Parcial');
+});
+test('payment retry keeps its identity and does not lose the typed value', async ({
+  page,
+}) => {
+  await page.goto('/?page=entries');
+  await page
+    .getByRole('button', {
+      name: /Registrar recebimento|Registrar pagamento|Receber|Pagar/,
+      exact: true,
+    })
+    .first()
+    .click();
+  const dialog = page.locator('.workspace-form-dialog');
+  await dialog
+    .getByLabel('Valor desta baixa (R$)', { exact: true })
+    .fill('1,23');
+  const keys: string[] = [];
+  await page.route('**/api/v1/finance/entries/*/pay', async (route) => {
+    keys.push(route.request().postDataJSON().requestId);
+    if (keys.length === 1)
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Tente novamente.' }),
+      });
+    else await route.continue();
+  });
+  await dialog
+    .getByRole('button', { name: 'Confirmar baixa', exact: true })
+    .click();
+  await expect(dialog.getByRole('alert')).toContainText('Tente novamente.');
+  await expect(
+    dialog.getByLabel('Valor desta baixa (R$)', { exact: true }),
+  ).toHaveValue('1,23');
+  await dialog
+    .getByRole('button', { name: 'Confirmar baixa', exact: true })
+    .click();
+  await expect(dialog).toHaveCount(0);
+  expect(keys).toHaveLength(2);
+  expect(keys[0]).toBe(keys[1]);
+});
+test('installment form previews every cent and fits on a phone', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/?page=entries');
+  await page.getByRole('button', { name: /Novo lançamento/ }).click();
+  const dialog = page.locator('.workspace-form-dialog');
+  await dialog
+    .getByLabel('Formato', { exact: true })
+    .selectOption('INSTALLMENT');
+  await dialog.getByLabel('Valor total (R$)', { exact: true }).fill('100,00');
+  await dialog
+    .getByLabel('Quantidade de ocorrências', { exact: true })
+    .fill('3');
+  await expect(dialog.locator('.workspace-schedule')).toContainText('33,34');
+  await expect(dialog.locator('.workspace-schedule')).toContainText('33,33');
+  expect(
+    await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+  ).toBeTruthy();
+  await page.screenshot({ path: 'test-results/finance-form-mobile.png' });
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+});

@@ -44,3 +44,10 @@ A resposta oferece previsão atual, cenário, diferença, efeitos e composição
 `IndicatorExplanationService` lê totais e fontes pela mesma base de pagamentos, sem reconstruir valores no frontend. Os novos DTOs monetários usam texto decimal; o cliente formata a parte inteira com BigInt e mantém os centavos, usando Number somente nas coordenadas visuais dos gráficos.
 
 A única exceção nova à regra de escrita por assinatura/perfil é `POST /api/v1/scenarios/preview`: é uma operação de leitura autenticada com CSRF. Nenhuma API de mutação financeira é liberada por essa exceção. Os testes de integração exercitam VIEWER, isolamento por empresa, entrada inválida e ausência de alterações persistidas.
+
+
+## Operações em React (0.36.0)
+
+Um segundo root React mantém diálogos financeiros independentes do conteúdo de página. `act` encaminha criação, edição, baixa e cancelamento ao workspace depois da verificação de permissão. A API segue como autoridade; as páginas antigas continuam disponíveis durante a migração. Ao salvar, a consulta atual e o painel de detalhes são atualizados. Sessão expirada e voltar/avançar fecham os diálogos.
+
+A chave de baixa ou série pertence à intenção do formulário. Ela é preservada ao repetir o mesmo conteúdo depois de erro e renovada quando valor/data/configuração mudam. Não há repetição automática de escrita. A criação avulsa usa a API existente, sem promessa de idempotência. Campos monetários aceitam vírgula ou ponto e enviam texto decimal, sem arredondamento silencioso. A prévia de parcelas usa inteiros em centavos; o servidor valida a confirmação.
