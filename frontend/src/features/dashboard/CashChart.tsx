@@ -80,6 +80,7 @@ export function CashChart({
         <label className="field">
           Visualização
           <select
+            aria-label="Visualização salva"
             value={prefs.active}
             onChange={(e) =>
               setPrefs((p) => ({
@@ -136,7 +137,7 @@ export function CashChart({
             aria-pressed={config.series.includes(s)}
             onClick={() => toggle(s)}
           >
-            <i style={{ background: seriesInfo[s].color }} />
+            <i className={'workspace-series-' + s} />
             {seriesInfo[s].label}
           </button>
         ))}
@@ -289,11 +290,7 @@ export function CashChart({
               />
             ))}
           </svg>
-          <div
-            className="workspace-months"
-            style={{ gridTemplateColumns: `repeat(${flow.length},1fr)` }}
-            aria-label="Selecione um mês"
-          >
+          <div className="workspace-months" aria-label="Selecione um mês">
             {flow.map((m) => (
               <button
                 key={m.month}

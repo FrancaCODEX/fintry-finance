@@ -49,11 +49,15 @@ test('React dashboard keeps line series visible and saves a named view', async (
   await page.getByLabel('Nome', { exact: true }).fill('Meu fluxo');
   await page.getByRole('button', { name: 'Salvar', exact: true }).click();
   await expect(
-    page.getByLabel('Visualização', { exact: true }).locator('option:checked'),
+    page
+      .getByLabel('Visualização salva', { exact: true })
+      .locator('option:checked'),
   ).toHaveText('Meu fluxo');
   await page.reload();
   await expect(
-    page.getByLabel('Visualização', { exact: true }).locator('option:checked'),
+    page
+      .getByLabel('Visualização salva', { exact: true })
+      .locator('option:checked'),
   ).toHaveText('Meu fluxo');
   await page.screenshot({
     path: 'test-results/dashboard-desktop.png',
@@ -84,6 +88,7 @@ test('entry filters survive reload and details preserve the current query', asyn
   await expect(page.locator('#details-drawer')).toBeVisible();
   await page
     .getByRole('button', { name: 'Fechar detalhes', exact: true })
+    .first()
     .click();
   await expect(page).toHaveURL(/status=PARTIAL/);
   await page

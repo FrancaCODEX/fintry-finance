@@ -809,3 +809,17 @@
     transition: none;
   }
 }
+
+.workspace-months {
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+}
+.workspace-series-income {
+  background: var(--chart-income);
+}
+.workspace-series-expense {
+  background: var(--chart-expense);
+}
+.workspace-series-result {
+  background: var(--chart-result);
+}
