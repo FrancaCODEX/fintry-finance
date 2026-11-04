@@ -1,5 +1,24 @@
 # Changelog do Fintry
 
+## [0.39.0] - 2026-11-04
+
+### Funcionalidades
+
+- Migra as listagens de produtos, serviços, vendas, propostas, contatos, categorias, equipe e contas para React/TypeScript, com estados de carregamento/erro, filtros na URL e paginação onde suportada pela API.
+- Integra as ações de cadastro, edição, inativação, convites, movimentação de estoque, detalhes de vendas/propostas e transferências aos fluxos existentes, preservando confirmações e validações no servidor.
+
+### Melhorias
+
+- Renova cores, superfícies, hierarquia, botões, campos, cartões, dashboard e navegação com tokens compartilhados para temas claro/escuro e telas móveis.
+- Separa Financeiro e Planejamento no menu e adiciona atalho de novo lançamento na lateral.
+- Adiciona componentes compartilhados para estados vazios e paginação, com nomes acessíveis e feedback de consulta.
+- Mantém as demais páginas e os formulários comerciais no host, com os mesmos estilos compartilhados. A migração integral para React continua em evolução; esta entrega não altera cálculos financeiros nem banco de dados.
+
+### Correções
+
+- Preserva o produto selecionado e o endereço de retorno ao abrir o histórico de estoque a partir do catálogo React.
+- Mantém filtros aplicados ao recarregar, navegar para trás e concluir ações pelos formulários existentes.
+
 ## [0.38.0] - 2026-11-04
 
 ### Conciliação assistida

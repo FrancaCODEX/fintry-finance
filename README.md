@@ -2,9 +2,11 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.38.0**
+**Versão atual: 0.39.0**
 
 Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard React reúne indicadores explicáveis e gráficos ajustáveis. O simulador compara hipóteses com o fluxo previsto, salva planejamentos e preserva o histórico de cálculos sem alterar os registros financeiros. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
+
+A 0.39.0 renova os estilos compartilhados, separa navegação diária e planejamento e leva oito áreas para React: produtos, serviços, vendas, propostas, clientes/fornecedores, categorias, equipe e contas. As listagens oferecem cartões responsivos e filtros persistidos na URL. Os formulários comerciais e as demais páginas continuam integrados ao host durante a migração.
 
 Novo cadastro abre a comparação de planos, com Profissional em teste de 14 dias no modo comercial e opção de começar sem contratar. Veja [primeiro acesso](docs/01-product/first-access.md).
 

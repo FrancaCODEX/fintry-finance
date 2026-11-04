@@ -932,7 +932,15 @@ async function loadData(id) {
   const access = await api("/subscription/access");
   if (id !== requestId || !state.user) return;
   state.subscriptionAccess = access;
-  if (["dashboard", "entries", "scenarios", "reconciliation"].includes(state.page) && await mountWorkspace(id)) return;
+  if (state.page === "team" && !isAdmin()) {
+    state.page = "dashboard";
+    return load();
+  }
+  const reactPages = [
+    "dashboard", "entries", "scenarios", "reconciliation", "products", "services",
+    "sales", "proposals", "contacts", "categories", "team", "accounts",
+  ];
+  if (reactPages.includes(state.page) && await mountWorkspace(id)) return;
   if (!root.querySelector(".shell")) shell();
   if (state.page === "company") {
     if (!isAdmin()) {

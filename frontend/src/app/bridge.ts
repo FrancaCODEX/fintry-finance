@@ -1,3 +1,4 @@
+import type { CatalogPage, CatalogResult } from '../features/catalog/model';
 import type {
   Account,
   Entry,
@@ -5,12 +6,20 @@ import type {
   Summary,
   Transport,
 } from '../api/client';
-export type Page = 'dashboard' | 'entries' | 'scenarios' | 'reconciliation';
+export type Page =
+  'dashboard' | 'entries' | 'scenarios' | 'reconciliation' | CatalogPage;
 export interface Bridge {
   page: Page;
   month: string;
   user: { id: string; name: string; companyId: string };
   canWrite: boolean;
+  isAdmin: boolean;
+  catalogAction: (
+    page: CatalogPage,
+    data: CatalogResult,
+    name: string,
+    id?: string,
+  ) => Promise<void>;
   request: Transport;
   action: (name: string, row?: Entry) => Promise<void>;
   details: (id: string) => Promise<void>;

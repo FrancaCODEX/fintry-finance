@@ -208,7 +208,10 @@ test('React finance forms create, edit and partially settle a movement', async (
   page,
 }) => {
   await page.goto('/?page=entries');
-  await page.getByRole('button', { name: /Novo lançamento/ }).click();
+  await page
+    .locator('#page-content')
+    .getByRole('button', { name: /Novo lançamento/ })
+    .click();
   const dialog = page.locator('.workspace-form-dialog');
   await dialog.getByLabel('Descrição', { exact: true }).fill('Contrato React');
   await dialog.getByLabel('Valor (R$)', { exact: true }).fill('100,10');
@@ -287,7 +290,10 @@ test('installment form previews every cent and fits on a phone', async ({
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/?page=entries');
-  await page.getByRole('button', { name: /Novo lançamento/ }).click();
+  await page
+    .locator('#page-content')
+    .getByRole('button', { name: /Novo lançamento/ })
+    .click();
   const dialog = page.locator('.workspace-form-dialog');
   await dialog
     .getByLabel('Formato', { exact: true })
@@ -413,4 +419,104 @@ test('reconciliation explains a reusable rule and confirms the link explicitly',
     path: 'test-results/reconciliation-assisted.png',
     fullPage: true,
   });
+});
+
+test('catalog filters survive reload and product actions retain the correct row', async ({
+  page,
+}) => {
+  await page.goto('/?page=products');
+  await expect(page.locator('.workspace-record').first()).toBeVisible();
+  const product = page.locator('.workspace-record').first();
+  const name = (await product.locator('h2').innerText()).trim();
+  await page.getByLabel('Buscar por nome ou referência').fill(name);
+  await page
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  await expect(page).toHaveURL(/search=/);
+  await page.reload();
+  await expect(page.getByLabel('Buscar por nome ou referência')).toHaveValue(
+    name,
+  );
+  await page
+    .getByRole('button', { name: `Editar ${name}`, exact: true })
+    .click();
+  await expect(page.locator('#modal')).toBeVisible();
+  await expect(page.locator('#modal [name=name]')).toHaveValue(name);
+  await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Histórico de estoque', exact: true })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/page=stock/);
+  await page.goBack();
+  await expect(page.getByLabel('Buscar por nome ou referência')).toHaveValue(
+    name,
+  );
+});
+
+test('commercial and administration pages render on mobile in both themes', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of [
+    'products',
+    'services',
+    'sales',
+    'proposals',
+    'contacts',
+    'categories',
+    'team',
+    'accounts',
+  ]) {
+    await page.goto('/?page=' + route);
+    await expect(page.locator('.workspace-record').first()).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBeTruthy();
+    await page.evaluate(
+      () => (document.documentElement.dataset.theme = 'dark'),
+    );
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBeTruthy();
+    await page.getByRole('button', { name: 'Abrir menu', exact: true }).click();
+    await expect(page.locator('#navigation-dialog')).toBeVisible();
+    await expect(
+      page.locator('#navigation-dialog [aria-current=page]'),
+    ).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#navigation-dialog')).not.toBeVisible();
+  }
+  await page.screenshot({
+    path: 'test-results/catalog-mobile-dark.png',
+    fullPage: true,
+  });
+});
+
+test('proposal status uses the backend enum and filtered empty states can recover', async ({
+  page,
+}) => {
+  await page.goto('/?page=proposals&status=OPEN');
+  await expect(page.getByLabel('Situação', { exact: true })).toHaveValue(
+    'OPEN',
+  );
+  await expect(page.locator('.workspace-record').first()).toBeVisible();
+  await expect(
+    page.locator('.workspace-record .workspace-status').first(),
+  ).toHaveText('Em negociação');
+  await page.getByLabel('Buscar por nome ou referência').fill('no-match-0-39');
+  await page
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  await expect(
+    page.getByRole('heading', { name: 'Nenhum registro encontrado' }),
+  ).toBeVisible();
+  await page
+    .getByRole('button', { name: 'Limpar filtros', exact: true })
+    .click();
+  await expect(page.locator('.workspace-record').first()).toBeVisible();
 });

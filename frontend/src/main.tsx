@@ -1,3 +1,5 @@
+import { Catalog } from './features/catalog/Catalog';
+import { isCatalogPage } from './features/catalog/model';
 import { Component, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { flushSync } from 'react-dom';
@@ -66,7 +68,9 @@ window.FintryWorkspace = {
       root!.render(
         <Boundary>
           <div className="fintry-workspace">
-            {bridge.page === 'dashboard' ? (
+            {isCatalogPage(bridge.page) ? (
+              <Catalog key={bridge.page} page={bridge.page} bridge={bridge} />
+            ) : bridge.page === 'dashboard' ? (
               <Dashboard bridge={bridge} />
             ) : bridge.page === 'reconciliation' ? (
               <Reconciliation bridge={bridge} />

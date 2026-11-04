@@ -83,9 +83,11 @@ Sequência autorizada em 04/11/2026 após a v0.35.0:
 |---|---|---|
 | 0.36.0 | Formulários financeiros em React e componentes compartilhados | Incorporada à main (PR #43) |
 | 0.37.0 | Cenários salvos, duplicação, histórico de cálculos e recálculo | Incorporada à main (PR #45) |
-| 0.38.0 | Sugestões explicáveis e regras reutilizáveis de conciliação, com confirmação | Em validação |
-| 0.39.0 | Repaginação completa do frontend, navegação e módulos em React/CSS | Planejada |
+| 0.38.0 | Sugestões explicáveis e regras reutilizáveis de conciliação, com confirmação | Incorporada à main (PR #46) |
+| 0.39.0 | Repaginação dos estilos compartilhados, navegação e oito áreas adicionais em React | Implementada em branch; em validação |
 
 A v0.35.1 corrige o build Windows antes desta sequência.
 
 A v0.37.0 persiste cenários da empresa e retratos dos cálculos com revisão, consulta e comparação de histórico, sem alterar dados financeiros.
+
+A v0.39.0 renova a camada visual de todo o produto e migra oito listagens para React. As páginas de pendências, relatórios, fluxo projetado, parcelas/recorrências, importações, orçamento, estoque, histórico, empresa, segurança, cobrança/assinatura, ambiente e exemplos, assim como os formulários comerciais, continuam no host. A substituição integral dessas telas por React permanece como continuação da remodelação.

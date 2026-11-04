@@ -53,7 +53,30 @@ async function mountWorkspace(id) {
   const container = document.querySelector("#page-content");
   container.innerHTML = "";
   window.FintryWorkspace.mount(container, {
-    page:state.page, month:state.month, user:state.user, canWrite:!!canWrite(), request:api,
+    page:state.page, month:state.month, user:state.user, canWrite:!!canWrite(), isAdmin:!!isAdmin(), request:api,
+    // Seed the existing dialogs with the exact page that React displayed.
+    catalogAction: async (page, data, name, rowId) => {
+      try {
+        if (page !== state.page) return;
+        if (page === "products" || page === "sales") commerce[page] = data;
+        else if (page === "services" || page === "proposals") commercial[page] = data;
+        else state[page] = page === "categories" || page === "accounts" ? data.content : data;
+        if (name === "stock-history") {
+          const row = data.content.find(item => item.id === rowId);
+          if (!row) throw new Error("Produto não encontrado. Atualize a página.");
+          commerce.stockProduct = { id: row.id, name: row.name };
+          commerce.stockPage = 0;
+          await navigateWorkspace("stock");
+          return;
+        }
+        const button = document.createElement("button");
+        button.dataset.action = name;
+        if (rowId) button.dataset.id = rowId;
+        await act(button);
+      } catch (error) {
+        toast(error.message);
+      }
+    },
     navigate:navigateWorkspace,
     details:async (entryId) => {try {await openDetails(entryId);}catch(error){toast(error.message);}},
     sync:(data) => Object.assign(state,data),
