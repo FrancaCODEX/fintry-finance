@@ -1,5 +1,17 @@
 # Changelog do Fintry
 
+## [0.36.0] - 2026-11-04
+
+### Operações financeiras em React
+
+- Unifica criação, edição, cancelamento e baixa em diálogos React com foco, teclado, estados de envio e erros por campo. As ações também funcionam a partir das páginas existentes.
+- Mantém categorias, contatos pesquisáveis, lançamentos únicos, parcelas, recorrências e primeira baixa. Prévia mensal preserva centavos e datas de fim de mês.
+- Envia valores como texto decimal e mantém a identidade da tentativa de baixa/série após falha, renovando a chave se o conteúdo mudar.
+- Delimita o DOM React para que os decoradores de formulários anteriores não sobrescrevam rótulos dinâmicos, validações e foco.
+- Amplia contratos de escrita e testes de navegador para cadastro/edição/baixa parcial, repetição de tentativa e formulário no celular.
+
+
+
 ## [0.35.1] - 2026-11-04
 
 ### Build em checkouts Windows

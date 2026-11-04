@@ -1738,6 +1738,13 @@ async function act(btn) {
     toast("Seu perfil permite somente consultas.");
     return;
   }
+  if (["entry", "edit-entry", "pay", "cancel"].includes(action) && await workspaceReady && window.FintryWorkspace?.openFinance) {
+    window.FintryWorkspace.openFinance(action, btn.dataset.id, {
+      request: api, canWrite: !!canWrite(), notify: toast, createAccount: accountDialog,
+      refresh: async () => { await safeLoad(); if (drawer.open) await loadDetails(); },
+    });
+    return;
+  }
   if (action === "details") return openDetails(btn.dataset.id);
   if (action === "entry") return entryDialog();
   if (action === "report-export")

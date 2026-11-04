@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.35.1**
+**Versão atual: 0.36.0**
 
 Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard React reúne indicadores explicáveis e gráficos ajustáveis. O simulador compara hipóteses com o fluxo previsto sem alterar os registros financeiros. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
 

@@ -27,6 +27,20 @@ declare global {
     FintryWorkspace?: {
       mount: (element: HTMLElement, bridge: Bridge) => void;
       unmount: () => void;
+      openFinance: (
+        action: 'entry' | 'edit-entry' | 'pay' | 'cancel',
+        id: string | undefined,
+        bridge: FinanceBridge,
+      ) => void;
+      closeFinance: () => void;
     };
   }
+}
+
+export interface FinanceBridge {
+  request: Transport;
+  canWrite: boolean;
+  notify: (message: string) => void;
+  refresh: () => Promise<void>;
+  createAccount: () => void;
 }

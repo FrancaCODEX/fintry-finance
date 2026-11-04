@@ -1187,3 +1187,113 @@
     width: 100%;
   }
 }
+
+.workspace-form-dialog {
+  width: min(660px, calc(100vw - 28px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 30px 100px #061b2e44;
+}
+.workspace-form-dialog::backdrop {
+  background: #081b25a8;
+  backdrop-filter: blur(5px);
+}
+.workspace-form-dialog .workspace-panel-head {
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+  z-index: 2;
+  align-items: start;
+}
+.workspace-form-dialog h2 {
+  font-size: 24px;
+}
+.workspace-form-dialog .workspace-panel-head p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 8px 0 0;
+}
+.workspace-finance-form {
+  padding: 26px;
+  display: grid;
+  gap: 19px;
+}
+.workspace-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.workspace-finance-form .field {
+  min-width: 0;
+  gap: 8px;
+}
+.workspace-field-error,
+.workspace-form-feedback {
+  color: var(--red);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.workspace-finance-form [aria-invalid='true'] {
+  border-color: var(--red);
+}
+.workspace-form-context {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 18px;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font-size: 14px;
+}
+.workspace-form-context span {
+  color: var(--muted);
+}
+.workspace-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.workspace-schedule {
+  max-height: 220px;
+  overflow: auto;
+  background: var(--soft);
+  border-radius: 14px;
+  padding: 18px;
+  font-size: 12px;
+}
+.workspace-schedule div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.workspace-schedule small {
+  display: block;
+  margin-top: 12px;
+  color: var(--muted);
+}
+@media (max-width: 650px) {
+  .workspace-form-dialog {
+    max-height: calc(100dvh - 16px);
+    border-radius: 18px;
+  }
+  .workspace-finance-form {
+    padding: 20px;
+  }
+  .workspace-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .workspace-form-actions {
+    flex-wrap: wrap;
+  }
+}

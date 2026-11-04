@@ -1,3 +1,4 @@
+import { Field } from '../../shared/Field';
 import { useEffect, useState } from 'react';
 import type { Summary } from '../../api/client';
 import { money, monthLabel } from '../../shared/format';
@@ -76,8 +77,7 @@ export function CashChart({
       }
     >
       <div className="workspace-chart-controls">
-        <label className="field">
-          Visualização
+        <Field className="field" label={<>Visualização</>}>
           <select
             aria-label="Visualização salva"
             value={prefs.active}
@@ -97,7 +97,7 @@ export function CashChart({
               </option>
             ))}
           </select>
-        </label>
+        </Field>
         <div
           className="workspace-segments"
           role="group"
@@ -160,15 +160,14 @@ export function CashChart({
               setNotice('Visualização salva.');
             }}
           >
-            <label className="field">
-              Nome
+            <Field className="field" label={<>Nome</>}>
               <input
                 maxLength={32}
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
-            </label>
+            </Field>
             <button className="btn small">Salvar</button>
           </form>
         </details>

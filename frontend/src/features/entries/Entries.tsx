@@ -1,3 +1,4 @@
+import { Field } from '../../shared/Field';
 import { useEffect, useMemo, useState } from 'react';
 import type { Bridge } from '../../app/bridge';
 import { workspaceApi, type Entry } from '../../api/client';
@@ -121,8 +122,7 @@ export function Entries({ bridge }: { bridge: Bridge }) {
             apply({ ...draft, page: 0 });
           }}
         >
-          <label className="field">
-            Buscar lançamento
+          <Field className="field" label={<>Buscar lançamento</>}>
             <input
               type="search"
               maxLength={255}
@@ -130,9 +130,8 @@ export function Entries({ bridge }: { bridge: Bridge }) {
               value={draft.search}
               onChange={(e) => setDraft({ ...draft, search: e.target.value })}
             />
-          </label>
-          <label className="field">
-            Mês de vencimento
+          </Field>
+          <Field className="field" label={<>Mês de vencimento</>}>
             <input
               type="month"
               min="2000-01"
@@ -144,9 +143,8 @@ export function Entries({ bridge }: { bridge: Bridge }) {
                   setDraft({ ...draft, month: e.target.value });
               }}
             />
-          </label>
-          <label className="field">
-            Tipo
+          </Field>
+          <Field className="field" label={<>Tipo</>}>
             <select
               value={draft.type}
               onChange={(e) => setDraft({ ...draft, type: e.target.value })}
@@ -155,9 +153,8 @@ export function Entries({ bridge }: { bridge: Bridge }) {
               <option value="INCOME">Receitas</option>
               <option value="EXPENSE">Despesas</option>
             </select>
-          </label>
-          <label className="field">
-            Situação
+          </Field>
+          <Field className="field" label={<>Situação</>}>
             <select
               value={draft.status}
               onChange={(e) => setDraft({ ...draft, status: e.target.value })}
@@ -168,9 +165,8 @@ export function Entries({ bridge }: { bridge: Bridge }) {
               <option value="PAID">Realizados</option>
               <option value="CANCELLED">Cancelados</option>
             </select>
-          </label>
-          <label className="field">
-            Conta
+          </Field>
+          <Field className="field" label={<>Conta</>}>
             <select
               value={draft.accountId}
               onChange={(e) =>
@@ -184,7 +180,7 @@ export function Entries({ bridge }: { bridge: Bridge }) {
                 </option>
               ))}
             </select>
-          </label>
+          </Field>
           <button className="btn" type="submit">
             Aplicar filtros
           </button>
@@ -322,6 +318,7 @@ export function Entries({ bridge }: { bridge: Bridge }) {
                                     !row.saleId && (
                                       <button
                                         className="btn secondary small"
+                                        aria-label={'Editar ' + row.description}
                                         onClick={() =>
                                           bridge.action('edit-entry', row)
                                         }
