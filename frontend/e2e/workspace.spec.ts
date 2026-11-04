@@ -342,3 +342,75 @@ test('saved planning survives reload, duplicates and keeps calculation history',
     planning.getByLabel('Nome do cenário', { exact: true }),
   ).toHaveValue('Plano de contratação — cópia');
 });
+
+test('reconciliation explains a reusable rule and confirms the link explicitly', async ({
+  page,
+}) => {
+  const accounts = await (
+    await page.request.get('/api/v1/finance/accounts')
+  ).json();
+  const bank = accounts.find(
+    (a: { name: string }) => a.name === '[Exemplo] Banco principal',
+  );
+  const csrf = await (await page.request.get('/api/v1/auth/csrf')).json();
+  const date = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'America/Sao_Paulo',
+  }).format(new Date());
+  const created = await page.request.post('/api/v1/finance/entries', {
+    headers: { [csrf.headerName]: csrf.token },
+    data: {
+      accountId: bank.id,
+      description: 'Assinatura internet',
+      category: 'Internet',
+      type: 'EXPENSE',
+      amount: '312.55',
+      dueDate: date,
+      paid: false,
+    },
+  });
+  expect(created.status()).toBe(201);
+  await page.goto('/?page=reconciliation');
+  await expect(
+    page.getByRole('heading', {
+      name: 'Encontre o vínculo. Confira os motivos.',
+    }),
+  ).toBeVisible();
+  await page.locator('.workspace-rules>summary').click();
+  await page.getByRole('button', { name: 'Criar regra', exact: true }).click();
+  const dialog = page.locator('.workspace-form-dialog');
+  await dialog.getByLabel('Nome da regra', { exact: true }).fill('Internet');
+  await dialog
+    .getByLabel('Texto que aparece no banco', { exact: true })
+    .fill('COMPRA');
+  await dialog
+    .getByLabel('Texto que aparece no lançamento', { exact: true })
+    .fill('Assinatura');
+  await dialog
+    .getByRole('button', { name: 'Salvar regra', exact: true })
+    .click();
+  await expect(dialog).toHaveCount(0);
+  const movement = page
+    .locator('.workspace-rec-movement')
+    .filter({ hasText: 'COMPRA SEM LANCAMENTO PARA REVISAR' });
+  await expect(movement.locator('.workspace-rec-suggestions')).toContainText(
+    'Internet',
+  );
+  await movement
+    .getByRole('button', { name: 'Revisar correspondências', exact: true })
+    .click();
+  await dialog.locator('input[name=entryId]').first().check();
+  await dialog
+    .getByRole('button', { name: 'Confirmar decisão', exact: true })
+    .click();
+  await expect(dialog).toHaveCount(0);
+  await page.getByRole('button', { name: /Conciliados/ }).click();
+  await expect(
+    page
+      .locator('.workspace-rec-movement')
+      .filter({ hasText: 'COMPRA SEM LANCAMENTO PARA REVISAR' }),
+  ).toContainText('Justificativas no momento da confirmação');
+  await page.screenshot({
+    path: 'test-results/reconciliation-assisted.png',
+    fullPage: true,
+  });
+});

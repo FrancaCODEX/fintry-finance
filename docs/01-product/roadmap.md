@@ -82,8 +82,8 @@ Sequência autorizada em 04/11/2026 após a v0.35.0:
 | Versão | Entrega | Situação |
 |---|---|---|
 | 0.36.0 | Formulários financeiros em React e componentes compartilhados | Incorporada à main (PR #43) |
-| 0.37.0 | Cenários salvos, duplicação, histórico de cálculos e recálculo | Em validação |
-| 0.38.0 | Sugestões explicáveis e regras reutilizáveis de conciliação, com confirmação | Planejada |
+| 0.37.0 | Cenários salvos, duplicação, histórico de cálculos e recálculo | Incorporada à main (PR #45) |
+| 0.38.0 | Sugestões explicáveis e regras reutilizáveis de conciliação, com confirmação | Em validação |
 | 0.39.0 | Repaginação completa do frontend, navegação e módulos em React/CSS | Planejada |
 
 A v0.35.1 corrige o build Windows antes desta sequência.

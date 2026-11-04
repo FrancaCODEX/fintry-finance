@@ -6,6 +6,7 @@ import { Dashboard } from './features/dashboard/Dashboard';
 import { Scenario } from './features/scenarios/Scenario';
 import { Entries } from './features/entries/Entries';
 import './workspace.css';
+import { Reconciliation } from './features/reconciliation/Reconciliation';
 import { FinanceDialog } from './features/finance/FinanceDialog';
 class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -67,6 +68,8 @@ window.FintryWorkspace = {
           <div className="fintry-workspace">
             {bridge.page === 'dashboard' ? (
               <Dashboard bridge={bridge} />
+            ) : bridge.page === 'reconciliation' ? (
+              <Reconciliation bridge={bridge} />
             ) : bridge.page === 'scenarios' ? (
               <Scenario bridge={bridge} />
             ) : (

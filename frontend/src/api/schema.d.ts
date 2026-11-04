@@ -1039,6 +1039,378 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/finance/reconciliation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    accountId: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Operação isolada por empresa */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StatementMovementPage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/finance/reconciliation/{id}/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Até 100 sugestões explicáveis */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReconciliationCandidate"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/finance/reconciliation/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReconciliationResolution"];
+                };
+            };
+            responses: {
+                /** @description Operação isolada por empresa */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StatementMovement"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/finance/reconciliation/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["OfxInput"];
+                };
+            };
+            responses: {
+                /** @description Operação isolada por empresa */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OfxPreview"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/finance/reconciliation/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    accountId: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Operação isolada por empresa */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReconciliationRulePage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReconciliationRuleInput"];
+                };
+            };
+            responses: {
+                /** @description Operação isolada por empresa */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReconciliationRule"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/finance/reconciliation/rules/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReconciliationRuleInput"];
+                };
+            };
+            responses: {
+                /** @description Operação isolada por empresa */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReconciliationRule"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/finance/reconciliation/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["OfxImportInput"];
+                };
+            };
+            responses: {
+                /** @description Operação autorizada da conta da empresa */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OfxImportResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/finance/reconciliation/group": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReconciliationGroupInput"];
+                };
+            };
+            responses: {
+                /** @description Operação autorizada da conta da empresa */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReconciliationBatch"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/finance/reconciliation/group/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReconciliationGroupCandidatesInput"];
+                };
+            };
+            responses: {
+                /** @description Operação autorizada da conta da empresa */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Entry"][];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1363,6 +1735,155 @@ export interface components {
         ScenarioArchive: {
             revision: number;
             archived: boolean;
+        };
+        ReconciliationRule: {
+            /** Format: uuid */
+            id: string;
+            revision: number;
+            /** Format: uuid */
+            accountId: string;
+            name: string;
+            author: string;
+            /** @enum {string} */
+            direction: "INCOME" | "EXPENSE";
+            bankText: string;
+            entryText: string;
+            windowDays: number;
+            active: boolean;
+        };
+        ReconciliationRuleInput: {
+            /** Format: uuid */
+            requestId: string;
+            revision?: number | null;
+            /** Format: uuid */
+            accountId: string;
+            name: string;
+            /** @enum {string} */
+            direction: "INCOME" | "EXPENSE";
+            bankText: string;
+            entryText: string;
+            windowDays: number;
+            active: boolean;
+        };
+        ReconciliationRulePage: {
+            content: components["schemas"]["ReconciliationRule"][];
+            number: number;
+            totalPages: number;
+            totalElements: number;
+        };
+        ReconciliationCandidate: {
+            entry: components["schemas"]["Entry"];
+            explanation: string;
+            score: number;
+            reasons: string[];
+            rules: string[];
+        };
+        RuleEvidence: {
+            /** Format: uuid */
+            id: string;
+            revision: number;
+            name: string;
+        };
+        DecisionEvidence: {
+            score: number;
+            reasons: string[];
+            rules: components["schemas"]["RuleEvidence"][];
+        };
+        StatementMovement: {
+            /** Format: uuid */
+            id: string;
+            fitId: string;
+            description: string;
+            date: string;
+            amount: string;
+            /** @enum {string} */
+            status: "OPEN" | "LINKED" | "IGNORED";
+            /** Format: uuid */
+            entryId?: string | null;
+            reason?: string | null;
+            /** Format: uuid */
+            batchId?: string | null;
+            batchMovements: number;
+            revision: number;
+            entry?: components["schemas"]["Entry"];
+            suggestions: components["schemas"]["ReconciliationCandidate"][];
+            evidence?: components["schemas"]["DecisionEvidence"];
+        };
+        StatementMovementPage: {
+            content: components["schemas"]["StatementMovement"][];
+            number: number;
+            totalPages: number;
+            totalElements: number;
+            open: number;
+            linked: number;
+            ignored: number;
+        };
+        OfxPreviewRow: {
+            number: number;
+            fitId: string;
+            description: string;
+            date: string | null;
+            amount: string;
+            state: string;
+            message: string;
+        };
+        OfxPreview: {
+            accountName: string;
+            bank: string;
+            accountHint: string;
+            ready: number;
+            duplicates: number;
+            invalid: number;
+            rows: components["schemas"]["OfxPreviewRow"][];
+        };
+        OfxInput: {
+            /** Format: uuid */
+            accountId: string;
+            ofx: string;
+        };
+        ReconciliationResolution: {
+            revision: number;
+            /** @enum {string} */
+            action: "LINK" | "CREATE" | "IGNORE" | "REOPEN";
+            /** Format: uuid */
+            entryId?: string | null;
+            category?: string | null;
+            /** Format: uuid */
+            categoryId?: string | null;
+            reason?: string | null;
+        };
+        OfxImportInput: {
+            /** Format: uuid */
+            accountId: string;
+            ofx: string;
+            selectedRows: number[];
+        };
+        ReconciliationGroupInput: {
+            /** Format: uuid */
+            accountId: string;
+            movementIds: string[];
+            /** Format: uuid */
+            entryId: string;
+            reason: string;
+        };
+        ReconciliationGroupCandidatesInput: {
+            /** Format: uuid */
+            accountId: string;
+            movementIds: string[];
+        };
+        ReconciliationBatch: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            entryId: string;
+            amount: number;
+            paymentDate: string;
+            reason: string;
+            movements: number;
+        };
+        OfxImportResult: {
+            imported: number;
+            skipped: number;
         };
     };
     responses: never;

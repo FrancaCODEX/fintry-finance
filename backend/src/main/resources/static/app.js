@@ -932,7 +932,7 @@ async function loadData(id) {
   const access = await api("/subscription/access");
   if (id !== requestId || !state.user) return;
   state.subscriptionAccess = access;
-  if (["dashboard", "entries", "scenarios"].includes(state.page) && await mountWorkspace(id)) return;
+  if (["dashboard", "entries", "scenarios", "reconciliation"].includes(state.page) && await mountWorkspace(id)) return;
   if (!root.querySelector(".shell")) shell();
   if (state.page === "company") {
     if (!isAdmin()) {
