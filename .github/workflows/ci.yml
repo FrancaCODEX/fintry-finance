@@ -18,6 +18,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Frontend contracts and transport tests
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run contracts:check
+          npm run typecheck
+          npm test
       - name: Release version and changelog
         run: python3 scripts/check_release.py
       - name: Version increment against PR base
@@ -40,6 +47,8 @@ jobs:
           node --check backend/src/main/resources/static/navigation.js
           node --check backend/src/main/resources/static/dashboard.js
           node --check backend/src/main/resources/static/company.js
+          node --check backend/src/main/resources/static/state.js
+          node --check backend/src/main/resources/static/http.js
           node --check backend/src/main/resources/static/app.js
           node --check backend/src/main/resources/static/theme.js
       - name: H2 integration tests

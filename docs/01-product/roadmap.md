@@ -65,3 +65,5 @@ Em 26/10/2026, a v0.27.0 foi incorporada à main pela PR #30. A v0.28.0 prepara 
 
 
 Em 30/10/2026, a v0.32.0 foi incorporada à main pela PR #35: gráficos do dashboard com séries e formato ajustáveis, períodos de 3 ou 6 meses, visualizações salvas por usuário e consulta em tabela. A v0.32.1 prepara a apresentação com documentação alinhada ao produto; os dados financeiros do pacote de exemplos são fictícios.
+
+Em 04/11/2026, a v0.33.0 inicia a evolução autorizada do workspace: estado/transporte separados, consultas documentadas em OpenAPI com tipos TypeScript e chave opcional para repetir baixas parciais com segurança. A sequência acordada é v0.34.0 (dashboard e lançamentos em React) e v0.35.0 (simulador e indicadores explicáveis).

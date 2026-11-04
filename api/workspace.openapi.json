@@ -1,0 +1,707 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Fintry workspace read API",
+    "version": "0.33.0",
+    "description": "Contrato parcial para as consultas usadas pelo workspace. Valores monetários JSON são apenas exibidos no cliente; cálculos e mutações financeiras pertencem ao backend. APIs de escrita existentes seguem a documentação em docs/05-api."
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ],
+  "paths": {
+    "/finance/accounts": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Consulta autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Account"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão ausente ou expirada"
+          },
+          "404": {
+            "description": "Recurso não pertence à empresa"
+          }
+        }
+      }
+    },
+    "/finance/summary": {
+      "get": {
+        "parameters": [
+          {
+            "name": "month",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Summary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão ausente ou expirada"
+          },
+          "404": {
+            "description": "Recurso não pertence à empresa"
+          }
+        }
+      }
+    },
+    "/finance/entries": {
+      "get": {
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "seriesId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão ausente ou expirada"
+          },
+          "404": {
+            "description": "Recurso não pertence à empresa"
+          }
+        }
+      }
+    },
+    "/finance/entries/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão ausente ou expirada"
+          },
+          "404": {
+            "description": "Recurso não pertence à empresa"
+          }
+        }
+      }
+    },
+    "/reports/forecast": {
+      "get": {
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeOverdue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta autenticada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forecast"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sessão ausente ou expirada"
+          },
+          "404": {
+            "description": "Recurso não pertence à empresa"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Account": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "initialBalance",
+          "balance"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "initialBalance": {
+            "type": "number"
+          },
+          "balance": {
+            "type": "number"
+          }
+        }
+      },
+      "Month": {
+        "type": "object",
+        "required": [
+          "month",
+          "income",
+          "expense"
+        ],
+        "properties": {
+          "month": {
+            "type": "string"
+          },
+          "income": {
+            "type": "number"
+          },
+          "expense": {
+            "type": "number"
+          }
+        }
+      },
+      "CategoryTotal": {
+        "type": "object",
+        "required": [
+          "category",
+          "amount"
+        ],
+        "properties": {
+          "category": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      },
+      "Summary": {
+        "type": "object",
+        "required": [
+          "balance",
+          "income",
+          "expense",
+          "result",
+          "pendingIncome",
+          "pendingExpense",
+          "flow",
+          "previousIncome",
+          "previousExpense",
+          "previousResult",
+          "categories"
+        ],
+        "properties": {
+          "balance": {
+            "type": "number"
+          },
+          "income": {
+            "type": "number"
+          },
+          "expense": {
+            "type": "number"
+          },
+          "result": {
+            "type": "number"
+          },
+          "pendingIncome": {
+            "type": "number"
+          },
+          "pendingExpense": {
+            "type": "number"
+          },
+          "flow": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Month"
+            }
+          },
+          "previousIncome": {
+            "type": "number"
+          },
+          "previousExpense": {
+            "type": "number"
+          },
+          "previousResult": {
+            "type": "number"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryTotal"
+            }
+          }
+        }
+      },
+      "Entry": {
+        "type": "object",
+        "required": [
+          "id",
+          "accountId",
+          "description",
+          "category",
+          "type",
+          "amount",
+          "receivedAmount",
+          "remainingAmount",
+          "dueDate",
+          "paymentDate",
+          "status",
+          "transferId",
+          "categoryId",
+          "contactId",
+          "contactName",
+          "seriesId",
+          "sequenceNumber",
+          "seriesCount",
+          "seriesPaused",
+          "seriesKind",
+          "saleId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "accountId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/EntryType"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "receivedAmount": {
+            "type": "number"
+          },
+          "remainingAmount": {
+            "type": "number"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "paymentDate": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/EntryStatus"
+          },
+          "transferId": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "categoryId": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "contactId": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "contactName": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "seriesId": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "sequenceNumber": {
+            "allOf": [
+              {
+                "type": "integer"
+              }
+            ],
+            "nullable": true
+          },
+          "seriesCount": {
+            "allOf": [
+              {
+                "type": "integer"
+              }
+            ],
+            "nullable": true
+          },
+          "seriesPaused": {
+            "type": "boolean"
+          },
+          "seriesKind": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "saleId": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "EntryType": {
+        "type": "string",
+        "enum": [
+          "INCOME",
+          "EXPENSE"
+        ]
+      },
+      "EntryStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "PARTIAL",
+          "PAID",
+          "CANCELLED"
+        ]
+      },
+      "EntryPage": {
+        "type": "object",
+        "required": [
+          "content",
+          "totalElements",
+          "totalPages",
+          "number"
+        ],
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            }
+          },
+          "totalElements": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "number": {
+            "type": "integer"
+          }
+        }
+      },
+      "Payment": {
+        "type": "object",
+        "required": [
+          "id",
+          "amount",
+          "paymentDate"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "paymentDate": {
+            "type": "string"
+          }
+        }
+      },
+      "EntryDetails": {
+        "type": "object",
+        "required": [
+          "entry",
+          "accountName",
+          "createdAt",
+          "updatedAt",
+          "payments"
+        ],
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/Entry"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "payments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Payment"
+            }
+          }
+        }
+      },
+      "ForecastDay": {
+        "type": "object",
+        "required": [
+          "date",
+          "income",
+          "expense",
+          "balance"
+        ],
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "income": {
+            "type": "number"
+          },
+          "expense": {
+            "type": "number"
+          },
+          "balance": {
+            "type": "number"
+          }
+        }
+      },
+      "Forecast": {
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "openingBalance",
+          "closingBalance",
+          "pendingIncome",
+          "pendingExpense",
+          "overdueIncome",
+          "overdueExpense",
+          "minimumBalance",
+          "firstNegativeDate",
+          "includeOverdue",
+          "days"
+        ],
+        "properties": {
+          "start": {
+            "type": "string"
+          },
+          "end": {
+            "type": "string"
+          },
+          "openingBalance": {
+            "type": "number"
+          },
+          "closingBalance": {
+            "type": "number"
+          },
+          "pendingIncome": {
+            "type": "number"
+          },
+          "pendingExpense": {
+            "type": "number"
+          },
+          "overdueIncome": {
+            "type": "number"
+          },
+          "overdueExpense": {
+            "type": "number"
+          },
+          "minimumBalance": {
+            "type": "number"
+          },
+          "firstNegativeDate": {
+            "allOf": [
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          },
+          "includeOverdue": {
+            "type": "boolean"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastDay"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "session": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "JSESSIONID"
+      }
+    }
+  },
+  "security": [
+    {
+      "session": []
+    }
+  ]
+}

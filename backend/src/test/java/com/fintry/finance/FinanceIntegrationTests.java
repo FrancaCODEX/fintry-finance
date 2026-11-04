@@ -338,6 +338,33 @@ class FinanceIntegrationTests {
         details=b.request("GET","/finance/entries/"+id,null,200);assertEquals(2,details.get("payments").size());
         var report=b.request("GET",reportQuery(today,today),null,200);assertEquals(2,report.get("totalElements").asInt());amount("100",report.get("totals").get("income"));
     }
+    @Test void partialPaymentOperationKeySurvivesRetriesAndRejectsChangedPayloads() throws Exception {
+        var b=new Browser().signup();String account=b.account("Precisão","0.10");
+        String id=b.request("POST","/finance/entries",b.entry(account,false,"0.30","INCOME"),201).get("id").asText();
+        String key=UUID.randomUUID().toString();var input=Map.of("paymentDate",today,"amount","0.10","requestId",key);
+        var pool=java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            for(var result:pool.invokeAll(List.<java.util.concurrent.Callable<Integer>>of(
+                ()->b.call("POST","/finance/entries/"+id+"/pay",input,true).statusCode(),
+                ()->b.call("POST","/finance/entries/"+id+"/pay",input,true).statusCode()))) assertEquals(200,result.get());
+        } finally {pool.shutdownNow();}
+        amount("0.20",b.summary().get("balance"));
+        var detail=b.request("GET","/finance/entries/"+id,null,200);assertEquals(1,detail.get("payments").size());
+        amount("0.20",detail.get("entry").get("remainingAmount"));
+        b.request("POST","/finance/entries/"+id+"/pay",Map.of("paymentDate",today,"amount","0.20","requestId",key),409);
+        b.request("POST","/finance/entries/"+id+"/pay",Map.of("paymentDate",today,"amount","0.20","requestId",UUID.randomUUID().toString()),200);
+        amount("0.40",b.summary().get("balance"));
+        var other=new Browser().signup();other.request("GET","/finance/entries/"+id,null,404);
+    }
+    @Test void workspaceReadContractsMatchThePublishedRequiredFields() throws Exception {
+        var schema=json.readTree(java.nio.file.Files.readString(java.nio.file.Path.of("../api/workspace.openapi.json"))).get("components").get("schemas");
+        var b=new Browser().signup();String account=b.account("Contrato","0");
+        var entry=b.request("POST","/finance/entries",b.entry(account,false,"10","INCOME"),201);
+        for(var field:schema.get("Entry").get("required")) assertTrue(entry.has(field.asText()),field.asText());
+        for(var field:schema.get("Summary").get("required")) assertTrue(b.summary().has(field.asText()),field.asText());
+        var detail=b.request("GET","/finance/entries/"+entry.get("id").asText(),null,200);
+        for(var field:schema.get("EntryDetails").get("required")) assertTrue(detail.has(field.asText()),field.asText());
+    }
     @Test void companiesCannotReadOrMutateEachOthersData() throws Exception {
         var a=new Browser().signup();var b=new Browser().signup();String account=a.account("Privada","750");
         var entry=a.request("POST","/finance/entries",a.entry(account,false,"30","INCOME"),201).get("id").asText();

@@ -1,5 +1,14 @@
 # Changelog do Fintry
 
+## [0.33.0] - 2026-11-04
+
+### Fundação do workspace
+
+- Separa o estado compartilhado e o transporte HTTP da renderização da aplicação; preserva sessão e CSRF, compartilha a aquisição do token entre mutações simultâneas e mantém cancelamentos de consulta distinguíveis de erros de conexão.
+- Publica o contrato OpenAPI parcial de consultas do workspace, gera tipos TypeScript e verifica divergências no CI.
+- Acrescenta chave opcional de operação nas baixas parciais. Repetir a mesma chave e conteúdo não registra outra baixa; reutilizá-la com outro conteúdo retorna conflito. A interface mantém a chave durante novas tentativas do mesmo formulário.
+- Acrescenta testes HTTP de precisão monetária, concorrência das novas tentativas e campos obrigatórios do contrato, além de testes do transporte no frontend. Migração V23 incremental para PostgreSQL e H2.
+
 ## [0.32.4] - 2026-11-03
 
 ### Ajuste na seleção do gráfico

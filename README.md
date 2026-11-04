@@ -2,7 +2,7 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.32.4**
+**Versão atual: 0.33.0**
 
 Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard reúne indicadores analíticos e visualizações de gráficos ajustáveis. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
 
@@ -192,6 +192,10 @@ Para SMTP real, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSW
 - Migrações Flyway e testes de integração HTTP.
 
 **Como os números são calculados:** saldo inicial + receitas recebidas − despesas pagas. Pendências usam o vencimento e descontam pagamentos parciais; indicadores realizados usam a data e o valor de cada baixa. O saldo disponível é o saldo atual de todas as contas, independentemente do mês selecionado. Transferências afetam cada conta, mas não entram nas receitas/despesas e no resultado. Valores são armazenados com `BigDecimal` e duas casas decimais. A baixa repetida do mesmo lançamento não duplica o movimento.
+
+## Evolução do frontend
+
+A v0.33.0 separa estado e transporte HTTP e publica consultas tipadas para a evolução gradual do workspace. Veja a [decisão de arquitetura](docs/03-architecture/frontend-workspace.md) e os [contratos da API](api/README.md).
 
 ## Stack e estrutura
 

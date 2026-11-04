@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface EntryPaymentRepository
     extends JpaRepository<EntryPayment, UUID>, JpaSpecificationExecutor<EntryPayment> {
+  java.util.Optional<EntryPayment> findByCompanyIdAndRequestId(UUID companyId, UUID requestId);
+
   List<EntryPayment> findByEntry_IdOrderByPaymentDateAscCreatedAtAscIdAsc(UUID entryId);
 
   List<EntryPayment> findByReconciliationBatchIdOrderByPaymentDateAscIdAsc(UUID batchId);

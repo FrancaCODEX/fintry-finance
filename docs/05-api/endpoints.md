@@ -65,3 +65,7 @@ Todos os recursos derivam a empresa da sessão. Conta de outra empresa retorna 4
 - `DELETE /finance/entries/{entryId}/attachments/{id}`: exige CSRF, retorna 204; exclui arquivo e metadados, sem modificar o lançamento. Arquivo inexistente, de outro lançamento ou de outra empresa retorna 404.
 
 Comprovantes podem pertencer a pendentes, realizados, cancelados e transferências; não afetam saldos e permanecem após baixa/cancelamento. Anexo de uma série é associado somente à ocorrência escolhida. O usuário que enviou é derivado da sessão. Tema é preferência local do navegador e não adiciona endpoint de conta; `/theme.js` é público para o acesso inicial.
+
+### Chave de operação em baixas (0.33.0)
+
+O corpo de `POST /api/v1/finance/entries/{id}/pay` pode incluir `requestId` UUID. Preserve a chave ao repetir uma requisição de resultado desconhecido. Repetições com a mesma data e valor retornam o lançamento corrente sem duplicar o pagamento. Outra data, valor ou lançamento com a mesma chave retorna 409. A chave é isolada por empresa. Sem a chave, mantém-se o comportamento anterior. Valores e datas continuam sujeitos à validação e autorização existentes.
