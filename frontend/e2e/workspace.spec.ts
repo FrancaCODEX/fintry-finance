@@ -32,6 +32,14 @@ test.beforeEach(async ({ page }) => {
     headers: { [csrf.headerName]: csrf.token },
   });
   expect(sample.status()).toBe(201);
+  // Fail at startup instead of timing out separately on every missing control.
+  await page.goto('/');
+  await expect(
+    page.getByRole('heading', {
+      name: 'Seu caixa, com contexto.',
+      exact: true,
+    }),
+  ).toBeVisible();
 });
 test('React dashboard keeps line series visible and saves a named view', async ({
   page,

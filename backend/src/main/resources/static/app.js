@@ -941,6 +941,20 @@ async function loadData(id) {
   }
 }
 
+async function safeLoad() {
+  try {
+    await load();
+  } catch (err) {
+    if (!document.querySelector(".load-error")) toast(err.message);
+    if (
+      state.user &&
+      !document.querySelector("#page-content")?.children.length
+    ) {
+      document.querySelector("#page-content").innerHTML =
+        '<div class="empty"><h2>Não foi possível carregar os dados.</h2><button class="btn" data-action="reload">Tentar novamente</button></div>';
+    }
+  }
+}
 function showDialog(title, subtitle, fields, action, submit = "Salvar") {
   modal.innerHTML = `<div class="modal-head"><div><h2 id="modal-title">${title}</h2><p>${subtitle}</p></div><button class="close" data-action="close" aria-label="Fechar">×</button></div><form id="modal-form">${fields}<div class="form-error" role="alert"></div><div class="dialog-actions"><button type="button" class="btn secondary" data-action="close">Voltar</button><button class="btn" type="submit">${submit}</button></div></form>`;
   modal.showModal();
