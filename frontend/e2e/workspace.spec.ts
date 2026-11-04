@@ -442,7 +442,10 @@ test('catalog filters survive reload and product actions retain the correct row'
     .click();
   await expect(page.locator('#modal')).toBeVisible();
   await expect(page.locator('#modal [name=name]')).toHaveValue(name);
-  await page.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await page
+    .locator('#modal')
+    .getByRole('button', { name: 'Fechar', exact: true })
+    .click();
   await page
     .getByRole('button', { name: 'Histórico de estoque', exact: true })
     .first()
@@ -519,4 +522,229 @@ test('proposal status uses the backend enum and filtered empty states can recove
     .getByRole('button', { name: 'Limpar filtros', exact: true })
     .click();
   await expect(page.locator('.workspace-record').first()).toBeVisible();
+});
+
+test('every menu page is owned by React and loads without query errors', async ({
+  page,
+}) => {
+  test.setTimeout(180000);
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  const routes = [
+    'dashboard',
+    'entries',
+    'pending',
+    'accounts',
+    'reconciliation',
+    'billing',
+    'budgets',
+    'reports',
+    'forecast',
+    'scenarios',
+    'series',
+    'imports',
+    'products',
+    'services',
+    'proposals',
+    'stock',
+    'sales',
+    'contacts',
+    'categories',
+    'company',
+    'team',
+    'audit',
+    'operations',
+    'subscription',
+    'security',
+    'examples',
+  ];
+  for (const route of routes) {
+    await page.goto('/?page=' + route);
+    const root = page.locator('#page-content > .fintry-workspace');
+    await expect(root).toBeVisible();
+    await expect(root.locator('h1')).toBeVisible();
+    await expect(root.locator('.workspace-loading')).toHaveCount(0);
+    await expect(root.locator('.workspace-message[role=alert]')).toHaveCount(0);
+  }
+  expect(errors).toEqual([]);
+});
+
+test('remaining pages fit on a phone including reports, audit and plan usage', async ({
+  page,
+}) => {
+  test.setTimeout(180000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of [
+    'pending',
+    'reports',
+    'forecast',
+    'series',
+    'budgets',
+    'imports',
+    'stock',
+    'audit',
+    'company',
+    'security',
+    'operations',
+    'examples',
+    'billing',
+    'subscription',
+  ]) {
+    await page.goto('/?page=' + route);
+    await expect(page.locator('#page-content .fintry-workspace')).toBeVisible();
+    await expect(page.locator('.workspace-loading')).toHaveCount(0);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+      route,
+    ).toBeTruthy();
+  }
+  await page.screenshot({
+    path: 'test-results/subscription-mobile.png',
+    fullPage: true,
+  });
+});
+
+test('CSV preview and confirmation preserve selection and avoid duplicate imports', async ({
+  page,
+}) => {
+  await page.goto('/?page=imports');
+  await expect(page.getByLabel('Arquivo CSV', { exact: true })).toBeVisible();
+  const csv =
+    'descricao;tipo;valor;vencimento;categoria\nImportação React 039;receita;123,45;2026-12-20;Outros\n';
+  await page.getByLabel('Arquivo CSV', { exact: true }).setInputFiles({
+    name: 'financeiro.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(csv, 'utf8'),
+  });
+  await page.getByRole('button', { name: 'Gerar prévia', exact: true }).click();
+  await expect(
+    page.getByRole('heading', {
+      name: 'Confira antes de importar',
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByLabel('Selecionar registro 2', { exact: true }),
+  ).toBeChecked();
+  await page
+    .getByRole('button', { name: 'Revisar e importar', exact: true })
+    .click();
+  await page
+    .getByRole('button', { name: 'Confirmar importação', exact: true })
+    .click();
+  await expect(
+    page.getByRole('heading', {
+      name: '1 lançamento(s) importado(s).',
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page
+    .getByRole('button', { name: 'Importar outro arquivo', exact: true })
+    .click();
+  await page.getByLabel('Arquivo CSV', { exact: true }).setInputFiles({
+    name: 'financeiro.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(csv, 'utf8'),
+  });
+  await page.getByRole('button', { name: 'Gerar prévia', exact: true }).click();
+  await expect(
+    page.getByLabel('Selecionar registro 2', { exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole('button', { name: 'Revisar e importar', exact: true }),
+  ).toBeDisabled();
+});
+
+test('report filters persist, company editing saves and pending payments use React forms', async ({
+  page,
+}) => {
+  await page.goto('/?page=reports');
+  await page.getByLabel('Base do período', { exact: true }).selectOption('DUE');
+  await page.getByLabel('Situação', { exact: true }).selectOption('PENDING');
+  await page
+    .getByRole('button', { name: 'Aplicar filtros', exact: true })
+    .click();
+  await expect(page).toHaveURL(/basis=DUE/);
+  await page.reload();
+  await expect(page.getByLabel('Situação', { exact: true })).toHaveValue(
+    'PENDING',
+  );
+  await page.goto('/?page=company');
+  await page
+    .getByLabel('Nome fantasia', { exact: true })
+    .fill('Estúdio Aurora React');
+  await page
+    .getByLabel('Razão social', { exact: true })
+    .fill('Estúdio Aurora Ltda');
+  await page
+    .getByLabel('CNPJ ou documento', { exact: true })
+    .fill('12345678000199');
+  await page.getByLabel('Telefone', { exact: true }).fill('11999998888');
+  await page
+    .getByLabel('E-mail da empresa', { exact: true })
+    .fill('empresa@example.com');
+  await page
+    .getByRole('button', { name: 'Salvar dados da empresa', exact: true })
+    .click();
+  await expect(
+    page.getByText('Dados da empresa atualizados.', { exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel('Nome fantasia', { exact: true })).toHaveValue(
+    'Estúdio Aurora React',
+  );
+  await page.goto('/?page=pending');
+  await page
+    .locator('#page-content')
+    .getByRole('button', { name: /^(Pagar|Receber)$/ })
+    .first()
+    .click();
+  await expect(page.locator('.workspace-form-dialog')).toBeVisible();
+});
+
+test('React budget editor creates, changes and removes only the selected limit', async ({
+  page,
+}) => {
+  const csrf = await (await page.request.get('/api/v1/auth/csrf')).json();
+  const created = await page.request.post('/api/v1/categories', {
+    headers: { [csrf.headerName]: csrf.token },
+    data: {
+      name: 'Categoria orçamento React 039',
+      kind: 'EXPENSE',
+      active: true,
+    },
+  });
+  expect(created.ok()).toBeTruthy();
+  const category = await created.json();
+  await page.goto('/?page=budgets');
+  await page
+    .getByRole('button', { name: 'Novo orçamento', exact: true })
+    .click();
+  await page.getByLabel('Categoria', { exact: true }).selectOption(category.id);
+  await page.getByLabel('Limite mensal (R$)', { exact: true }).fill('250.00');
+  await page
+    .getByRole('button', { name: 'Salvar orçamento', exact: true })
+    .click();
+  const card = page
+    .locator('.workspace-record')
+    .filter({
+      has: page.getByRole('heading', {
+        name: 'Categoria orçamento React 039',
+        exact: true,
+      }),
+    });
+  await expect(card).toContainText('250,00');
+  await card
+    .getByRole('button', { name: 'Editar limite', exact: true })
+    .click();
+  await page.getByLabel('Limite mensal (R$)', { exact: true }).fill('125.00');
+  await page
+    .getByRole('button', { name: 'Salvar orçamento', exact: true })
+    .click();
+  await expect(card).toContainText('125,00');
+  await card.getByRole('button', { name: 'Remover', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirmar', exact: true }).click();
+  await expect(card).toHaveCount(0);
 });

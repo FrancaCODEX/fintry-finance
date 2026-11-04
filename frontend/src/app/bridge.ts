@@ -7,11 +7,44 @@ import type {
   Transport,
 } from '../api/client';
 export type Page =
-  'dashboard' | 'entries' | 'scenarios' | 'reconciliation' | CatalogPage;
+  | 'dashboard'
+  | 'entries'
+  | 'scenarios'
+  | 'reconciliation'
+  | CatalogPage
+  | 'pending'
+  | 'reports'
+  | 'forecast'
+  | 'series'
+  | 'budgets'
+  | 'imports'
+  | 'stock'
+  | 'audit'
+  | 'company'
+  | 'security'
+  | 'operations'
+  | 'examples'
+  | 'billing'
+  | 'subscription';
 export interface Bridge {
   page: Page;
   month: string;
-  user: { id: string; name: string; companyId: string };
+  user: { id: string; name: string; companyId: string; email: string };
+  canCollect: boolean;
+  welcome: boolean;
+  stockProduct?: { id: string; name: string };
+  hostAction: (
+    name: string,
+    args?: Record<string, string>,
+    context?: {
+      state?: Record<string, unknown>;
+      billing?: Record<string, unknown>;
+      subscription?: Record<string, unknown>;
+    },
+  ) => Promise<void>;
+  companyChanged: (name: string) => void;
+  auditLabel: (key: string) => string;
+  auditValue: (value: string) => string;
   canWrite: boolean;
   isAdmin: boolean;
   catalogAction: (

@@ -4,7 +4,9 @@
 
 ### Funcionalidades
 
-- Migra as listagens de produtos, serviços, vendas, propostas, contatos, categorias, equipe e contas para React/TypeScript, com estados de carregamento/erro, filtros na URL e paginação onde suportada pela API.
+- Migra todas as 26 páginas do menu para React/TypeScript: financeiro, planejamento, comercial, cadastros e administração. Usa consultas canceláveis, estados de carregamento/erro, filtros na URL e paginação onde suportada pela API.
+- Implementa formulários React de empresa, segurança e orçamentos, além da importação CSV com seleção, prévia, confirmação e proteção contra duplicidades.
+- Implementa consulta e controle de séries, relatório/exportações, projeção com gráfico/tabela, estoque e auditoria; preserva confirmações de cobrança e assinatura.
 - Integra as ações de cadastro, edição, inativação, convites, movimentação de estoque, detalhes de vendas/propostas e transferências aos fluxos existentes, preservando confirmações e validações no servidor.
 
 ### Melhorias
@@ -12,12 +14,13 @@
 - Renova cores, superfícies, hierarquia, botões, campos, cartões, dashboard e navegação com tokens compartilhados para temas claro/escuro e telas móveis.
 - Separa Financeiro e Planejamento no menu e adiciona atalho de novo lançamento na lateral.
 - Adiciona componentes compartilhados para estados vazios e paginação, com nomes acessíveis e feedback de consulta.
-- Mantém as demais páginas e os formulários comerciais no host, com os mesmos estilos compartilhados. A migração integral para React continua em evolução; esta entrega não altera cálculos financeiros nem banco de dados.
+- Remove o carregador das páginas HTML do host: todas as rotas autenticadas do menu usam React. A sessão, a estrutura da navegação, os detalhes globais e os diálogos comerciais/operacionais continuam integrados pelo host. Esta entrega não altera cálculos financeiros nem banco de dados.
 
 ### Correções
 
 - Preserva o produto selecionado e o endereço de retorno ao abrir o histórico de estoque a partir do catálogo React.
 - Mantém filtros aplicados ao recarregar, navegar para trás e concluir ações pelos formulários existentes.
+- Corrige o seletor de fechamento do teste de produto que bloqueava a primeira execução do CI.
 
 ## [0.38.0] - 2026-11-04
 

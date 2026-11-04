@@ -54,6 +54,27 @@ async function mountWorkspace(id) {
   container.innerHTML = "";
   window.FintryWorkspace.mount(container, {
     page:state.page, month:state.month, user:state.user, canWrite:!!canWrite(), isAdmin:!!isAdmin(), request:api,
+    canCollect: !!canCollect(), welcome: !!subscription.welcome, stockProduct: commerce.stockProduct,
+    companyChanged: (name) => {
+      state.user.companyName = name;
+      const label = document.querySelector(".company-label > span");
+      if (label) label.textContent = name;
+    },
+    auditLabel: (key) => auditActions[key] || key,
+    auditValue,
+    hostAction: async (name, args = {}, context = {}) => {
+      try {
+        if (context.state?.reportFilters) state.reportFilters = context.state.reportFilters;
+        if (context.billing) Object.assign(billing, context.billing);
+        if (context.subscription) Object.assign(subscription, context.subscription);
+        const button = document.createElement("button");
+        button.dataset.action = name;
+        for (const [key, value] of Object.entries(args)) button.dataset[key] = value;
+        await act(button);
+      } catch (error) {
+        toast(error.message);
+      }
+    },
     // Seed the existing dialogs with the exact page that React displayed.
     catalogAction: async (page, data, name, rowId) => {
       try {
