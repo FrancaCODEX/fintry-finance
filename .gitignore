@@ -54,3 +54,6 @@ __pycache__/
 # Frontend dependencies and generated bundles (Docker builds them from source)
 node_modules/
 backend/src/main/resources/static/workspace/
+
+frontend/test-results/
+frontend/playwright-report/

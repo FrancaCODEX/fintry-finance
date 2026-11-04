@@ -1,3 +1,11 @@
+FROM node:22-bookworm-slim AS frontend
+WORKDIR /frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ ./
+COPY api/ /api/
+RUN npm run contracts:check && npm run build
+
 FROM eclipse-temurin:21-jdk-jammy AS build
 WORKDIR /build
 COPY backend/.mvn .mvn
@@ -5,6 +13,7 @@ COPY backend/mvnw backend/pom.xml ./
 # Windows checkouts may contain CRLF even when Git enforces LF for new checkouts.
 RUN sed -i 's/\r$//' mvnw && chmod +x mvnw && sh ./mvnw -B dependency:go-offline
 COPY backend/src src
+COPY --from=frontend /backend/src/main/resources/static/workspace src/main/resources/static/workspace
 RUN sh ./mvnw -B -DskipTests package
 
 FROM eclipse-temurin:21-jre-jammy

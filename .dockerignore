@@ -13,3 +13,8 @@ backups
 **/*.dump.json
 **/.env
 **/.env.*
+
+**/node_modules
+**/test-results
+**/playwright-report
+backend/src/main/resources/static/workspace

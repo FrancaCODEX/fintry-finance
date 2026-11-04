@@ -1,5 +1,15 @@
 # Changelog do Fintry
 
+## [0.34.0] - 2026-11-04
+
+### Workspace React
+
+- Implementa dashboard e lançamentos em React/TypeScript com consultas canceláveis, estados de carregamento/erro, identidade visual compartilhada, cartões responsivos e navegação por teclado.
+- Migra as visualizações salvas do gráfico no mesmo navegador: linhas/barras, séries, períodos e tabela consultável. O realce do mês permanece atrás das séries.
+- Mantém mês e filtros de lançamentos na URL, incluindo atualização e voltar/avançar do navegador. O painel de detalhes preserva a consulta.
+- Integra as ações de cadastro, edição, baixa, cancelamento e comprovantes aos formulários e permissões existentes. Indicadores e meses do gráfico abrem relatórios pelas baixas correspondentes.
+- Acrescenta build Vite ao Docker e CI, testes das preferências e aceitação em navegador para gráfico, filtros, detalhes, responsividade e sessão expirada.
+
 ## [0.33.0] - 2026-11-04
 
 ### Fundação do workspace
