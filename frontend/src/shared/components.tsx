@@ -61,17 +61,15 @@ export function PageHeading({
   title,
   description,
   children,
-  eyebrow = 'Seu espaço financeiro',
 }: {
   title: string;
   description: string;
-  eyebrow?: string;
   children?: ReactNode;
 }) {
   return (
     <div className="page-head">
       <div>
-        <span className="eyebrow">{eyebrow}</span>
+        <span className="eyebrow">SEU ESPAÇO FINANCEIRO</span>
         <h1 tabIndex={-1}>{title}</h1>
         <p className="muted">{description}</p>
       </div>

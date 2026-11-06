@@ -1,5 +1,13 @@
 # Changelog do Fintry
 
+## [0.39.1] - 2026-11-06
+
+### Correções
+
+- Reverte integralmente a remodelação e a migração de páginas entregues na 0.39.0 (PR #47), por solicitação do usuário após problemas visuais e de funcionamento.
+- Restaura os arquivos de execução, estilos, navegação, componentes e testes ao estado da 0.38.0. Mantém o histórico de versões e identifica esta correção como 0.39.1.
+- Não altera dados existentes, migrações Flyway nem volumes. As funcionalidades anteriores de planejamento e conciliação são preservadas.
+
 ## [0.39.0] - 2026-11-04
 
 ### Funcionalidades

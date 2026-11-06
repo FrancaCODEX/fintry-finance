@@ -84,10 +84,11 @@ Sequência autorizada em 04/11/2026 após a v0.35.0:
 | 0.36.0 | Formulários financeiros em React e componentes compartilhados | Incorporada à main (PR #43) |
 | 0.37.0 | Cenários salvos, duplicação, histórico de cálculos e recálculo | Incorporada à main (PR #45) |
 | 0.38.0 | Sugestões explicáveis e regras reutilizáveis de conciliação, com confirmação | Incorporada à main (PR #46) |
-| 0.39.0 | Repaginação dos estilos e migração das 26 páginas do menu para React | Implementada no PR #47; validação final |
+| 0.39.0 | Repaginação do frontend e migração de páginas | Revertida na 0.39.1 a pedido do usuário |
+| 0.39.1 | Restauração da interface e dos fluxos da 0.38.0 | Reversão da entrega do PR #47 |
 
 A v0.35.1 corrige o build Windows antes desta sequência.
 
 A v0.37.0 persiste cenários da empresa e retratos dos cálculos com revisão, consulta e comparação de histórico, sem alterar dados financeiros.
 
-A v0.39.0 renova a camada visual e migra as 26 páginas do menu para React/TypeScript. Empresa, segurança, orçamento e importação CSV também têm formulários React. Sessão, navegação estrutural, detalhes globais e diálogos comerciais/operacionais continuam integrados pelo host para preservar os fluxos existentes. O CI percorre todas as rotas e cobre consulta móvel, filtros, CSV, empresa, orçamento e os fluxos financeiros já existentes.
+Em 06/11/2026, o usuário solicitou a reversão integral da 0.39.0 por problemas visuais e de funcionamento. A 0.39.1 restaura o código de execução da 0.38.0, preservando dados e histórico. A possível integração de IA permanece em discussão, sem implementação nesta entrega.
