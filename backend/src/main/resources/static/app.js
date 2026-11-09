@@ -829,7 +829,7 @@ function forecastChart(f) {
     )
     .join(
       "",
-    )}${zero}<polygon points="${x(0)},180 ${points.join(" ")} ${x(last)},180" fill="url(#forecast-fill)"/><polyline points="${points.join(" ")}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${f.days
+    )}${zero}<polygon points="${x(0)},180 ${points.join(" ")} ${x(last)},180" fill="url(#forecast-fill)"/><polyline pathLength="1" points="${points.join(" ")}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${f.days
     .filter(
       (d, i) =>
         i === 0 || i === f.days.length - 1 || d.date === f.firstNegativeDate,
@@ -907,7 +907,20 @@ function renderAccounts() {
       : `<section class="card">${empty("Sua primeira conta começa aqui", "Cadastre uma conta bancária ou o caixa da empresa.", "account", "Criar conta")}</section>`)
   );
 }
-let requestId = 0;
+let requestId = 0,
+  enteredPage = null,
+  enterTimer = 0;
+// The entrance plays when the page changes, not when the same page refreshes its data.
+function markPageEnter(container, page) {
+  if (!container || page === enteredPage) return;
+  enteredPage = page;
+  clearTimeout(enterTimer);
+  container.classList.add("page-enter");
+  enterTimer = setTimeout(
+    () => document.querySelector("#page-content")?.classList.remove("page-enter"),
+    700,
+  );
+}
 async function load() {
   window.FintryWorkspace?.unmount();
   const id = ++requestId,
@@ -924,6 +937,7 @@ async function load() {
     if (id !== requestId || !state.user) return;
     container = document.querySelector("#page-content");
     container?.setAttribute("aria-busy", "false");
+    markPageEnter(container, page);
     if (!modal.open && !drawer.open) {
       const restored = focused
         ? Array.from(container?.querySelectorAll("[name]") || []).find(

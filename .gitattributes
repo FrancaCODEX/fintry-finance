@@ -5,3 +5,4 @@ Dockerfile text eol=lf
 
 # Generated contract has a stable checkout format; validation also accepts CRLF.
 frontend/src/api/schema.d.ts text eol=lf
+*.woff2 binary

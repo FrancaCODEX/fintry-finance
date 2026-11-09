@@ -1,0 +1,159 @@
+/*
+ * Fintry 0.41 — camada de marca: tipografia própria e movimento.
+ * Carregada depois de style.css e design.css. Movimento usa somente opacity e transform,
+ * para não provocar layout nem pintura a cada quadro; "prefers-reduced-motion" o desliga.
+ * Fontes: Inter e Bricolage Grotesque, SIL Open Font License 1.1 (ver fonts/LICENSE.txt).
+ */
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter.woff2") format("woff2-variations");
+}
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/fonts/bricolage-grotesque.woff2") format("woff2-variations");
+}
+:root {
+  --font-ui: "Inter Variable", "Inter", "Aptos", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", var(--font-ui);
+  --ease-out: cubic-bezier(0.22, 0.8, 0.26, 1);
+  --motion-fast: 130ms;
+  --motion-base: 260ms;
+  --motion-slow: 520ms;
+}
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-ui);
+}
+h1,
+h2,
+.brand-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+h1,
+.page-head h1,
+.fintry-workspace .page-head h1 {
+  font-weight: 650;
+  letter-spacing: -0.026em;
+}
+h2 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Entrada de página: cada bloco sobe alguns pixels, em sequência curta. */
+@keyframes brand-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes brand-fade {
+  from {
+    opacity: 0;
+  }
+}
+#page-content.page-enter > :not(.fintry-workspace),
+.fintry-workspace > * {
+  animation: brand-rise var(--motion-base) var(--ease-out) backwards;
+}
+#page-content.page-enter > :nth-child(2),
+.fintry-workspace > :nth-child(2) {
+  animation-delay: 45ms;
+}
+#page-content.page-enter > :nth-child(3),
+.fintry-workspace > :nth-child(3) {
+  animation-delay: 90ms;
+}
+#page-content.page-enter > :nth-child(4),
+.fintry-workspace > :nth-child(4) {
+  animation-delay: 135ms;
+}
+#page-content.page-enter > :nth-child(n + 5),
+.fintry-workspace > :nth-child(n + 5) {
+  animation-delay: 180ms;
+}
+.fintry-workspace {
+  animation: none;
+}
+
+/* Diálogos e painel de detalhes entram com um gesto curto; o fundo apenas esmaece. */
+@keyframes brand-dialog {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+@keyframes brand-drawer {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+dialog[open] {
+  animation: brand-dialog var(--motion-base) var(--ease-out);
+}
+dialog.details-drawer[open] {
+  animation-name: brand-drawer;
+}
+dialog[open]::backdrop {
+  animation: brand-fade var(--motion-base) ease-out;
+}
+
+/* Resposta ao toque e ao ponteiro. */
+.btn,
+.nav-btn {
+  transition:
+    transform var(--motion-fast) var(--ease-out),
+    background-color var(--motion-fast) ease-out,
+    border-color var(--motion-fast) ease-out,
+    color var(--motion-fast) ease-out,
+    box-shadow var(--motion-fast) ease-out;
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.nav-btn .icon {
+  transition: transform var(--motion-base) var(--ease-out);
+}
+.nav-btn:hover .icon,
+.nav-btn.active .icon {
+  transform: scale(1.08);
+}
+
+/* A linha da projeção se desenha uma vez, da esquerda para a direita. */
+@keyframes brand-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+.forecast-chart polyline {
+  stroke-dasharray: 1;
+  animation: brand-draw var(--motion-slow) var(--ease-out) 120ms backwards;
+}
+.forecast-chart polygon {
+  animation: brand-fade var(--motion-slow) ease-out 320ms backwards;
+}
+.workspace-spark {
+  animation: brand-fade var(--motion-slow) ease-out 200ms backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+  }
+  .forecast-chart polyline {
+    stroke-dasharray: none;
+  }
+}

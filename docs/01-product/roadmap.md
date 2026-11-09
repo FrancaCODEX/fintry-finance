@@ -86,6 +86,8 @@ Sequência autorizada em 04/11/2026 após a v0.35.0:
 | 0.38.0 | Sugestões explicáveis e regras reutilizáveis de conciliação, com confirmação | Incorporada à main (PR #46) |
 | 0.39.0 | Repaginação do frontend e migração de páginas | Revertida na 0.39.1 a pedido do usuário |
 | 0.39.1 | Restauração da interface e dos fluxos da 0.38.0 | Reversão da entrega do PR #47 |
+| 0.40.0 | Refinamento da interface existente: indicadores com tendência, projeção legível, filtros e tabelas alinhados; compressão e revalidação de arquivos | Incorporada à main (PR #48) |
+| 0.41.0 | Evolução da marca: tipografia própria, movimento leve e resumo em frases no dashboard | Em revisão |
 
 A v0.35.1 corrige o build Windows antes desta sequência.
 

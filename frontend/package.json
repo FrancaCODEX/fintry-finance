@@ -1,7 +1,7 @@
 {
   "name": "fintry-workspace",
   "private": true,
-  "version": "0.40.0",
+  "version": "0.41.0",
   "type": "module",
   "scripts": {
     "contracts": "openapi-typescript ../api/workspace.openapi.json -o src/api/schema.d.ts",
