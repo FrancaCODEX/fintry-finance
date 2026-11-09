@@ -4525,3 +4525,40 @@ dialog::backdrop {
     transition: none;
   }
 }
+
+/* 0.40.0 — foco programático discreto, projeção legível e respiro nos avisos */
+#page-content h1[tabindex="-1"]:focus {
+  outline: 0;
+}
+.account-grid + .notice {
+  margin-top: 18px;
+}
+.forecast-chart .forecast-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.forecast-chart .forecast-zero {
+  stroke: var(--muted);
+  stroke-dasharray: 4 4;
+}
+.forecast-chart .forecast-point {
+  fill: var(--green);
+  stroke: var(--paper);
+  stroke-width: 2;
+}
+.forecast-chart .forecast-point.negative {
+  fill: #b54a49;
+}
+/* A coluna de valor quebra o detalhe da baixa parcial para a tabela caber sem rolagem lateral. */
+.entry-table td.positive small,
+.entry-table td.negative small {
+  display: block;
+  white-space: normal;
+  min-width: 150px;
+  max-width: 190px;
+}
+.entry-table td:nth-child(3) {
+  white-space: normal;
+  min-width: 110px;
+  max-width: 150px;
+}

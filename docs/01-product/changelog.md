@@ -1,5 +1,22 @@
 # Changelog do Fintry
 
+## [0.40.0] - 2026-11-09
+
+### Melhorias
+
+- Indicadores do dashboard mostram a variação mensal em destaque (alta/queda, com tom de atenção para despesa em alta) e uma minilinha dos meses do histórico já retornado pelo resumo. Nenhum cálculo novo é feito no navegador.
+- O gráfico do fluxo projetado ajusta a escala ao intervalo previsto, com linhas de referência e área preenchida; o zero aparece quando o saldo se aproxima dele ou fica negativo.
+- Filtros de lançamentos ficam em uma linha no desktop, com as ações alinhadas à direita; as ações de cada linha não quebram mais de forma irregular.
+- A tabela de pendências e lançamentos da interface existente cabe na largura da página sem rolagem lateral em telas de 1440 px.
+- Contas, Conciliação e Cobranças ganham ícones próprios no menu; o aviso da página de contas recebe espaçamento.
+- No celular, o botão “Mês atual” alinha com o campo de mês.
+- Respostas de texto são compactadas pelo servidor e os arquivos da interface passam a ser revalidados pelo navegador (`Cache-Control: no-cache`) em vez de baixados por completo a cada acesso. Respostas da API continuam `no-store`.
+- Erros de validação de formulário incluem `message` além de `errors`, no mesmo formato das demais respostas de erro.
+
+### Correções
+
+- Remove o contorno de foco exibido ao redor do título ao abrir cada página. O foco programático para leitores de tela é mantido; o contorno de teclado dos controles não muda.
+
 ## [0.39.1] - 2026-11-06
 
 ### Correções

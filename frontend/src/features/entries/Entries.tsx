@@ -181,25 +181,27 @@ export function Entries({ bridge }: { bridge: Bridge }) {
               ))}
             </select>
           </Field>
-          <button className="btn" type="submit">
-            Aplicar filtros
-          </button>
-          <button
-            className="btn text"
-            type="button"
-            onClick={() =>
-              apply({
-                ...filters,
-                search: '',
-                type: '',
-                status: '',
-                accountId: '',
-                page: 0,
-              })
-            }
-          >
-            Limpar filtros
-          </button>
+          <div className="workspace-filter-actions">
+            <button className="btn" type="submit">
+              Aplicar filtros
+            </button>
+            <button
+              className="btn text"
+              type="button"
+              onClick={() =>
+                apply({
+                  ...filters,
+                  search: '',
+                  type: '',
+                  status: '',
+                  accountId: '',
+                  page: 0,
+                })
+              }
+            >
+              Limpar filtros
+            </button>
+          </div>
         </form>
         <QueryState {...query} />
         {data && (
