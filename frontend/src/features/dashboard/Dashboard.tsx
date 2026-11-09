@@ -20,6 +20,31 @@ function change(value: number, previous: number) {
   if (previous < 0) return `${money(value - previous)} vs. mês anterior`;
   return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(((value - previous) / previous) * 100)}% vs. mês anterior`;
 }
+function direction(value: number, previous: number) {
+  if (!previous || value === previous) return 'flat';
+  return value > previous ? 'up' : 'down';
+}
+function Sparkline({ values }: { values: number[] }) {
+  if (values.length < 2 || values.every((v) => v === values[0])) return null;
+  const low = Math.min(...values),
+    high = Math.max(...values),
+    step = 100 / (values.length - 1),
+    points = values.map(
+      (v, i) =>
+        `${(i * step).toFixed(2)},${(26 - ((v - low) / (high - low)) * 22).toFixed(2)}`,
+    );
+  return (
+    <svg
+      className="workspace-spark"
+      viewBox="0 0 100 30"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <polygon points={`0,30 ${points.join(' ')} 100,30`} />
+      <polyline points={points.join(' ')} vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+}
 export function Dashboard({ bridge }: { bridge: Bridge }) {
   const [indicator, setIndicator] = useState<IndicatorKind>();
   const [month, setMonth] = useState(() => readLocation(bridge.month).month);
@@ -170,7 +195,10 @@ export function Dashboard({ bridge }: { bridge: Bridge }) {
                     {label} <i>↗</i>
                   </span>
                   <strong>{money(value)}</strong>
-                  <small>{change(value, previous)}</small>
+                  <small className={direction(value, previous)}>
+                    {change(value, previous)}
+                  </small>
+                  <Sparkline values={s.flow.map((m) => m[tone])} />
                   <em>Entender valor</em>
                 </button>
               ))}

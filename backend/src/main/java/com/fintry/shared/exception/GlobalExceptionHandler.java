@@ -97,6 +97,9 @@ public class GlobalExceptionHandler {
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
         body.put("errors", errors);
+        body.put("message", errors.size() == 1
+                ? errors.values().iterator().next()
+                : "Confira os campos destacados.");
 
         return ResponseEntity
                 .badRequest()
