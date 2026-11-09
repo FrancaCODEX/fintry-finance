@@ -19,6 +19,11 @@ const dateLabel = (date) =>
       )
     : "—";
 const icons = {
+  scale:
+    '<path d="M12 4v16M7 20h10M5 7h14M5 7l-3 7a3.5 3.5 0 0 0 6 0L5 7Zm14 0-3 7a3.5 3.5 0 0 0 6 0l-3-7Z"/>',
+  receipt:
+    '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  bank: '<path d="m3 9 9-5 9 5M5 9v9m4.7-9v9m4.6-9v9M19 9v9M3 20h18"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   close: '<path d="m6 6 12 12M18 6 6 18"/>',
   panel:
@@ -799,29 +804,43 @@ function forecastChart(f) {
     Number(f.openingBalance),
     ...f.days.map((d) => Number(d.balance)),
   ];
-  let low = Math.min(0, ...values),
-    high = Math.max(0, ...values);
-  if (high === low) high = low + 1;
-  const pad = (high - low) * 0.12;
-  low -= pad;
-  high += pad;
-  const x = (i) => 48 + (i / (f.days.length - 1)) * 530,
-    y = (v) => 20 + ((high - v) / (high - low)) * 160;
-  const points = f.days
-    .map((d, i) => `${x(i)},${y(Number(d.balance))}`)
-    .join(" ");
-  return `<div class="chart"><svg viewBox="0 0 600 220" role="img" aria-label="Evolução estimada do saldo até ${dateLabel(f.end)}"><line x1="48" x2="580" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)" stroke-dasharray="4 4"/>${[high, (high + low) / 2, low].map((v) => `<text x="0" y="${y(v) + 4}">${v.toLocaleString("pt-BR", { notation: "compact", maximumFractionDigits: 1 })}</text>`).join("")}<polyline points="${points}" fill="none" stroke="var(--green)" stroke-width="2.5"/>${f.days
+  // The scale follows the projected range; zero only joins it when the balance gets close.
+  let low = Math.min(...values),
+    high = Math.max(...values);
+  const span = Math.max(high - low, Math.abs(high) * 0.04, 1);
+  low -= span * 0.35;
+  high += span * 0.25;
+  if (Math.min(...values) >= 0 && low < 0) low = 0;
+  const last = Math.max(1, f.days.length - 1),
+    x = (i) => 56 + (i / last) * 524,
+    y = (v) => 16 + ((high - v) / (high - low)) * 164,
+    compact = (v) =>
+      v.toLocaleString("pt-BR", { notation: "compact", maximumFractionDigits: 1 });
+  const points = f.days.map((d, i) => `${x(i)},${y(Number(d.balance))}`);
+  const ticks = [0, 1, 2, 3].map((i) => high - ((high - low) * i) / 3);
+  const zero =
+    low < 0 && high > 0
+      ? `<line class="forecast-zero" x1="56" x2="580" y1="${y(0)}" y2="${y(0)}"/>`
+      : "";
+  return `<div class="chart forecast-chart"><svg viewBox="0 0 600 220" role="img" aria-label="Evolução estimada do saldo até ${dateLabel(f.end)}"><defs><linearGradient id="forecast-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--green)" stop-opacity=".22"/><stop offset="1" stop-color="var(--green)" stop-opacity="0"/></linearGradient></defs>${ticks
+    .map(
+      (v) =>
+        `<line class="forecast-grid" x1="56" x2="580" y1="${y(v)}" y2="${y(v)}"/><text x="48" y="${y(v) + 4}" text-anchor="end">${compact(v)}</text>`,
+    )
+    .join(
+      "",
+    )}${zero}<polygon points="${x(0)},180 ${points.join(" ")} ${x(last)},180" fill="url(#forecast-fill)"/><polyline points="${points.join(" ")}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${f.days
     .filter(
       (d, i) =>
         i === 0 || i === f.days.length - 1 || d.date === f.firstNegativeDate,
     )
     .map((d) => {
       const i = f.days.indexOf(d);
-      return `<circle cx="${x(i)}" cy="${y(Number(d.balance))}" r="4" fill="${Number(d.balance) < 0 ? "#b54a49" : "#18785a"}"><title>${dateLabel(d.date)}: ${money(d.balance)}</title></circle>`;
+      return `<circle class="${Number(d.balance) < 0 ? "forecast-point negative" : "forecast-point"}" cx="${x(i)}" cy="${y(Number(d.balance))}" r="4.5"><title>${dateLabel(d.date)}: ${money(d.balance)}</title></circle>`;
     })
     .join(
       "",
-    )}<text x="48" y="207">${dateLabel(f.start)}</text><text x="578" y="207" text-anchor="end">${dateLabel(f.end)}</text></svg></div>`;
+    )}<text x="56" y="207">${dateLabel(f.start)}</text><text x="580" y="207" text-anchor="end">${dateLabel(f.end)}</text></svg></div>`;
 }
 function renderForecast() {
   const f = state.forecast,
@@ -884,7 +903,7 @@ function renderAccounts() {
       `<button class="btn secondary" data-action="transfer">${icon("transfer")}Transferir</button><button class="btn" data-action="account">${icon("plus")}Nova conta</button>`,
     ) +
     (state.accounts.length
-      ? `<section class="account-grid">${state.accounts.map((a) => `<article class="card account-card"><div class="metric-icon">${icon("wallet")}</div><h2>${e(a.name)}</h2><span class="eyebrow">Saldo atual</span><strong>${money(a.balance)}</strong><p>Saldo inicial: ${money(a.initialBalance)}</p></article>`).join("")}</section><p class="notice">O saldo é calculado pelo valor inicial mais os lançamentos realizados. Transferências movimentam as contas sem alterar o resultado da empresa.</p>`
+      ? `<section class="account-grid">${state.accounts.map((a) => `<article class="card account-card"><div class="metric-icon">${icon("bank")}</div><h2>${e(a.name)}</h2><span class="eyebrow">Saldo atual</span><strong>${money(a.balance)}</strong><p>Saldo inicial: ${money(a.initialBalance)}</p></article>`).join("")}</section><p class="notice">O saldo é calculado pelo valor inicial mais os lançamentos realizados. Transferências movimentam as contas sem alterar o resultado da empresa.</p>`
       : `<section class="card">${empty("Sua primeira conta começa aqui", "Cadastre uma conta bancária ou o caixa da empresa.", "account", "Criar conta")}</section>`)
   );
 }
