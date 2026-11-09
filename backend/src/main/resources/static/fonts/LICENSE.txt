@@ -1,0 +1,7 @@
+inter.woff2 — Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
+bricolage-grotesque.woff2 — Copyright 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage)
+
+Both fonts are licensed under the SIL Open Font License, Version 1.1:
+https://openfontlicense.org/open-font-license-official-text/
+
+The files are the Latin variable subsets distributed by Fontsource (https://fontsource.org).

@@ -2,9 +2,9 @@
 
 **Control today. Grow tomorrow.**
 
-**Versão atual: 0.40.0**
+**Versão atual: 0.41.0**
 
-A 0.40.0 refina a interface existente sem remodelá-la: indicadores com tendência, projeção legível, filtros alinhados e carregamento mais leve. A 0.39.1 reverteu a remodelação da 0.39.0 e restaura a interface e os fluxos da 0.38.0.
+A 0.41.0 evolui a marca sem trocar a identidade: tipografia própria, movimento leve e um resumo em frases no dashboard. A 0.40.0 refinou a interface existente sem remodelá-la: indicadores com tendência, projeção legível, filtros alinhados e carregamento mais leve. A 0.39.1 reverteu a remodelação da 0.39.0 e restaura a interface e os fluxos da 0.38.0.
 
 Projeto pessoal em desenvolvimento, preparado para demonstração. O dashboard React reúne indicadores explicáveis e gráficos ajustáveis. O simulador compara hipóteses com o fluxo previsto, salva planejamentos e preserva o histórico de cálculos sem alterar os registros financeiros. Veja a [visão geral do dashboard](docs/01-product/dashboard.md).
 

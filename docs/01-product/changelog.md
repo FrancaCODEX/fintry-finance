@@ -1,5 +1,17 @@
 # Changelog do Fintry
 
+## [0.41.0] - 2026-11-09
+
+### Funcionalidades
+
+- O dashboard abre com uma saudação pelo nome e até três frases sobre o momento do caixa: saldo que fica negativo nos próximos 30 dias, valores vencidos, receitas do mês à frente do mês anterior e o previsto para os próximos 30 dias. Cada frase leva à página correspondente.
+- `GET /api/v1/reports/briefing` monta as frases no servidor a partir da projeção e do resumo mensal existentes, sempre da empresa autenticada. Não grava nada e não recalcula saldos. Um mês em andamento só é comparado ao anterior quando já está à frente.
+
+### Melhorias
+
+- Tipografia própria servida pelo aplicativo: Inter no texto e Bricolage Grotesque nos títulos (SIL Open Font License). Antes a interface pedia Inter sem entregá-la e caía na fonte do sistema. Verde, logotipo e estrutura das telas não mudam.
+- Movimento em `brand.css`, somente com opacidade e transformação: entrada escalonada dos blocos ao trocar de página, abertura de diálogos e do painel de detalhes, resposta ao pressionar botões e desenho da linha da projeção. A entrada não se repete quando a mesma página atualiza seus dados, e tudo é desligado com “reduzir movimento” no sistema.
+
 ## [0.40.0] - 2026-11-09
 
 ### Melhorias

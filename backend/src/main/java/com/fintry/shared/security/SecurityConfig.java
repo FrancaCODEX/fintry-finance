@@ -63,6 +63,8 @@ public class SecurityConfig {
                         "/theme.js",
                         "/style.css",
                         "/design.css",
+                        "/brand.css",
+                        "/fonts/**",
                         "/navigation.js",
                         "/dashboard.js",
                         "/company.js",

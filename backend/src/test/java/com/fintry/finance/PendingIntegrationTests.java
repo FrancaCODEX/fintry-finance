@@ -367,4 +367,36 @@ class PendingIntegrationTests {
     b.request("POST", "/finance/entries/" + ids.get(0) + "/cancel", null, 200);
     assertEquals(19, b.pending("").get("totalElements").asInt());
   }
+
+  @Test
+  void briefingSpeaksAboutTheCompanyOwnFiguresOnly() throws Exception {
+    var owner = new Browser().signup();
+    var first = owner.request("GET", "/reports/briefing", null, 200).get("messages");
+    assertEquals(1, first.size());
+    assertEquals("accounts", first.get(0).get("page").asText());
+
+    var account = owner.account("Banco");
+    owner.entry(account, "Cliente atrasado", "INCOME", "980.00", -3);
+    owner.entry(account, "Aluguel", "EXPENSE", "1500.00", 5);
+    var messages = owner.request("GET", "/reports/briefing", null, 200).get("messages");
+    assertTrue(messages.size() <= 3);
+    var texts = new ArrayList<String>();
+    var pages = new ArrayList<String>();
+    for (var message : messages) {
+      texts.add(message.get("text").asText().replace('\u00a0', ' '));
+      pages.add(message.get("page").asText(""));
+    }
+    assertTrue(pages.contains("scenarios"), texts.toString());
+    assertTrue(
+        texts.stream().anyMatch(t -> t.startsWith("R$ 980,00 a receber já passaram")),
+        texts.toString());
+    assertEquals("ATTENTION", messages.get(0).get("tone").asText());
+
+    var other = new Browser().signup();
+    other.account("Outro banco");
+    var quiet = other.request("GET", "/reports/briefing", null, 200).get("messages");
+    assertEquals(1, quiet.size());
+    assertEquals("POSITIVE", quiet.get(0).get("tone").asText());
+    assertTrue(quiet.get(0).get("page").isNull());
+  }
 }

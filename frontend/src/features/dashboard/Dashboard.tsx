@@ -20,6 +20,27 @@ function change(value: number, previous: number) {
   if (previous < 0) return `${money(value - previous)} vs. mês anterior`;
   return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(((value - previous) / previous) * 100)}% vs. mês anterior`;
 }
+type Briefing = {
+  messages: {
+    tone: 'POSITIVE' | 'ATTENTION' | 'NEUTRAL';
+    text: string;
+    page: string | null;
+    action: string | null;
+  }[];
+};
+function greeting(name: string) {
+  const hour = new Date().getHours(),
+    period =
+      hour < 5
+        ? 'Boa madrugada'
+        : hour < 12
+          ? 'Bom dia'
+          : hour < 18
+            ? 'Boa tarde'
+            : 'Boa noite',
+    first = name.trim().split(/\s+/)[0];
+  return first ? `${period}, ${first}.` : `${period}.`;
+}
 function direction(value: number, previous: number) {
   if (!previous || value === previous) return 'flat';
   return value > previous ? 'up' : 'down';
@@ -50,7 +71,7 @@ export function Dashboard({ bridge }: { bridge: Bridge }) {
   const [month, setMonth] = useState(() => readLocation(bridge.month).month);
   const client = useMemo(() => workspaceApi(bridge.request), [bridge]);
   const query = useResource('dashboard:' + month, async (signal) => {
-    const [accounts, summary, pending] = await Promise.all([
+    const [accounts, summary, pending, briefing] = await Promise.all([
       client.accounts(signal),
       client.summary(month, signal),
       bridge.request<{
@@ -62,8 +83,15 @@ export function Dashboard({ bridge }: { bridge: Bridge }) {
         }[];
         totalElements: number;
       }>('/finance/pending?group=UPCOMING&size=5', { signal }),
+      // The briefing is a courtesy: the dashboard still opens when it is unavailable.
+      bridge
+        .request<Briefing>('/reports/briefing', { signal })
+        .catch((error: Error) => {
+          if (error.name === 'AbortError') throw error;
+          return undefined;
+        }),
     ]);
-    return { accounts, summary, pending };
+    return { accounts, summary, pending, briefing };
   });
   useEffect(() => {
     saveLocation('dashboard', { month }, false);
@@ -143,6 +171,34 @@ export function Dashboard({ bridge }: { bridge: Bridge }) {
               >
                 Explorar exemplos
               </button>
+            </section>
+          )}
+          {!!data.accounts.length && !!data.briefing?.messages.length && (
+            <section
+              className="workspace-briefing"
+              aria-labelledby="briefing-title"
+            >
+              <span className="workspace-briefing-mark" aria-hidden="true">
+                F
+              </span>
+              <div>
+                <h2 id="briefing-title">{greeting(bridge.user.name)}</h2>
+                <ul>
+                  {data.briefing.messages.map((message, index) => (
+                    <li key={index} className={message.tone.toLowerCase()}>
+                      <p>{message.text}</p>
+                      {message.page && message.action && (
+                        <button
+                          className="btn text small"
+                          onClick={() => bridge.navigate(message.page!)}
+                        >
+                          {message.action} →
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </section>
           )}
           <div className="workspace-overview">
